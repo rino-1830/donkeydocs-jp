@@ -50,6 +50,12 @@ DONKEY_SIM_PATH = "/home/<user-name>/projects/DonkeySimLinux/donkey_sim.x86_64"
 DONKEY_GYM_ENV_NAME = "donkey-generated-track-v0"
 ```
 
+> 補足: 実行ファイルに権限を与えるため、以下のコマンドを実行する必要があります。
+
+```bash
+chmod +x ~/projects/DonkeySimLinux/donkey_sim.x86_64
+```
+
 > 注: 実行ファイルのパスはプラットフォームとユーザーによって異なります。
 >  Windows: DonkeySimWin/donkey_sim.exe
 >  Mac OS: DonkeySimMac/donkey_sim.app/Contents/MacOS/donkey_sim
