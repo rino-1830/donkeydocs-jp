@@ -19,6 +19,14 @@ conda create -n donkey python=3.11
 conda activate donkey
 ```
 
+> 補足: ターミナルに `conda: command not found` と表示される場合、以下のコマンドを実行するなどしてminicondaのインストール先のパスを通す必要があります。
+
+```bash
+echo "export PATH=~/miniconda3/bin:\$PATH" >> ~/.bashrc
+echo "source ~/miniconda3/etc/profile.d/conda.sh" >> ~/.bashrc
+source ~/.bashrc
+```
+
 現在、2通りのインストール方法があります。ほとんどの場合、
 ユーザーインストールを行うことになるでしょう。次に
 [_User install_](#user-install) を実行します。もし
