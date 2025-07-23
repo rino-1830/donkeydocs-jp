@@ -1,79 +1,79 @@
-# Virtual Race League
+# バーチャルレースリーグ
 
-We've taken the next step in DIY Robocars competitions. We are now hosting special events online! We welcome competitors from all over the world. Events will be scheduled by Chris Anderson and the Donkeycar maintainers. But this is by no means donkeycar only. Please read on, and we will provide two paths depending on whether you decide to use the donkeycar framework to race.
+DIY Robocars の競技において次の段階に進みました。現在、特別イベントをオンラインで開催しています！ 世界中からの参加者を歓迎します。イベントは Chris Anderson と Donkeycar のメンテナによってスケジュールされます。ただし、これは Donkeycar 専用というわけではありません。引き続き読んでいただければ、Donkeycar フレームワークを使用してレースを行うかどうかで2通りの方法を案内します。
 
 ![race_previe](/docs/assets/virtual_race_league.jpg) 
 
-We will be broadcasting the race stream over Twitch. Check the event annoucement for the url. Race comepetitors will join a group Zoom chat event. Tawn will host the race server and share the stream over Zoom/Twitch. And we will see how things go.
+レースの模様は Twitch で配信します。イベント告知で URL を確認してください。参加者は Zoom のグループチャットに参加します。Tawn がレースサーバーをホストし、Zoom/Twitch 経由で映像を共有します。うまくいくか見てみましょう。
 
-## About the Sim server
+## シムサーバーについて
 
-We are using the [SDSandbox](https://github.com/tawnkramer/sdsandbox) open source project as the racing sim. This creates a 3d environment using [Unity](https://unity.com/) game creation tool. It uses [NVidia PhysX](https://developer.nvidia.com/physx-sdk) open source physics engine to simulate 4 wheeled vehicle dynamics. This sim also acts as a server, listening on TCP port 9091. This sends and receives JSON packets. More on the API later.
+[SDSandbox](https://github.com/tawnkramer/sdsandbox) というオープンソースプロジェクトをレース用シミュレータとして利用しています。これは [Unity](https://unity.com/) を使って 3D 環境を作成します。また、[NVidia PhysX](https://developer.nvidia.com/physx-sdk) オープンソース物理エンジンを使用して四輪車の動力学をシミュレートします。このシムはサーバーとしても機能し、TCP ポート 9091 を待ち受けます。ここでは JSON パケットを送受信します。API については後述します。
 
-We use an OpenAI GYM style wrapper to interface with the server. The project for this wrapper is [gym-donkeycar](https://github.com/tawnkramer/gym-donkeycar).
+サーバーとのインターフェースには OpenAI GYM 形式のラッパーを使用します。このラッパーのプロジェクトは [gym-donkeycar](https://github.com/tawnkramer/gym-donkeycar) です。
 
-You can build the server from the source project above, or use [pre-built binaries](https://github.com/tawnkramer/gym-donkeycar/releases) for Ubuntu, Mac, and Windows. This has been tested on Ubuntu 18.04, Mac 10.13, and Windows 10.
+サーバーは上記のソースからビルドすることもできますし、Ubuntu、Mac、Windows 用の [事前ビルド済みバイナリ](https://github.com/tawnkramer/gym-donkeycar/releases) を利用することもできます。これは Ubuntu 18.04、Mac 10.13、Windows 10 でテストされています。
 
-## Setup for Donkeycar users
+## Donkeycar ユーザー向けセットアップ
 
-If you are using the donkeycar framework to race, you can use follow the guide to [setup the simulator](/docs/guide/deep_learning/simulator.md). If visuals directions help out, checkout the [Windows Sim Setup Screen-Cast on Youtube](https://youtu.be/wqQMmHVT8qw). Use this to practice before the race. When it comes time to race, modify your myconfig.py to have these two changes:
+Donkeycar フレームワークでレースをする場合は、[シミュレータのセットアップ](/docs/guide/deep_learning/simulator.md)のガイドに従ってください。映像での説明が役立つ場合は、[Windows Sim Setup Screen-Cast on Youtube](https://youtu.be/wqQMmHVT8qw) を参照してください。レース前の練習に利用しましょう。レース本番では、myconfig.py に次の 2 つの変更を加えます。
 
 ```
 DONKEY_SIM_PATH = "remote"
 SIM_HOST = "trainmydonkey.com"
 ```
 
-This racing server will not always be running. We will bring it up for testing events and on race day. We are aiming to have it up from 7pm-9pm Pacific every night a week before race day. If not up, ask on Discord and we will try to get things running.
+このレースサーバーは常時稼働しているわけではありません。テストイベントやレース当日に起動します。レースの 1 週間前から毎晩 7pm～9pm（太平洋時間）に稼働させる予定です。サーバーが起動していない場合は Discord で声をかけてください。できるだけ対応します。
 
-> Note: If you trained a donkey model, but wish to run it on a Jetson Nano or some platform where you are having troubles installing all the dependencies, [here's a single script](https://gist.github.com/tawnkramer/a74938653ab70e3fd22af1e4788a5001) you can use to run without any donkeycar or gym-donkeycar dependencies. Just pass it the model file name, the host name, and the car name. And it will run as a client to the race sim.
+> 注: Donkey のモデルをトレーニングしたものの、Jetson Nano など依存関係のインストールが難しい環境で実行したい場合は、[この単体スクリプト](https://gist.github.com/tawnkramer/a74938653ab70e3fd22af1e4788a5001) を利用できます。モデルファイル名、ホスト名、車両名を指定するだけで、donkeycar や gym-donkeycar の依存なしにレースシムのクライアントとして動作します。
 
-## Setup for Non-Donkeycar users
+## Donkeycar を使わないユーザー向けセットアップ
 
-If you would like to roll your own client, we have some python code to get you started. 
+独自のクライアントを作成したい場合、始めるための Python コードを用意しています。
 
-* You will first want to download the sim [pre-built binary](https://github.com/tawnkramer/gym-donkeycar/releases) for your platform. Extract that where you like.
+* まずは、ご利用のプラットフォーム向けのシム[事前ビルドバイナリ](https://github.com/tawnkramer/gym-donkeycar/releases)をダウンロードし、任意の場所に展開してください。
 
-* Then clone the gym-donkeycar python project and install. If you are using a virtual environment, don't forget to activate it first. 
+* 続いて gym-donkeycar の Python プロジェクトをクローンしてインストールします。仮想環境を使用している場合は、先に有効化するのを忘れずに。
 ```bash
 git clone https://github.com/tawnkramer/gym-donkeycar
 pip install -e gym-donkeycar
 ```
 
-* get the test client. Download via wget on Mac or Linux like:
+* テストクライアントを取得します。Mac や Linux では次のように wget でダウンロードできます。
 ```
 wget https://raw.githubusercontent.com/tawnkramer/sdsandbox/master/src/test_client.py
 ```
 
- * or on Windows open a browser to [https://github.com/tawnkramer/sdsandbox/tree/master/src](https://github.com/tawnkramer/sdsandbox/tree/master/src)
- * then right click on test_client.py and choose "Save link as..." and choose a location on your PC.
+ * Windows の場合はブラウザーで [https://github.com/tawnkramer/sdsandbox/tree/master/src](https://github.com/tawnkramer/sdsandbox/tree/master/src) を開きます。
+ * test_client.py を右クリックし「名前を付けてリンクを保存」を選び、任意の場所に保存してください。
 
- * start up the simulator and let it get to the menu screen. 
- * run the test client like 
+ * シミュレータを起動し、メニュー画面まで進めます。
+ * 以下のようにテストクライアントを実行します。
  
  ```
  python3 test_client.py
  ```
 
-Checkout test_client.py to see what's going there. Class SimpleClient connects to the host of your choosing. Then it sends a load scene command depending on which course you want to try. It then sends some car visual configuration, and then some camera config information. Then it enters an update loop.
+test_client.py を確認すると何をしているか分かります。SimpleClient クラスは指定したホストに接続し、試したいコースに応じてシーン読み込みコマンドを送信します。その後、車両の外観設定とカメラ設定を送り、更新ループに入ります。
 
-You can try changing the num_clients variable to 2 or more clients. See how the sim can handle them.
+num_clients 変数を 2 以上に変更して、シムが複数クライアントをどう処理するか試してみてください。
 
-The test client will send random steering command for time_to_drive = 1.0 seconds. Then quit.
+テストクライアントは time_to_drive = 1.0 秒の間ランダムなステアリングコマンドを送信し、その後終了します。
 
-During that time, the telemetry messages will come into SimpleClient::on_msg_recv. See them printed out for you. Also take a look at the 'test.png' that it writes to get a feel for what the camera looks like.
+その間、テレメトリメッセージは SimpleClient::on_msg_recv に届きます。これらが表示される様子を確認してください。また、生成される 'test.png' を見ればカメラ映像の雰囲気が分かります。
 
-There's some comments in there explaining the camera configuration in detail. If you have a custom camera setup, hopefully we can come close to matching it with these controls.
+コード中のコメントではカメラ設定について詳細に説明しています。独自のカメラ構成をお持ちなら、これらの設定で近い構成にできるはずです。
 
-When it's time to race, change the variable:
+レース本番の際は次の変数を変更します。
 ```
 host = "trainmydonkey.com"
 ```
 
-Be sure to enable controls to start the car on your command. We will likely be old school calling 3, 2, 1, GO! over video chat.
+自分の合図で車を走らせられるよう、コントロールを有効にしておいてください。ビデオチャットで昔ながらの「3、2、1、GO!」と掛け声をかけることになりそうです。
 
-## Getting Help
+## ヘルプを得るには
 
-There's a lot to learn. And come to [Discord](https://discord.gg/JGQUU8w) to get some help. Check out the #virtual-racing-league channel there.
+学ぶことはたくさんあります。不明点があれば [Discord](https://discord.gg/JGQUU8w) に参加して助けを求めてください。#virtual-racing-league チャンネルも確認しましょう。
 
 
 

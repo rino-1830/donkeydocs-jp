@@ -1,102 +1,102 @@
-# Drive your car
+# 車を運転する
 
-After you've [calibrated](/guide/calibrate) your car you can start driving it. 
+車を[キャリブレーション](/guide/calibrate)したら、運転を始められます。
 
-If you are not already, please [ssh into your vehicle](/guide/robot_sbc/setup_raspberry_pi/#step-5-connecting-to-the-pi).
+まだ接続していない場合は、[車両にssh接続](/guide/robot_sbc/setup_raspberry_pi/#step-5-connecting-to-the-pi)してください。
 
-## Start your car
- 
-> *** Put your car in a safe place where the wheels are off the ground ***.
+## 車を起動する
 
-This is the step were the car can take off. 
+> *** 車のタイヤが地面に触れない安全な場所に置いてください ***。
 
-Open your car's folder and start your car. 
+この操作中に車が急発進する可能性があります。
+
+車のフォルダーを開いて起動します。
 ```
 cd ~/mycar
 python manage.py drive
 ```
 
-This script will start the drive loop in your car which includes a part that 
-is a web server for you to control your car. You can now control your car
-from a web browser at the URL: `<your car's hostname.local>:8887`
+このスクリプトは車のドライブループを開始し、
+その中にはウェブサーバーが含まれます。これにより、
+ウェブブラウザーから `<your car's hostname.local>:8887` にアクセスして操作できます。
 
 ![drive UI](../assets/web_controller.png)
 
-## Driving with Web Controller
+## ウェブコントローラーで運転する
 
-There are 3 ways to move the car using the web controller
-- **Device Tilt**: 
-Select **Device Tilt** in the **Control Mode** section of the web controller.  Then select **User** in the **Mode** section.  You can then tilt your phone forward to increase throttle and tilt it side to side to turn the steering. 
-- **Joystick**:
-Select **Joystick** in the **Control Mode** section of the web controller.  Then select **User** in the **Mode** section.  You can then touch and drag on the virtual joystick area that appears.  Moving up increases throttle, moving down decreases or reverses.  Moving left turns left, moving right turns right.  Releasing you finger stops.
-- **Gamepad**:
-If you have a game controller attached (either by cable or by bluetooth) to the machine on which you are viewing the web ui, and that game controller is compatible with the HTML5 Gamepad API, then you can choose **Gamepad** in the **Control Mode** section of the web controller.  Then select **User** in the **Mode** section.  You can then drive the donkeycar using the game controller..
+ウェブコントローラーで車を動かす方法は3つあります。
+- **デバイス傾き**:
+**Control Mode** セクションで **Device Tilt** を選択し、**Mode** セクションでは **User** を選択します。スマートフォンを前に傾けるとスロットルが上がり、左右に傾けるとハンドルを切れます。
+- **ジョイスティック**:
+ウェブコントローラーの **Control Mode** セクションで **Joystick** を選び、**Mode** セクションで **User** を選択します。表示される仮想ジョイスティックをドラッグすることで操作できます。上に動かすとスロットルが上がり、下に動かすと減速または後退します。左に動かすと左折、右に動かすと右折します。指を離すと停止します。
+- **ゲームパッド**:
+ウェブUIを表示しているマシンにゲームコントローラー（ケーブルまたはBluetooth接続）があり、HTML5 Gamepad APIに対応していれば、ウェブコントローラーの **Control Mode** セクションで **Gamepad** を選択できます。その後 **Mode** セクションで **User** を選択し、ゲームコントローラーでDonkeycarを操作できます。
 
-### Features
+### 機能
 
-* Recording - Press record data to start recording images, steering angels and throttle values. 
-* Throttle mode - Option to set the throttle as constant. This is used in 
-races if you have a pilot that will steer but doesn't control throttle. 
-* Pilot mode - Choose this if the pilot should control the angle and/or throttle.
-* Max throttle - Select the maximum throttle.
+* Recording - 「record data」を押すと、画像、ステアリング角度、スロットル値の記録を開始します。
+* Throttle mode - スロットルを一定にするオプションです。
+レースでパイロットが舵を取るがスロットルを操作しない場合に使用します。
+* Pilot mode - パイロットが角度やスロットルを制御する場合に選択します。
+* Max throttle - 最高スロットルを設定します。
 
-### Keyboard shortcuts
+### キーボードショートカット
 
-* `space` : stop car and stop recording
-* `r` : toggle recording
-* `i` : increase throttle
-* `k` : decrease throttle
-* `j` : turn left 
-* `l` : turn right 
-
------
-
-If you don't have a joystick then you can skip to next section - [train an autopilot](/guide/train_autopilot/).
+* `space` : 車を停止し、記録を停止
+* `r` : 記録を切り替え
+* `i` : スロットルを上げる
+* `k` : スロットルを下げる
+* `j` : 左折する
+* `l` : 右折する
 
 -----
 
-## Driving with Physical Joystick Controller
+ジョイスティックを持っていない場合は、次のセクション [自動運転の学習](/guide/train_autopilot/) に進んでください。
 
-You may find that it helps to use a physical joystick device to control your vehicle.
+-----
 
-### Setup Bluetooth and pair joystick
+## 物理ジョイスティックで運転する
 
-Check the [Controllers](/parts/controllers/#physical-joystick-controller) section to read about setting up the bluetooth connection.
+物理的なジョイスティックを使うと車両を操作しやすい場合があります。
 
-### Start car
+### Bluetoothを設定してジョイスティックをペアリングする
+
+Bluetooth接続の設定については[Controllers](/parts/controllers/#physical-joystick-controller)セクションを参照してください。
+
+### 車を起動する
 
 ```bash
 cd ~/mycar
 python manage.py drive --js
 ```
 
-Optionally, if you want joystick use to be sticky and don't want to add the --js each time, modify your __myconfig.py__ so that __USE_JOYSTICK_AS_DEFAULT = True__
+ジョイスティックの使用を常に有効にし、毎回 --js を付けたくない場合は、`__myconfig.py__` の __USE_JOYSTICK_AS_DEFAULT = True__ を変更します。
 
 ```bash
 nano myconfig.py
 ```
 
-### Joystick Controls
+### ジョイスティックの操作
 
-* Left analog stick - Left and right to adjust steering
-* Right analog stick - Forward to increase forward throttle
-* Pull back twice on right analog to reverse
+* 左アナログスティック - 左右でステアリングを調整
+* 右アナログスティック - 前方に倒すと前進スロットルを上げる
+* 右アナログスティックを2回後ろに引くと後進
 
-> Whenever the throttle is not zero, driving data will be recorded - as long as you are in User mode!
+> スロットルがゼロでない限り、Userモードであれば走行データが記録されます。
 
-* Select button switches modes - "User, Local Angle, Local(angle and throttle)"
-* Triangle - Increase max throttle
-* X  - Decrease max throttle
-* Circle - Toggle recording (disabled by default. auto record on throttle is enabled by default)
-* dpad up - Increase throttle scale
-* dpad down - Decrease throttle scale
-* dpad left - Increase steering scale
-* dpad right - Decrease steering scale
-* Start - Toggle constant throttle. Sets to max throttle (modified by X and Triangle).
+* Selectボタン - モードを切り替え「User, Local Angle, Local(angle and throttle)」
+* Triangle - 最大スロットルを上げる
+* X - 最大スロットルを下げる
+* Circle - 記録のオン／オフ（デフォルトでは無効。スロットルによる自動記録はデフォルトで有効）
+* dpad up - スロットルスケールを増やす
+* dpad down - スロットルスケールを減らす
+* dpad left - ステアリングスケールを増やす
+* dpad right - ステアリングスケールを減らす
+* Start - 定速スロットルのオン／オフ。最大スロットルに設定（XとTriangleで調整）。
 
 -----
 
-### Next let's train an autopilot.
-- [Train a deep-learning autopilot](/guide/deep_learning/train_autopilot)
-- [Train a gps path-follow autopilot](/guide/path_follow/path_follow)
-- [Build a computer vision autopilot](/guide/computer_vision/computer_vision/)
+### 次は自動運転を学習させましょう。
+- [ディープラーニング自動運転を学習させる](/guide/deep_learning/train_autopilot)
+- [GPSパスフォロー自動運転を学習させる](/guide/path_follow/path_follow)
+- [コンピュータビジョン自動運転を構築する](/guide/computer_vision/computer_vision/)

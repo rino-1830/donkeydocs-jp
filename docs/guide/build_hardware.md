@@ -1,141 +1,141 @@
-# How to Build a Donkey&reg;
+# Donkey\u00ae を組み立てる方法
 
 &nbsp;
 
-* [Overview](build_hardware.md#overview)
-* [Parts Needed](build_hardware.md#parts-needed)
-* [Hardware:](build_hardware.md#hardware)
-  * [Step 1: Print Parts](build_hardware.md#step-1-print-parts)
-  * [Step 2: Clean up parts](build_hardware.md#step-2-clean-up-parts)
-  * [Step 3: Assemble Top plate and Roll Cage](build_hardware.md#step-3-assemble-top-plate-and-roll-cage)
-  * [Step 4: Connect Servo Shield to Raspberry Pi](build_hardware.md#step-4-connect-servo-shield-to-raspberry-pi)
-  * [Step 5: Attach Raspberry Pi to 3D Printed bottom plate](build_hardware.md#step-5-attach-raspberry-pi-to-3d-printed-bottom-plate)
-  * [Step 6: Attach Camera](build_hardware.md#step-6-attach-camera)
-  * [Step 7: Put it all together](build_hardware.md#step-7-put-it-all-together)
-* [Software](install_software.md)
+* [概要](build_hardware.md#overview)
+* [必要な部品](build_hardware.md#parts-needed)
+* [ハードウェア:](build_hardware.md#hardware)
+  * [ステップ1: パーツを印刷](build_hardware.md#step-1-print-parts)
+  * [ステップ2: パーツを整える](build_hardware.md#step-2-clean-up-parts)
+  * [ステップ3: トッププレートとロールケージを組み立てる](build_hardware.md#step-3-assemble-top-plate-and-roll-cage)
+  * [ステップ4: サーボシールドをRaspberry Piに接続](build_hardware.md#step-4-connect-servo-shield-to-raspberry-pi)
+  * [ステップ5: Raspberry Piを3Dプリントのボトムプレートに取り付け](build_hardware.md#step-5-attach-raspberry-pi-to-3d-printed-bottom-plate)
+  * [ステップ6: カメラを取り付け](build_hardware.md#step-6-attach-camera)
+  * [ステップ7: すべてを組み立て](build_hardware.md#step-7-put-it-all-together)
+* [ソフトウェア](install_software.md)
 
-## Overview
+## 概要
 
-The latest version of the software installation instructions are maintained in the [software instructions](install_software.md) section.   Be sure to follow those instructions after you've built your car. 
+最新のソフトウェアインストール手順は[ソフトウェアの手順](install_software.md)セクションで管理されています。車を組み立てた後は必ずその手順に従ってください。
 
-## Choosing a Car
+## 車の選択
 
-There are two main options for cars.  If you want a pre-assembled car, we recommend the [Waveshare Piracer Pro](https://amzn.to/4eqxpyM), which comes with a Raspberry Pi 4 and everything else you need. Although it comes with outdated Donkeycar software, you can easily upgrade it to the latest version by following the instructions [here](https://www.diyrobocars.com/2025/06/28/tips-for-installing-donkeycar-on-the-waveshare-piracer-pro/).
+車を選ぶ方法は大きく二つあります。組み立て済みの車が欲しい場合は、Raspberry Pi 4 など必要なものがすべてそろった[Waveshare Piracer Pro](https://amzn.to/4eqxpyM)をおすすめします。付属のDonkeycarソフトウェアは古いものですが、[こちら](https://www.diyrobocars.com/2025/06/28/tips-for-installing-donkeycar-on-the-waveshare-piracer-pro/)の手順で簡単に最新版へ更新できます。
 
-If you want to build a car follow these instructions below.  
+自分で車を組み立てたい場合は以下の手順に従ってください。
 
-To build a car, you first need to choose a car.  A donkey car can be made out of almost any RC car, however if you want to follow an easy path buy either the WL Toys car listed below or the Exceed one.
+Donkeycarを作るにはまずベースとなるRCカーを選ぶ必要があります。ほとんどのRCカーで作成できますが、簡単に始めたいなら下記のWL Toys製かExceed製の車を購入するとよいでしょう。
 
-*NOTE: only the WL Toys 144010 and HSP-94186 are readily avilable rignt now* 
+*注意: 現在入手しやすいのはWL Toys 144010とHSP-94186のみです*
 
-The [WL Toys 144010](https://amzn.to/3yCVyBI) is probably the easiest car to get right now.  It has a brushless motor, which makes it fast, but takes some getting used to for beginners.  There are brushed motor versions of theis car the 144011 and 144001 but both require the user to replace both the steering servo and ESC with these parts [ESC](https://amzn.to/42uvmpt) and [Servo](https://amzn.to/40vSDoi).  Only do this if you are familiar with RC or enjoy tinkering.  [Here is a short video](https://www.youtube.com/watch?v=4LKDjoTKlaE) explaining how to assemble the car.  You can find the adapters in [Thingiverse](https://www.thingiverse.com/thing:2566276) and print them yourself or go to a 3rd party printing service.
+[WL Toys 144010](https://amzn.to/3yCVyBI)は現時点で最も入手しやすい車でしょう。ブラシレスモーターで高速ですが初心者には扱いが難しいかもしれません。ブラシモーター版の144011や144001もありますが、ステアリングサーボとESCを[こちらのESC](https://amzn.to/42uvmpt)と[こちらのサーボ](https://amzn.to/40vSDoi)に交換する必要があります。RCに慣れている、または工作が好きな方のみ行ってください。[この短い動画](https://www.youtube.com/watch?v=4LKDjoTKlaE)で組み立て方法が説明されています。アダプターは[Thingiverse](https://www.thingiverse.com/thing:2566276)からダウンロードして自分で印刷するか、外部のプリントサービスを利用してください。
 
-The alterate car, which often has slighly less availability is the HSP 94186 and the "Exceed" brand cars.  There are 5 supported cars, all are very similar and should be considered equivalent.  Note, often some of these are out of stock, so go through the links to find one that is in stock.  If they are out of stock on Amazon, you can find the cars at the [Exceed Website](https://www.nitrorcx.com/1rcelca.html).   The HSP-94186 is identical to the Exceed Magnet 1/16 Truck; it can be found on AliExpress but takes about a month to get to the US, there are local options that charge a premium.
+別の選択肢として、やや入手しにくいことがありますがHSP 94186やExceedブランドの車があります。5種類がサポートされており、ほぼ同等と考えて構いません。Amazonで在庫切れの場合は[Exceedの公式サイト](https://www.nitrorcx.com/1rcelca.html)を確認してください。HSP-94186はExceed Magnet 1/16 Truckと同じもので、AliExpressでも購入できますが到着まで約1か月かかります。
 
-*  Exceed Magnet [Blue](https://amzn.to/2BkBRka), [Red](https://amzn.to/3qKksIC)
+*  Exceed Magnet [Blue](https://amzn.to/2BkBRka)、[Red](https://amzn.to/3qKksIC)
 *  HSP-94186 [1/16 electric Truck](https://www.aliexpress.us/item/2255799890095973.html)
 *  Exceed Desert Monster [Green](https://amzn.to/2MhOfn6)
-*  Exceed Short Course Truck  [Green](https://amzn.to/2Bek0ew),  [Red](https://amzn.to/3cmCNkE)
-*  Exceed Blaze [Blue](https://amzn.to/3cnP9ci), [Yellow](https://amzn.to/2zOGthR), [Wild Blue](https://amzn.to/3dkI4uD), [Max Red](https://amzn.to/2TWOxE8)
+*  Exceed Short Course Truck  [Green](https://amzn.to/2Bek0ew)、[Red](https://amzn.to/3cmCNkE)
+*  Exceed Blaze [Blue](https://amzn.to/3cnP9ci)、[Yellow](https://amzn.to/2zOGthR)、[Wild Blue](https://amzn.to/3dkI4uD)、[Max Red](https://amzn.to/2TWOxE8)
 
-These cars are electrically identical but have different tires, mounting and other details.  It is worth noting that the Desert Monster, Short Course Truck and Blaze all require adapters which can be easily printed or purchased from the donkey store.  These are the standard build cars because they are mostly plug and play, both have a brushed motor which makes training easier, they handle rough driving surfaces well and are inexpensive.
+これらの車は電気的には同一ですが、タイヤやマウントなど細部が異なります。Desert Monster、Short Course Truck、Blazeの3車種はアダプターが必要ですが、簡単に印刷するかDonkeyストアで購入できます。これらはブラシモーターで扱いやすく、荒れた路面にも強く価格も手頃なため標準的な組み立て車として推奨されます。
 
-Here is a [video](https://youtu.be/UucnCmCAGTI) overview of the different cars (Excluding the WL Toys car) and how to assemble them.
+[この動画](https://youtu.be/UucnCmCAGTI)では（WL Toys車を除く）各車種の概要と組み立て方を確認できます。
 
-For advanced users there are 2 more cars supported under the "Donkey Pro" name.  These are 1/10 scale cars which means that they are bigger, perform a little better and are slightly more expensive.  They can be found here:
+上級者向けには「Donkey Pro」名義でさらに2台の1/10スケール車がサポートされています。サイズが大きく性能も高い分、価格もやや高めです。
 
-*  HobbyKing Mission-D [found here](https://hobbyking.com/en_us/1-10-hobbykingr-mission-d-4wd-gtr-drift-car-arr.html?affiliate_code=XFPFGDFDZOPWEHF&_asc=337569952)
-*  Tamaya TT01 or Clone [commonly used knockoff found here](https://amzn.to/2MdNLhZ) - found worldwide but usually has to be built as a kits.  The other two cars are ready to be donkified, this one, however is harder to assemble.  
+*  HobbyKing Mission-D [入手先](https://hobbyking.com/en_us/1-10-hobbykingr-mission-d-4wd-gtr-drift-car-arr.html?affiliate_code=XFPFGDFDZOPWEHF&_asc=337569952)
+*  Tamaya TT01 またはクローン [よくある互換品はこちら](https://amzn.to/2MdNLhZ) - 組み立てキットで販売されることが多く、他の2台より組み立てが難しいかもしれません。
 
-Here is a [video](https://youtu.be/K-REL9aqPE0) that goes over the different models.  The Donkey Pro models are not yet very well documented, just a word of warning.  
+[この動画](https://youtu.be/K-REL9aqPE0)ではそれぞれのモデルを説明しています。Donkey Proモデルはまだ十分にドキュメント化されていない点にご注意ください。
 
-For more detail and other options, follow the link to: [supported cars](/cars/supported_cars)
+詳細やその他のオプションについては[サポートされている車種](/cars/supported_cars)を参照してください。
 
 ![donkey](../assets/build_hardware/donkey.png)
 
-## Roll Your Own Car
+## 自作の車を作る
 
-Alternatively If you know RC or need something the standard Donkey does not support, you can roll your own.  Here is a quick reference to help you along the way.  [Roll Your Own](../cars/roll_your_own.md)
+RCに詳しい、あるいは標準のDonkeyでは満足できない場合は、自分で車を作ることも可能です。参考として[自分で作る](../cars/roll_your_own.md)を参照してください。
 
-## Video Overview of Hardware Assembly
+## ハードウェア組み立てのビデオ概要
 
-This [video](https://www.youtube.com/watch?v=OaVqWiR2rS0&t=48s) covers how to assemble a standard Donkey Car, it also covers the Sombrero, the Raspberry Pi and the nVidia Jetson Nano.  
+[この動画](https://www.youtube.com/watch?v=OaVqWiR2rS0&t=48s)では、標準的なDonkey Carの組み立て方に加え、Sombrero、Raspberry Pi、nVidia Jetson Nanoの説明も行っています。
 
 [![IMAGE ALT TEXT HERE](../assets/HW_Video.png)](https://www.youtube.com/watch?v=OaVqWiR2rS0&t=48s)
 
-## Parts Needed
 
-The following instructions are for the Raspberry Pi, below in Optional Upgrades section, you can find the NVIDIA Jetson Nano instructions.  
+## 必要な部品
 
-| Part Description                                                                    | Link                                                                                  | Approximate Cost |
-|-------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|------------------|
-| Magnet Car or alternative                                                                        | see cars above under 'choosing a car'                                         | $92              |
-| M2x6 screws (8)                                                                     | [Amazon](https://amzn.to/2ZSKa0D)                                           | $4.89 &ast;          |
-| M3x10 screws (3)                                                                  | [Amazon](https://amzn.to/3gBQuzE)                                                     | $7.89 &ast;          |
-| USB Battery  | [Anker 10,000 maH](https://amzn.to/4dStvNr)                                           | $26              |
-| Raspberry Pi 5B 4GB                                                                      | [Pi 5B](https://amzn.to/3AmRmqa)                                          | $60              |
-| MicroSD Card              | [64GB](https://amzn.to/2XP7UAa)                                         | $18.99           |
-| Wide Angle Raspberry Pi Camera                                                      | [Amazon](https://amzn.to/4bRHCRV)                    | $18              |
-| Female to Female Jumper Wire                                                        | [Amazon](https://amzn.to/36RiMlo))                                         | $7 &ast;             |
-| Servo Driver PCA 9685                                                               | [Amazon](https://amzn.to/2BbVYkj)                                           | $12 &ast;&ast;           |
-| 3D Printed roll cage and top plate.                                                 | Print yourself, or go to a 3rd party service | $xx                 |
+以下の説明はRaspberry Pi用です。オプションのアップグレードについては後述のJetson Nano向け手順を参照してください。
 
-&ast; If it is hard to find these components, there is some wiggle room. Instead of an M2 you can use an M2.2, m2.3 or #4 SAE screw.  Instead of an M3 a #6 SAE screw can be used.  Machine screws can be used in a pinch.  
+| 部品説明 | リンク | 参考価格 |
+|--------------------------------------------------------------------|------------------------------------------------|--------------|
+| Magnet Car または代替車 | 上記「車の選択」で紹介した車を参照 | $92 |
+| M2x6 ネジ (8本) | [Amazon](https://amzn.to/2ZSKa0D) | $4.89 |
+| M3x10 ネジ (3本) | [Amazon](https://amzn.to/3gBQuzE) | $7.89 |
+| USBバッテリー | [Anker 10,000 mAh](https://amzn.to/4dStvNr) | $26 |
+| Raspberry Pi 5B 4GB | [Pi 5B](https://amzn.to/3AmRmqa) | $60 |
+| MicroSDカード | [64GB](https://amzn.to/2XP7UAa) | $18.99 |
+| 広角Raspberry Piカメラ | [Amazon](https://amzn.to/4bRHCRV) | $18 |
+| メス-メス ジャンパワイヤ | [Amazon](https://amzn.to/36RiMlo)) | $7 |
+| サーボドライバー PCA9685 | [Amazon](https://amzn.to/2BbVYkj) | $12 |
+| 3Dプリント製ロールケージとトッププレート | 自分で印刷するか外部サービスを利用 | $xx |
 
-&ast;&ast; This component can be purchased from Ali Express for ~$2-4 if you can wait the 30-60 days for shipping.
+* これらの部品が見つからない場合は、M2の代わりにM2.2、M2.3、または#4 SAEネジを、M3の代わりに#6 SAEネジを使用するなど多少の融通が利きます。機械ネジを代用することも可能です。
+* この部品はAli Expressで約2～4ドルで購入できますが、発送に30～60日かかります。
 
-### Optional Upgrades
+### 追加のアップグレード
 
-* **LiPo Battery and Accessories:** LiPo batteries have significantly better energy density and have a better dropoff curve.  See below (courtesy of Traxxas).
+* **LiPoバッテリーとアクセサリー:** LiPoバッテリーはエネルギー密度が高く、放電特性も優れています。以下の図（Traxxas提供）を参照してください。
 
 ![donkey](../assets/build_hardware/traxxas.png)
 
-| Part Description                                      | Link                                                              | Approximate Cost |
-|-------------------------------------------------------|-------------------------------------------------------------------|------------------|
-| LiPo Battery                                          | [hobbyking.com/en_us/turnigy-1800mah-2s-20c-lipo-pack.html](https://hobbyking.com/en_us/turnigy-1800mah-2s-20c-lipo-pack.html?affiliate_code=XFPFGDFDZOPWEHF&_asc=1096095044) or [amazon.com/gp/product/B0072AERBE/](https://www.amazon.com/gp/product/B0072AERBE/) | $8.94 to $~17           |
-| Lipo Charger (takes 1hr to charge the above battery)  | [charger](https://amzn.to/3gE6DVe)                                               | $13              |
-| Lipo Battery Case (to prevent damage if they explode) | [lipo safe](https://amzn.to/2XkUhcV)                                               | $8               |
+| 部品説明 | リンク | 参考価格 |
+|-------------------------------------------------------|------------------------------------------------|--------------|
+| LiPoバッテリー | [hobbyking.com/en_us/turnigy-1800mah-2s-20c-lipo-pack.html](https://hobbyking.com/en_us/turnigy-1800mah-2s-20c-lipo-pack.html?affiliate_code=XFPFGDFDZOPWEHF&_asc=1096095044) または [amazon.com/gp/product/B0072AERBE/](https://www.amazon.com/gp/product/B0072AERBE/) | $8.94～$17 |
+| LiPo充電器（上記バッテリーの充電に約1時間） | [charger](https://amzn.to/3gE6DVe) | $13 |
+| LiPoバッテリーケース（破裂時の被害を防ぐため） | [lipo safe](https://amzn.to/2XkUhcV) | $8 |
 
-## Hardware
+## ハードウェア
 
-If you purchased parts from the Donkey Car Store, skip to step 3.
+Donkey Car Storeで部品を購入した場合はステップ3に進んでください。
 
-### Step 1: Print Parts
+### ステップ1: パーツを印刷
 
-If you do not have a 3D Printer, you can order parts from [Donkey Store](https://donkeycar-701334.square.site).  I printed parts in black PLA, with 2mm layer height and no supports.  The top roll bar is designed to be printed upside down.   Remember that you need to print the adapters unless you have a "Magnet"
+3Dプリンターを持っていない場合は[Donkey Store](https://donkeycar-701334.square.site)から部品を注文できます。私は黒のPLAで層高2mm、サポートなしで印刷しました。トップロールバーは逆さにして印刷する設計です。「Magnet」でない限りアダプターも印刷してください。
 
-I printed parts in black PLA, with .3mm layer height with a .5mm nozzle and no supports.  The top roll bar is designed to be printed upside down.  
+私は別の方法として層高0.3mm、ノズル径0.5mmでも印刷しました。こちらもサポートなしで、トップロールバーは逆向きに印刷します。
 
-### Step 2: Clean up parts
+### ステップ2: パーツを整える
 
-Almost all 3D Printed parts will need clean up.  Re-drill holes, and clean up excess plastic.
+ほとんどの3Dプリント部品には仕上げが必要です。穴を開け直したり余分なプラスチックを取り除きましょう。
 
 ![donkey](../assets/build_hardware/2a.png)
 
-In particular, clean up the slots in the side of the roll bar, as shown in the picture below:
+特にロールバーの側面のスロットは下の写真のようにきれいにしてください。
 
 ![donkey](../assets/build_hardware/2b.png)
 
-### Step 3: Assemble Top plate and Roll Cage
+### ステップ3: トッププレートとロールケージを組み立てる
 
-If you have an Exceed Short Course Truck, Blaze or Desert Monster watch this [video](https://youtu.be/UucnCmCAGTI)
+Exceed Short Course Truck、Blaze、Desert Monsterを使う場合は[この動画](https://youtu.be/UucnCmCAGTI)を参照してください。
 
-This is a relatively simple assembly step.   Just use the 3mm self tapping screws to scew the plate to the roll cage.  
+この工程は比較的簡単で、3mmのタッピングネジを使ってプレートをロールケージに固定するだけです。
 
-When attaching the roll cage to the top plate, ensure that the nubs on the top plate face the roll-cage. This will ensure the equipment you mount to the top plate fits easily.
+ロールケージをトッププレートに取り付ける際は、トッププレートの突起がロールケージ側を向くようにしてください。これで後から取り付ける機材がスムーズに収まります。
 
-### Step 4: Connect Servo Shield to Raspberry Pi
+### ステップ4: サーボシールドをRaspberry Piに接続
 
-The PCA9685 Servo controller can control up to 16 PWM devices like servos, motor controllers, LEDs or almost anything that uses a PWM signal.  It is connected to the RaspberryPi (or Jetson Nano) 40 pin GPIO bus via the I2C pins.
+PCA9685サーボコントローラーは最大16個のPWMデバイスを制御できます。Raspberry Pi（またはJetson Nano）の40ピンGPIOにI2Cピンで接続します。
 
-*   GPIO I2C bus 1
-    *   SDA is board pin 03
-    *   SCL is board pin 05
-*   Wiring
-    *   SDA and SCL may be through a shared bus rather than a direct connection between nano and PCA9685 if other devices are using the I2C bus (like an OLED display)
-    *   3.3v VCC power may be provided by a 3.3v pin on the GPIO bus (typically board pin 01).
-    *   5v VIN should NOT be provided by the GPIO bus because motors/servos may draw too much power.  Most Electronic Speed Controllers actually provide the necessary power via the 3 pin cables that get plugged into the PCA9685, so it is generally not necessary to provide power directly to VIN.
-    *   All GND must be common ground.  On the GPIO it is usually easiest to use GPIO board pin 09 for ground.  Once again the 3 pin cables from the ESC carry ground and the PCA9685 connects this to the GPIO via the GND pin.
+* GPIO I2Cバス1
+  * SDAはボードピン03
+  * SCLはボードピン05
+* 配線
+  * 他のデバイスがI2Cバスを使っている場合、SDAとSCLは共有バス経由でも構いません
+  * 3.3V VCCはGPIOの3.3Vピン（通常ボードピン01）から供給できます
+  * 5V VINはモーターやサーボが大きな電流を必要とするためGPIOから供給しないでください。多くのESCが必要な電力を3ピンケーブル経由で提供します
+  * すべてのGNDは共通にしてください。GPIOではボードピン09を使うと簡単です
 
 ```
 ---
@@ -143,7 +143,7 @@ The PCA9685 Servo controller can control up to 16 PWM devices like servos, motor
     3v3-01 <---> VCC
     pin-03 <---> SDA
     pin-05 <---> SCL
-    GND-09 <---> GND 
+    GND-09 <---> GND
                  VIN  <---> 5v   optional, see above
                  GND  <---> GND
                  CH-0 <---------> ESC
@@ -151,86 +151,86 @@ The PCA9685 Servo controller can control up to 16 PWM devices like servos, motor
 ---
 ```
 
-
-*   checking connections
-    *   The PCA9685 should appear on I2C bus 1 at address 0x40
-    *   ssh into the Donkeycar and use i2cdetect to read bus 1.  A device should exist at address 0x40
-
+* 接続確認
+  * PCA9685はI2Cバス1のアドレス0x40に表示されるはずです
+  * Donkeycarにsshで入り`i2cdetect`でバス1を確認するとアドレス0x40にデバイスが見えます
 
 ```
 ---
     $ i2cdetect -y -r 1
          0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
-    00:          -- -- -- -- -- -- -- -- -- -- -- -- -- 
-    10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
-    20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
-    30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
-    40: 40 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
-    50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
-    60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
-    70: UU -- -- -- -- -- -- --                         
+    00:          -- -- -- -- -- -- -- -- -- -- -- -- --
+    10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+    20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+    30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+    40: 40 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+    50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+    60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+    70: UU -- -- -- -- -- -- --
 ---
 ```
 
-You could do this after attaching the Raspberry Pi to the bottom plate, I just think it is easier to see the parts when they are laying on the workbench.  Connect the parts as you see below:
+Raspberry Piをボトムプレートに取り付けた後でも接続できますが、作業台で部品を並べた状態の方が見やすいでしょう。以下の写真を参考に接続してください。
 
 ![donkey](../assets/build_hardware/4a.png)
 
-For reference, below is the Raspberry Pi Pinout for reference.  You will notice we connect to 3.3v, the two I2C pins (SDA and SCL) and ground:
+参考までにRaspberry Piのピン配置を示します。3.3V、SDA、SCL、GNDを接続しています。
 
 ![donkey](../assets/build_hardware/4b.png)
 
-### Step 5: Attach Raspberry Pi to 3D Printed bottom plate
+### ステップ5: Raspberry Piを3Dプリントのボトムプレートに取り付け
 
-Before you start, now is a good time to insert the already flashed SD card and bench test the electronics.  Once that is done, attaching the Raspberry Pi and Servo is as simple as running screws through the board into the screw bosses on the top plate.  The M2.5x12mm screws should be the perfect length to go through the board, the plastic and still have room for a washer.  The “cap” part of the screw should be facing up and the nut should be on the bottom of the top plate.  The ethernet and USB ports should face forward.  This is important as it gives you access to the SD card and makes the camera ribbon cable line up properly.
+作業を始める前に、フラッシュ済みのSDカードを挿入して電子部品をテストしておくとよいでしょう。準備ができたら、基板にネジを通してトッププレートのネジ穴に固定します。M2.5x12mmのネジが最適な長さです。ネジの頭は上向き、ナットはトッププレートの裏側に置きます。EthernetとUSBポートは前方を向け、SDカードへのアクセスやカメラリボンケーブルの位置合わせを容易にします。
 
-Attach the USB battery to the underside of the printed bottom plate using cable ties or velcro.
+USBバッテリーはボトムプレートの裏側にケーブルタイかベルクロで固定します。
 
 ![donkey](../assets/build_hardware/5ab.png)
 
-### Step 6: Attach Camera
+### ステップ6: カメラを取り付け
 
-Slip the camera into the slot, cable end first.  However, **do not to push on the camera lens** and instead press the board.
+カメラをスロットに差し込みますが、ケーブル側から入れ、**レンズを押さないように**基板を押して挿入してください。
+
 ![donkey](../assets/build_hardware/assemble_camera.jpg)
 
-The temptation is to push on the lens if you need to remove the camera, but **do not push on the camera lens**; instead push on the connector as is shown in these pictures.  
+カメラを取り外すときレンズを押したくなりますが、**絶対にレンズを押さず**コネクター部分を押してください。
+
 ![donkey](../assets/build_hardware/Remove--good.jpg) ![donkey](../assets/build_hardware/Remove--bad.jpg)
 
-Before using the car, remove the plastic film or lens cover from the camera lens.
+使用前にカメラレンズの保護フィルムやカバーを取り外してください。
 
 ![donkey](../assets/build_hardware/6a.png)
 
-It is easy to put the camera cable in the wrong way so look at these photos and make sure the cable is put in properly.  There are loads of tutorials on youtube if you are not used to this.  The Raspberry Pi documentation has an excellent section on how to [Connect the Camera](https://www.raspberrypi.com/documentation/accessories/camera.html#connect-the-camera).
+ケーブルの向きを間違えやすいので、写真をよく見て正しく接続してください。慣れない場合はYouTubeのチュートリアルも役立ちます。Raspberry Piの公式ドキュメントにも[カメラ接続方法](https://www.raspberrypi.com/documentation/accessories/camera.html#connect-the-camera)が掲載されています。
 
 ![donkey](../assets/build_hardware/6b.png)
 
-Later, in the [Install the Software](https://docs.donkeycar.com/guide/install_software/#step-2-install-software-on-donkeycar) steps you will install RaspberryPi OS; at that time you will want to make sure that your camera works correctly; see **Make sure your camera works** in the [Camera](https://docs.donkeycar.com/parts/cameras/#raspberry-pi) part documentation.
+後の[ソフトウェアをインストール](https://docs.donkeycar.com/guide/install_software/#step-2-install-software-on-donkeycar)するステップでカメラが正しく動作するか確認してください。詳細は[カメラ](https://docs.donkeycar.com/parts/cameras/#raspberry-pi)のドキュメント内「Make sure your camera works」を参照してください。
 
-### Step 7: Put it all together
+### ステップ7: すべてを組み立て
 
-*** Note if you have a Desert Monster Chassis see 7B section below ***
-The final steps are straightforward.  First attach the roll bar assembly to the car.  This is done using the same pins that came with the vehicle.  
+*** Desert Monster シャーシの場合は下の7Bセクションを参照してください ***
+車体にロールバーアセンブリを取り付けます。付属のピンを使用します。
 
 ![donkey](../assets/build_hardware/7a.png)
 
-Second run the servo cables up to the car.  The throttle cable runs to channel 0 on the servo controller and steering is channel 1.
+次にサーボケーブルを車体に接続します。スロットルはチャンネル0、ステアリングはチャンネル1に接続します。
 
 ![donkey](../assets/build_hardware/7b.png)
 
-Now you are done with the hardware!!
+これでハードウェアは完成です!
 
-### Step 7b: Attach Adapters (Desert Monster only)
+### ステップ7b: アダプターを取り付ける（Desert Monsterのみ）
 
-The Desert monster does not have the same set up for holding the body on the car and needs two adapters mentioned above.  To attach the adapters you must first remove the existing adapter from the chassis and screw on the custom adapter with the same screws as is shown in this photo:
+Desert Monsterはボディ固定方法が他と異なるため、上記の2つのアダプターが必要です。まず既存のアダプターを外し、同じネジでカスタムアダプターを取り付けます。
 
 ![adapter](../assets/build_hardware/Desert_Monster_adapter.png)
 
-Once this is done, go back to step 7
+取り付けが完了したらステップ7に戻ります。
 
-## Software
+## ソフトウェア
 
-Congrats!  Now to get your get your car moving, see the [software instructions](install_software.md) section.
+おめでとうございます！車を動かすための手順は[ソフトウェアの手順](install_software.md)を参照してください。
 
 ![donkey](../assets/build_hardware/donkey2.png)
 
-> We are a participant in the Amazon Services LLC Associates Program, an affiliate advertising program designed to provide a means for us to earn fees by linking to Amazon.com and affiliated sites.
+> 当サイトはAmazonアソシエイト・プログラムの参加者です。このプログラムによりAmazon.comおよび関連サイトへのリンクを通じて紹介料を得ることがあります。

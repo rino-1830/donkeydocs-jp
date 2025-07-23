@@ -1,126 +1,118 @@
-# Get Your Raspberry Pi Working
+# Raspberry Pi を動作させる
 
 ![donkey](/assets/logos/rpi_logo.png)
 
-Please read this carefully as Donkey Car is now installed differently
-depending on the version. The latest Donkey Car version is 5.1 and requires 
-64-bit Raspberry Pi OS Bookworm. Only in case you are using 5.0 you would 
-install 64-bit Bullseye.
+Donkey Carは現在インストール方法が以前と異なっています。以下をよくお読みください。
+バージョンに応じてインストール方法が変わります。最新のバージョン5.1では
+64ビット版 Raspberry Pi OS Bookworm が必要です。5.0を使用している場合のみ
+64ビット版Bullseyeをインストールしてください。
 
-If you're using an older version of Donkey Car, sucbh as 4.X, then you need to 
-use the older Raspberry Pi OS (Raspian) version called Buster. Jump to 
-those instructions [here](#step-1-flash-operating-system).
+Donkey Carの4.Xなど古いバージョンを使用している場合は
+古い Raspberry Pi OS(Raspbian) のBuster版を使用する必要があります。
+その手順は[こちら](#step-1-flash-operating-system)をご覧ください。
 
-Tub data, car templates, etc are compatible between the two versions as well
-as models in keras format `.h5`. However, Tensorflow Lite models `.tflite`
-are not and need to be regenerated.
+Tubデータや車のテンプレートなどは両方のバージョン間で互換性があります。
+keras形式の`.h5`モデルも同様ですが、Tensorflow Lite形式の`.tflite`モデルは
+互換性がないため再生成する必要があります。
 
-In general, we recommend the RPi 4 or 5 with 4GB of ram. It's also recommended 
-using a 128GB microSD card with U3 speed, like for example 
-[this SanDisk SD Card.](https://www.amazon.com/SanDisk-128GB-Extreme-microSD-Adapter/dp/B07FCMKK5X/ref=sr_1_4?crid=1J19V1ZZ4EVQ5&keywords=SanDisk+128GB+Extreme+microSDXC+UHS-I&qid=1676908353&sprefix=sandisk+128gb+extreme+microsdxc+uhs-i%2Caps%2C121&sr=8-4)
-
-
-## Installation for latest Donkey Car (>= 5.1) using Raspberry Pi OS Bookworm
-
-This installation is using Raspberry Pi OS Bookworm (64 bit).
-
-* [Step 1: Install Operating System](#step-1-install-raspberry-pi-os)
-* [Step 2: Update and Upgrade](#step-2-update-and-upgrade)
-* [Step 3: Raspi-config](#step-3-raspi-config)
-* [Step 4: Setup Virtual Environment](#step-4-setup-virtual-environment)
-* [Step 5: Install Donkeycar Python Code](#step-5-install-donkeycar-python-code)
-* Then [Create your Donkeycar Application](/guide/create_application/)
+一般的には、4GBのRAMを搭載したRPi 4または5を推奨します。
+また、U3速度の128GB microSDカードの使用を推奨します。例として
+[このSanDisk SDカード](https://www.amazon.com/SanDisk-128GB-Extreme-microSD-Adapter/dp/B07FCMKK5X/ref=sr_1_4?crid=1J19V1ZZ4EVQ5&keywords=SanDisk+128GB+Extreme+microSDXC+UHS-I&qid=1676908353&sprefix=sandisk+128gb+extreme+microsdxc+uhs-i%2Caps%2C121&sr=8-4) などがあります。
 
 
-### Step 1: Install Raspberry Pi OS
+## 最新のDonkey Car (>= 5.1) をRaspberry Pi OS Bookwormでインストールする
 
-Raspberry Pi OS can be installed with the graphical installer _Raspberry Pi
-Imager_ which can be downloaded from [here](https://www.raspberrypi.com/software/).
-Please download and start the application, with the SD card you'll be using for your RaspberryPi inserted into your computer's SD card reader.
+ここでは64ビット版のRaspberry Pi OS Bookwormを使用します。
 
-First choose the device you'll be using: Raspberry Pi 5 or Raspberry Pi 4
+* [ステップ1: OSのインストール](#step-1-install-raspberry-pi-os)
+* [ステップ2: 更新とアップグレード](#step-2-update-and-upgrade)
+* [ステップ3: Raspi-config](#step-3-raspi-config)
+* [ステップ4: 仮想環境のセットアップ](#step-4-setup-virtual-environment)
+* [ステップ5: DonkeycarのPythonコードをインストール](#step-5-install-donkeycar-python-code)
+* その後で [Donkeycarアプリケーションを作成](/guide/create_application/)
 
-Then click on 'Operating System' and select 'Raspberry Pi OS (64 bit)' 
 
-Then click on 'Storage' and select your SD card. 
+### ステップ1: Raspberry Pi OSをインストール
 
-Press 'NEXT' and you will be given the option to apply 'OS customization settings'. Select 'Edit Settings'
+Raspberry Pi OSはグラフィカルインストーラー _Raspberry Pi Imager_ を用いてインストールできます。
+インストーラーは[こちら](https://www.raspberrypi.com/software/)からダウンロードしてください。
+使用するSDカードをパソコンのカードリーダーに挿入した状態で、アプリケーションをダウンロードして起動します。
+RaspberryPi用に使用するSDカードをコンピュータのSDカードリーダーに挿入してください。
 
-Here you can enter the specifics of your username. password and wifi details. Set a hostname (here chosen to be
-'donkeycar'), desired password, your wifi, region, etc. 
+最初に使用するデバイス（Raspberry Pi 5 または Raspberry Pi 4）を選択します。
 
-It should look like this:
+次に「Operating System」をクリックして「Raspberry Pi OS (64 bit)」を選択します。
+
+続いて「Storage」をクリックしてSDカードを選びます。
+
+「NEXT」を押すと「OS customization settings」を適用するオプションが表示されるので、「Edit Settings」を選択します。
+
+ここでユーザー名やパスワード、WiFiの詳細を入力します。ホスト名（ここでは「donkeycar」とします）やパスワード、WiFi、地域などを設定します。
+
+次のような画面になります:
 ![imager_advanced_dialog](/assets/imager.png)
 
-Everything else can be left at the default. When you're done, click on 'Save' which will bring you back to the OS customization dialog. Click on 'Yes' and it will write the OS to your SD card.
+他の項目はデフォルトのままで構いません。終了したら「Save」をクリックするとOSカスタマイズのダイアログに戻ります。「Yes」をクリックするとSDカードへOSが書き込まれます。
 
-When it's done, you can place your SD card in the Pi and power it on. It will take a minute or so to boot the first time, but once it has done so (the green light stops flashing)  
+完了したらSDカードをPiに挿入し、電源を入れます。初回起動には1分ほどかかりますが、緑のランプの点滅が止まったら起動が完了です。
 
-You should be able to ssh in to the Pi through your network using the hostname 'donkeycar.local' (or whatever
-you chose in the menu) like this: ```ssh username@hostname.local```. So in the above example it would be ```ssh mydonkey@donkeycar.local``` . 
+ネットワークを介してホスト名 "donkeycar.local" （もしくは設定した名前）でPiにSSH接続できるはずです。例として ```ssh mydonkey@donkeycar.local``` のように接続します。
 
 
-### Step 2: Update and Upgrade
+### ステップ2: 更新とアップグレード
 
 ```bash
 sudo apt-get update --allow-releaseinfo-change
 sudo apt-get upgrade
 ```
 
-### Step 3: Raspi-config
+### ステップ3: Raspi-config
 
-Launch the Raspi config utility:
+Raspi-configユーティリティを起動します:
 
 ```bash
 sudo raspi-config
 ```
 
-* Enable `Interfacing Options` - `I2C`
-* Select `Advanced Options` - `Expand Filesystem` so you can use your whole
-  sd-card storage
-* Do *not* enable the legacy camera (it's disabled by default, so don't change anything)
+* `Interfacing Options` - `I2C` を有効にします
+* `Advanced Options` - `Expand Filesystem` を選んでSDカード全体を使用できるようにします
+* レガシーカメラを有効にしないでください（デフォルトで無効なので変更しないでください）
 
-Choose `<Finish>` and hit enter.
+`<Finish>` を選択してEnterキーを押します。
 
-> Note: Reboot after changing these settings. Should happen if you select `yes`.
+> 注意: これらの設定変更後は再起動が必要です。`yes` を選ぶと再起動します。
 
-Alternatively if you connect to the full desktop using VNC and are running
-the desktop, go to 'Raspberry -> Preferences -> Raspberry Pi Configuration'
-and apply the settings there.
+VNCでデスクトップに接続している場合は、「Raspberry -> Preferences -> Raspberry Pi Configuration」で同じ設定を行うこともできます。
 
-> Note: If you prefer to install the headless version of Raspberry Pi OS, 
-> please follow the steps [here](https://www.raspberrypi.com/documentation/computers/configuration.html#setting-up-a-headless-raspberry-pi).
-> You will need to run `sudo apt -y install pip git` afterwards.
+> 注意: ラズパイOSのヘッドレス版をインストールする場合は、[こちら](https://www.raspberrypi.com/documentation/computers/configuration.html#setting-up-a-headless-raspberry-pi)の手順に従ってください。その後 `sudo apt -y install pip git` を実行する必要があります。
 
 
-### Step 4: Setup virtual environment
+### ステップ4: 仮想環境のセットアップ
 
-To create a virtual environmnet run the following from your home directory:
+自宅ディレクトリで次のコマンドを実行して仮想環境を作成します:
 ```bash
 python3 -m venv env --system-site-packages
 echo "source ~/env/bin/activate" >> ~/.bashrc
 source ~/.bashrc
 ```
 
-Install required libraries
+必要なライブラリをインストールします
 ```bash
 sudo apt install libcap-dev libhdf5-dev libhdf5-serial-dev
 ```
 
-### Step 5: Install Donkeycar Python Code
+### ステップ5: Donkeycar Pythonコードのインストール
 
-#### User Install (preferred way)
-Simply type:
+#### ユーザーインストール（推奨）
+以下を実行します:
 ```bash
 pip install donkeycar[pi]
 ```
-Note: this will take 5-10 minutes to complete. Be patient!
+完了まで5〜10分かかります。少々お待ちください。
 
-#### Developer Install (only required if you want to checkout different forks, branches, tags)
+#### 開発者向けインストール（別のフォークやブランチ、タグを使用したい場合のみ）
 
-Create a project directory you would like to use as the 
-head of your projects, change into it and download and install `donkeycar` 
-from GitHub. Make sure your `donkey` env is activated.
+プロジェクトの基点となるディレクトリを作成して移動し、GitHubから `donkeycar` をダウンロードしてインストールします。`donkey` 環境が有効になっていることを確認してください。
 
 ```bash
 mkdir projects
@@ -131,79 +123,50 @@ git checkout main
 pip install -e .[pi]
 ```
 
-### Further steps
+### 追加の手順
 
-- **Make sure your camera works**.  [Camera connection](https://www.raspberrypi.com/documentation/accessories/camera.html#connect-the-camera) issues are common, especially after [assembly of a new Donkeycar](https://docs.donkeycar.com/guide/build_hardware/#step-6-attach-camera), installation of a new camera or after a crash.  In any of those cases or if you otherwise encounter an camera error when using the Donkeycar software, you should make sure your camera is working properly before asking for help on the [Discord](https://discord.gg/PN6kFeA).  Raspberry Pi OS includes [Camera Software](https://www.raspberrypi.com/documentation/computers/camera_software.html) that will take a picture or stream video.  If you have a keyboard, mouse and monitor connected to the Raspberry Pi, then you can run the [`rpicam-hello`](https://www.raspberrypi.com/documentation/computers/camera_software.html#rpicam-hello) utility to show the camera's video stream.  If you are ssh'ing into your Raspberry Pi, then you can take an image and save it as a jpeg using the [`rpicam-jpeg`](https://www.raspberrypi.com/documentation/computers/camera_software.html#rpicam-jpeg) utility, then copy the resulting jpeg file to you host computer to view it (generally if it successfully takes the photo without reporting an error then the camera should be ok).
+- **カメラが正常に動作することを確認してください**。[カメラ接続](https://www.raspberrypi.com/documentation/accessories/camera.html#connect-the-camera)はよく問題になります。特に[新しいDonkeycarの組み立て](https://docs.donkeycar.com/guide/build_hardware/#step-6-attach-camera)直後やカメラの交換、クラッシュ後によく発生します。こうした状況やその他の理由でDonkeycarのソフトウェア使用時にカメラエラーが発生した場合、[Discord](https://discord.gg/PN6kFeA)で質問する前にカメラが正常に動作しているか確認してください。Raspberry Pi OSには[カメラソフトウェア](https://www.raspberrypi.com/documentation/computers/camera_software.html)が含まれており、写真撮影やビデオストリームを行えます。キーボード、マウス、モニタをRaspberry Piに接続している場合は、[`rpicam-hello`](https://www.raspberrypi.com/documentation/computers/camera_software.html#rpicam-hello)ユーティリティを実行してカメラの映像を確認できます。SSH接続している場合は、[`rpicam-jpeg`](https://www.raspberrypi.com/documentation/computers/camera_software.html#rpicam-jpeg)を使ってJPEG画像を保存し、そのファイルをホストPCにコピーして確認できます（エラーなく撮影できればカメラは問題ないと考えられます）。
 
-- **Make sure tensorflow works**.  You can validate your tensorflow install by running this command (with the donkey environment activated; if you have completed Step 4 above, then it should be activated).  Make sure the version that here is no error.  Write down the version that it prints; if you have trouble training a Deep Learning autopilot in [later steps](https://docs.donkeycar.com/guide/train_autopilot/) then knowing the version of tensorflow that is running is critical to getting help on the [Discord](https://discord.gg/PN6kFeA). 
+- **TensorFlowが動作することを確認してください**。以下のコマンドを実行してTensorFlowのインストールを確認できます（donkey環境が有効になっていることが前提です。ステップ4を完了していれば有効なはずです）。エラーが出ないことを確認し、表示されるバージョン番号を書き留めておいてください。後の[深層学習自動運転の学習手順](https://docs.donkeycar.com/guide/train_autopilot/)で問題が発生した場合、このバージョン情報がDiscordで助けを求める際に非常に重要になります。
 
 ```bash
 python -c "import tensorflow; print(tensorflow.__version__)"
 ```
+* [ステップ12: (任意) OpenCV のインストール](#step-12-optional-install-opencv)
+* [ステップ13: (任意) モバイルアプリのインストール](#step-13-optional-install-mobile-app)
+* その後で [Donkeycar アプリケーションの作成](/guide/create_application/)
+
+### ステップ1: オペレーティングシステムの書き込み
+
+> 注意: モバイルアプリを使用する予定がある場合は、あらかじめ構築されたイメージの利用を検討してください。
+> 詳細は [モバイルアプリのユーザーガイド](../deep_learning/mobile_app.md) を参照してください。
+
+microSDカードにオペレーティングシステムのイメージを書き込みます。
+
+> 注意: 最新のRaspbian(bullseye)はPythonカメラバインディングと互換性がありません。カメラシステムが変更されたためです。`main` ブランチから最新バージョンをインストールするには以下の手順に従ってください。
+
+1. [Raspian Legacy (Buster)](https://downloads.raspberrypi.org/raspios_oldstable_lite_armhf/images/raspios_oldstable_lite_armhf-2021-12-02/2021-12-02-raspios-buster-armhf-lite.zip) をダウンロードします。
+2. OS ごとの手順は [こちら](https://www.raspberrypi.org/documentation/installation/installing-images/) を参照してください。
+3. microSDカードは挿したままにして、以下のファイルを編集／作成します:
 
 
-----
-## Installation for Donkeycar <= 4.5 using Raspberry Pi OS Buster
+### ステップ2: 初回起動用の WiFi 設定
 
-This installation is using Raspberry Pi OS Buster (32 bit).
+初回起動時にWiFiへ接続するための特別なファイルを作成できます。
+詳しくは[こちら](https://raspberrypi.stackexchange.com/questions/10251/prepare-sd-card-for-wifi-on-headless-pi)を参照してくださいが、以下の手順を説明します。
 
-* [Step 1: Flash Operating System](#step-1-flash-operating-system)
-* [Step 2: Setup the WiFi for First Boot](#step-2-setup-the-wifi-for-first-boot)
-* [Step 3: Setup Pi's Hostname](#step-3-setup-pis-hostname)
-* [Step 4: Enable SSH on Boot](#step-4-enable-ssh-on-boot)
-* [Step 5: Connecting to the Pi](#step-5-connecting-to-the-pi)
-* [Step 6: Update and Upgrade](#step-6-update-and-upgrade)
-* [Step 7: Raspi-config](#step-7-raspi-config)
-* [Step 8: Install Dependencies](#step-8-install-dependencies)
-* [Step 9: (Optional) Install OpenCV Dependencies](#step-9-optional-install-opencv-dependencies)
-* [Step 10: Setup Virtual Env](#step-10-setup-virtual-env)
-* [Step 11: Install Donkeycar Python Code](#step-11-install-donkeycar-python-code)
-* [Step 12: (Optional) Install OpenCV](#step-12-optional-install-opencv)
-* [Step 13: (Optional) Install Mobile App](#step-13-optional-install-mobile-app)
-* Then [Create your Donkeycar Application](/guide/create_application/)
+Windows ではメモリカードにイメージを書き込み、カードを挿したままにすると 2 つのドライブ（実際には 2 つのパーティション）が表示されます。
+そのうちの一つは __boot__ とラベル付けされています。Mac や Linux でも __boot__ パーティションにアクセス可能です。
+このパーティションは一般的な FAT 形式でフォーマットされており、ここでファイルを編集して初回起動時に WiFi に接続できるようにします。
 
-### Step 1: Flash Operating System
+> 注意: __boot__ がすぐに表示されない場合は、カードリーダーを抜き差ししてください。
 
-> Note:  If you plan to use the mobile app, consider using the pre-built image.
-> Refer to the [mobile app user guide](../deep_learning/mobile_app.md) for
-> details.
-
-You need to flash a micro SD image with an operating system.
-
-> Note: Raspbian Latest (bullseye) is not compatible with the Python camera
-> bindings. The underlying camera system has changed. Please follow steps
-> below for installing the latest version from the `main` branch.
-
-1. Download [Raspian Legacy (Buster)](https://downloads.raspberrypi.org/raspios_oldstable_lite_armhf/images/raspios_oldstable_lite_armhf-2021-12-02/2021-12-02-raspios-buster-armhf-lite.zip).
-2. Follow OS specific guides [here](https://www.raspberrypi.org/documentation/installation/installing-images/).
-3. Leave micro SD card in your machine and edit/create some files as below:
-
-
-### Step 2: Setup the WiFi for first boot
-
-We can create a special file which will be used to login to wifi on first boot.
-More
-reading [here](https://raspberrypi.stackexchange.com/questions/10251/prepare-sd-card-for-wifi-on-headless-pi),
-but we will walk you through it.
-
-On Windows, with your memory card image burned and memory disc still inserted,
-you should see two drives, which are actually two partitions on the mem disc.
-One is labeled __boot__. On Mac and Linux, you should also have access to the _
-_boot__ partition of the mem disc.
-This is formatted with the common FAT type and is where we will edit some files
-to help it find and log-on to your wifi on its first boot.
-
-> Note: If __boot__ is not visible right away, try unplugging and re-inserting
-> the memory card reader.
-
-* Start a text editor
-    * `gedit` on Linux.
-    * Notepad++ on Windows.
-    * VI on Mac (type `vi /Volumes/boot/wpa_supplicant.conf` where `boot` is the
-      name of the SD Card).
-* Possible `country` codes to use can be
-  found [here](https://www.thinkpenguin.com/gnu-linux/country-code-list)
-* Paste and edit this contents to match your wifi, adjust as needed:
+* テキストエディタを起動します
+    * Linux では `gedit`
+    * Windows では Notepad++
+    * Mac では `vi /Volumes/boot/wpa_supplicant.conf` (`boot` はSDカード名)
+* 使用可能な `country` コードは[ここ](https://www.thinkpenguin.com/gnu-linux/country-code-list)で確認できます
+* 以下の内容を貼り付け、WiFiに合わせて編集します:
 
 ```text
 country=US
@@ -217,179 +180,148 @@ network={
 
 ```
 
-Note - `country` defines allowed wifi channels, ensure to set it properly to
-your location and hardware.
+`country` は利用可能なWiFiチャネルを指定します。お住まいの地域とハードウェアに合わせて正しく設定してください。
 
-Replace `<your network name>` with the ID of your network. Leave the quotes.
-I've seen problems when the network name contained an apostrophe, like "Joe's
-iPhone".
-Replace `<your password>` with your password, leaving it surrounded by quotes.
-If it bothers you to leave your password unencrypted, you may change
-the [contents later](https://unix.stackexchange.com/questions/278946/hiding-passwords-in-wpa-supplicant-conf-with-wpa-eap-and-mschap-v2)
-once you've gotten the pi to boot and log-in.
+`<your network name>` にはネットワークのIDを入力します。引用符は残します。ネットワーク名にアポストロフィ（例: "Joe's iPhone"）が含まれていると問題になることがあります。
+`<your password>` にはパスワードを入力します。引用符は付けたままにしてください。パスワードを平文で置いておくのが気になる場合は、起動後に
+[こちら](https://unix.stackexchange.com/questions/278946/hiding-passwords-in-wpa-supplicant-conf-with-wpa-eap-and-mschap-v2)の方法で内容を変更できます。
 
-* Save this file to the root of __boot__ partition with the
-  filename `wpa_supplicant.conf`. On first boot, this file will be moved
-  to `/etc/wpa_supplicant/wpa_supplicant.conf` where it may be edited later. If
-  you are using Notepad on Windows, make sure it doesn't have a .txt at the end.
+* このファイルを __boot__ パーティションのルートに `wpa_supplicant.conf` という名前で保存します。
+  初回起動時にこのファイルは `/etc/wpa_supplicant/wpa_supplicant.conf` に移動され、後から編集できます。Windows の Notepad を使用している場合は拡張子 `.txt` が付かないよう注意してください。
 
 
-### Step 3: Setup Pi's Hostname
+### ステップ3: Pi のホスト名設定
 
-> Note: This step only possible on a Linux host pc. Otherwise you can set it up
-> later in `raspi-config` after logging in to your pi.
+> 注意: この手順は Linux ホスト PC でのみ可能です。そうでない場合は Pi にログイン後 `raspi-config` で設定できます。
 
-We can also setup the hostname so that your Pi easier to find once on the
-network. If yours is the only Pi on the network, then you can find it with
+Pi をネットワーク上で見つけやすくするため、ホスト名を設定します。ネットワーク上に自分の Pi だけがあるなら、次のようにして見つけられます。
 
 ```bash
 ping raspberrypi.local
 ```
 
-once it's booted. If there are many other Pi's on the network, then this will
-have problems.
-If you are on a Linux machine, or are able to edit the UUID partition, then you
-can edit the `/etc/hostname` and `/etc/hosts` files now to make finding your pi
-on the network easier after boot.
-Edit those to replace `raspberrypi` with a name of your choosing.
-Use all lower case, no special characters, no hyphens, yes underscores `_`.
-Good idea is to use something like `pi-<MAC_ADDRESS>` such as `pi-deadbeef`
-especially if you have more pi devices in the same network.
+起動したらこのコマンドを実行します。ネットワークに他の Pi が多数ある場合はうまくいかないことがあります。
+Linux マシンを使用している、または UUID パーティションを編集できる場合は、今のうちに `/etc/hostname` と `/etc/hosts` を編集しておくと、起動後に Pi を見つけやすくなります。
+これらのファイルで `raspberrypi` を任意の名前に変更します。
+小文字のみを使用し、特殊文字やハイフンは避け、アンダースコア `_` は使用できます。
+複数の Pi デバイスが同じネットワークにある場合は `pi-<MAC_ADDRESS>` のようにするのがよいでしょう。
 
 ```bash
 sudo vi /media/userID/UUID/etc/hostname
 sudo vi /media/userID/UUID/etc/hosts
 ```
 
-### Step 4: Enable SSH on Boot
+### ステップ4: 起動時に SSH を有効化
 
-Put a file named __ssh__ in the root of your __boot__ partition. On Mac or Linux
-this can be done using the `touch` command. For example, on the
-Mac, `touch /Volumes/boot/ssh` where `boot` is the name of the SD card.
+__boot__ パーティションのルートに __ssh__ という名前のファイルを置きます。Mac や Linux では `touch` コマンドで作成できます。例: `touch /Volumes/boot/ssh` (`boot` は SD カード名)。
 
-Now your SD card is ready. Eject it from your computer - wait until system shows
-the writing is done
-and it is safe to remove card. Ensure Pi is turned off, put the card in the Pi
-and power on the Pi.
+これで SD カードの準備は完了です。書き込みが終了するまで待ってからカードを安全に取り外し、Pi の電源がオフになっていることを確認してカードを挿入し、電源を入れます。
 
-### Step 5: Connecting to the Pi
+### ステップ5: Pi へ接続する
 
-If you followed the above instructions to add wifi access, your Pi should
-now be connected to your wifi network. Now you need to find its IP address
-so you can connect to it via SSH.
+上記の手順で WiFi 設定を行った場合、Pi は既にネットワークに接続されているはずです。次に SSH で接続するための IP アドレスを調べます。
 
-The easiest way (on Ubuntu) is to use the `findcar` donkey command.
-You can try `ping raspberrypi.local`. If you've modified the hostname, then you
-should try:
+Ubuntu では `findcar` コマンドを使うのが最も簡単です。
+`ping raspberrypi.local` を試すこともできます。ホスト名を変更している場合は次のようにします:
 
 ```bash
 ping <your hostname>.local
 ```
 
-This will fail on a windows machine. Windows users will need the full IP
-address (unless using cygwin).
+この方法は Windows では失敗します。Windows ユーザーは完全な IP アドレスが必要です（cygwin を使用していない場合）。
 
-If you are having troubles locating your Pi on the network, you will want to
-plug in an HDMI monitor and USB keyboard into the Pi. Boot it. Login with:
+ネットワーク上で Pi を見つけられないときは、Pi に HDMI モニターと USB キーボードを接続して起動し、次の情報でログインします:
 
 * Username: `pi`
 * Password: `raspberry`
 
-Then try the command:
+その後、以下のコマンドを試します:
 
 ```bash
 ifconfig wlan0
 ```
 
-or just all Ip addresses assigned to the pi (wifi or cable):
+または、Pi に割り当てられているすべての IP アドレスを確認するには次を実行します:
 
 ```bash
 ip -br a
 ```
 
-If this has a valid IPv4 address, 4 groups of numbers separated by dots, then
-you can try that with your SSH command. If you don't see anything like that,
-then your wifi config might have a mistake. You can try to fix with
+ここに IPv4 アドレス（数字4組）が表示されていれば、そのアドレスで SSH 接続を試せます。表示されない場合は WiFi 設定が間違っている可能性があります。以下で修正してみてください。
 
 ```bash
 sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
 ```
 
-If you don't have a HDMI monitor and keyboard, you can plug-in the Pi with a
-CAT5 cable to a router with DHCP.
-If that router is on the same network as your PC, you can try:
+HDMI モニターとキーボードがない場合は、CAT5 ケーブルで Pi を DHCP ルーターに接続します。
+そのルーターが PC と同じネットワークにあるなら次のコマンドを試せます:
 
 ```bash
 ping raspberrypi.local
 ```
 
-Hopefully, one of those methods worked and you are now ready to SSH into your
-Pi. On Mac and Linux, you can open Terminal.
-On Windows you can
-install [Putty](http://www.putty.org/), [one of the alternatives](https://www.htpcbeginner.com/best-ssh-clients-windows-putty-alternatives/2/),
-or on Windows 10 you may have ssh via the command prompt.
+うまくいけば、これらの方法のいずれかで Pi に SSH 接続できるはずです。Mac や Linux ではターミナルを開きます。
+Windows の場合は [Putty](http://www.putty.org/) や[他の選択肢](https://www.htpcbeginner.com/best-ssh-clients-windows-putty-alternatives/2/)を使用するか、Windows 10 ならコマンドプロンプトから ssh が利用できることもあります。
 
-If you have a command prompt, you can try:
+コマンドプロンプトがある場合は次を試してみてください:
 
 ```bash
 ssh pi@raspberrypi.local
 ```
 
-or
+また、
 
 ```bash
 ssh pi@<your pi ip address>
 ```
 
-or via Putty.
+と入力しても接続できます。Putty を使うことも可能です。
 
-* Username: `pi`
-* Password: `raspberry`
-* Hostname: `<your pi IP address>`
+* ユーザー名: `pi`
+* パスワード: `raspberry`
+* ホスト名: `<your pi IP address>`
 
 
-### Step 6: Update and Upgrade
+### ステップ6: 更新とアップグレード
 
 ```bash
 sudo apt-get update --allow-releaseinfo-change
 sudo apt-get upgrade
 ```
 
-### Step 7: Raspi-config
+### ステップ7: Raspi-config
 
 ```bash
 sudo raspi-config
 ```
 
-* change default password for pi
-* change hostname
-* enable `Interfacing Options` - `I2C`
-* enable `Interfacing Options` - `Camera`
-* select `Advanced Options` - `Expand Filesystem` so you can use your whole
-  sd-card storage
+* pi のデフォルトパスワードを変更
+* ホスト名を変更
+* `Interfacing Options` - `I2C` を有効化
+* `Interfacing Options` - `Camera` を有効化
+* `Advanced Options` - `Expand Filesystem` を選択して SD カード全体を使用可能にする
 
-Choose `<Finish>` and hit enter.
+`<Finish>` を選択して Enter を押します。
 
-> Note: Reboot after changing these settings. Should happen if you select `yes`.
+> 注意: これらの設定を変更した後は再起動が必要です。`yes` を選ぶと再起動します。
 
-### Step 8: Install Dependencies
+### ステップ8: 依存関係をインストール
 
 ```bash
 sudo apt-get install build-essential python3 python3-dev python3-pip python3-virtualenv python3-numpy python3-picamera python3-pandas python3-rpi.gpio i2c-tools avahi-utils joystick libopenjp2-7-dev libtiff5-dev gfortran libatlas-base-dev libopenblas-dev libhdf5-serial-dev libgeos-dev git ntp
 ```
 
-### Step 9: (Optional) Install OpenCV Dependencies
+### ステップ9: (任意) OpenCV 依存関係のインストール
 
-If you are going for a minimal install, you can get by without these. But it can
-be handy to have OpenCV.
+最小構成でインストールする場合はこれらを省略できますが、OpenCV があると便利です。
 
 ```bash
 sudo apt-get install libilmbase-dev libopenexr-dev libgstreamer1.0-dev libjasper-dev libwebp-dev libatlas-base-dev libavcodec-dev libavformat-dev libswscale-dev
 ```
 
-### Step 10: Setup Virtual Env
+### ステップ10: 仮想環境の設定
 
-This needs to be done only once:
+この作業は一度だけ行えば十分です:
 
 ```bash
 python3 -m virtualenv -p python3 env --system-site-packages
@@ -397,20 +329,18 @@ echo "source ~/env/bin/activate" >> ~/.bashrc
 source ~/.bashrc
 ```
 
-Modifying your `.bashrc` in this way will automatically enable this environment
-each time you login. To return to the system python you can type `deactivate`.
+`.bashrc` をこのように変更しておくと、ログインするたびにこの環境が自動で有効になります。システムの Python に戻るには `deactivate` と入力します。
 
-### Step 11: Install Donkeycar Python Code
+### ステップ11: Donkeycar の Python コードをインストール
 
-* Create and change to a directory you would like to use as the head of your
-  projects.
+* プロジェクトの作業ディレクトリとなるフォルダを作成して移動します。
 
 ```bash
 mkdir projects
 cd projects
 ```
 
-* Get the latest stable release (which will be a 4.4 version)
+* 最新の安定版リリース（4.4 系）を取得します
 
 ```bash
 git clone https://github.com/autorope/donkeycar
@@ -421,44 +351,39 @@ pip install -e .[pi]
 pip install https://github.com/lhelontra/tensorflow-on-arm/releases/download/v2.2.0/tensorflow-2.2.0-cp37-none-linux_armv7l.whl
 ```
 
-You can validate your tensorflow install with
+TensorFlow のインストールを確認するには次を実行します
 
 ```bash
 python -c "import tensorflow; print(tensorflow.__version__)"
 ```
 
-### Step 12: (Optional) Install OpenCV
+### ステップ12: (任意) OpenCV をインストール
 
-If you've opted to install the OpenCV dependencies earlier, you can install
-Python OpenCV bindings now with command:
+先に OpenCV の依存関係をインストールした場合は、次のコマンドで Python 用 OpenCV バインディングをインストールできます:
 
 ```bash
 sudo apt install python3-opencv
 ```
 
-If that failed, you can try pip:
+うまくいかないときは pip を試します:
 
 ```bash
 pip install opencv-python
 ```
 
-Then test to see if import succeeds.
+その後、インポートできるかテストします。
 
 ``` bash
 python -c "import cv2"
 ```
 
-And if no errors, you have OpenCV installed!
+エラーが出なければ OpenCV のインストール完了です。
 
-### Step 13: (Optional) Install Mobile App
+### ステップ13: (任意) モバイルアプリのインストール
 
-There is a mobile application available on the iPhone and Android that provides
-an alternative user experience. It can be installed manually or by downloading
-an SD card image. Follow
-these [instructions](/guide/deep_learning/mobile_app/#optional-manual-installation)
-to install manually.
+iPhone と Android 向けにモバイルアプリが提供されています。SD カードイメージをダウンロードするか、手動でインストールできます。手動インストールの方法は[こちら](/guide/deep_learning/mobile_app/#optional-manual-installation)を参照してください。
 
-> **Note** The server component currently supports **RaspberryPi 4B only**.
+> **注意** サーバーコンポーネントは **RaspberryPi 4B** のみをサポートしています。
 
 
-## Next, [create your Donkeycar application](/guide/create_application/).
+## 次に、[Donkeycar アプリケーションを作成](/guide/create_application/) してください。

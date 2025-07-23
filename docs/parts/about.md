@@ -1,19 +1,19 @@
-# Donkeycar Software Architecture
+# Donkeycar ソフトウェアアーキテクチャ
 
-Donkeycar is very simple; code is organized into parts that take inputs and return outputs.  These parts are added to a vehicle.  The vehicle loop, once started, runs the parts in order.  The parts effectively communicate by reading and mutating the vehicle memory.
+Donkeycar は非常にシンプルで、コードは入力を受け取り出力を返すパーツに整理されています。これらのパーツは車両に追加されます。車両ループが開始されるとパーツは順番に実行され、車両のメモリを読み書きすることで効果的に通信します。
 
-A 'template' is a python file that contains code to construct a 'vehicle' and one or more 'parts'.  A part is a Python class that wraps a functional component of a vehicle.  The parts are added to the vehicle.  The parts can take values from the vehicle's memory as inputs and can write values to the vehicle's memory as outputs.  When the vehicle loop is started the parts are run in the order that they were added; getting their inputs from memory and outputing their results to memory.  This continues in a loop until the vehicle is stopped, then all the parts are shutdown and the template exits.
+「テンプレート」とは、「ビークル」と1つ以上の「パーツ」を構築するコードを含む Python ファイルのことです。パーツは車両の機能コンポーネントを包む Python クラスです。パーツは車両に追加されます。パーツは車両メモリの値を入力として受け取り、出力としてそのメモリに値を書き込むことができます。ビークルループが開始されると、パーツは追加された順に実行され、メモリから入力を取得して結果をメモリに出力します。これは車両が停止するまで続き、停止するとすべてのパーツがシャットダウンしてテンプレートが終了します。
 
-## Templates
-When you create your car application using the `donkey createcar ...` command as described in the [Create Donkeycar App](https://docs.donkeycar.com/guide/create_application/) section of the docs, what happens under the hood is that a few files are copied from the `donkeycar/templates` folder into your my car folder.  The two we need to talk about are manage.py and myconfig.py.
+## テンプレート
+`donkey createcar ...` コマンドを使用して車のアプリケーションを作成すると、ドキュメントの [Create Donkeycar App](https://docs.donkeycar.com/guide/create_application/) セクションで説明されているように、いくつかのファイルが `donkeycar/templates` フォルダからマイカーのフォルダにコピーされます。ここで説明するのは manage.py と myconfig.py の2つです。
 
-The files that are copied to the mycar folder are renamed versions of a pair of template files in the templates folder.  The files are chosen based on the template name you passed in the `--template` argument to the `createcar` command; if you pass nothing then the default is `--template = complete`.  So `donkey createcar --path=~/mycar` is the same as `donkey createcar --path=~/mycar --template=complete`.  In this case then the files that are renamed and copied to `~/mycar/manage.py` and `~/mycar/myconfig.py` are `donkeycar/templates/complete.py` and `donkeycar/templates/cfg_complete.py` respectively. If you create a path follow application by passing `--template=path_follow` to createcar, then the files that are copied are `donkeycar/templates/path_follow.py` and `donkeycar/templates/cfg_path_follow.py`
+mycar フォルダにコピーされるファイルは、テンプレートフォルダ内のテンプレートファイルの名前を変えたものです。ファイルは `createcar` コマンドの `--template` 引数に渡したテンプレート名によって選択されます。何も渡さない場合のデフォルトは `--template = complete` です。したがって `donkey createcar --path=~/mycar` は `donkey createcar --path=~/mycar --template=complete` と同じです。この場合、`~/mycar/manage.py` と `~/mycar/myconfig.py` にコピーされるのは `donkeycar/templates/complete.py` と `donkeycar/templates/cfg_complete.py` です。`--template=path_follow` を指定してアプリケーションを作成した場合は、`donkeycar/templates/path_follow.py` と `donkeycar/templates/cfg_path_follow.py` がコピーされます。
 
-Now technically another copy of the `donkeycar/template/cfg_xxxx.py` is copied to the mycar folder as `config.py`; this contains the default configuration and should not be edited.  The myconfig.py file is really a commented out version of config.py.  To change your app's configuration (like to choose the kind of camera or drivetrain) uncomment the section you care about in myconfig.py and edit it.
+厳密には `donkeycar/template/cfg_xxxx.py` の別コピーが mycar フォルダに `config.py` としてコピーされます。これはデフォルト設定を含むもので、編集すべきではありません。myconfig.py は実際には config.py をコメントアウトしたバージョンです。アプリの設定（カメラや駆動方式など）を変更するには、myconfig.py で必要な部分のコメントを外して編集します。
 
-The manage.py file is where that action really is; this is the code that runs your car.  It is organized into a 'vehicle loop' that runs at the rate specified by the `DRIVE_LOOP_HZ` value in your myconfig.py file; that is how often the vehicle loop's 'parts' will get updated.  The donkeycar vehicle loop is a pipeline of what we call 'parts' that get and set state in a hashmap we call 'memory'. 
+manage.py ファイルこそが実際に車を動かすコードです。これは myconfig.py の `DRIVE_LOOP_HZ` 値で指定されるレートで動く「ビークルループ」に構成されています。つまりその頻度で車両ループの「パーツ」が更新されます。donkeycar の車両ループは「メモリ」と呼ばれるハッシュマップで状態を取得・設定する「パーツ」のパイプラインです。
 
-The complete.py and path_follow.py templates are fairly complex because they are very configurable.  However they are not in anyway special.  You can create your own template to do what you want; or you don't have create or use a template at all; you can write your own `manage.py` directly.  Here is an example of a vehicle loop with a single part that will accept a number, multiply it by a random number and return the result.  As the vehicle loop runs, the value will continue to get randomized.
+complete.py と path_follow.py のテンプレートは非常に設定項目が多いため複雑ですが、特別なものではありません。自分専用のテンプレートを作成することもできますし、テンプレートを使わずに直接 `manage.py` を書くこともできます。次に示すのは、1つのパーツだけを持つ車両ループの例で、数値を受け取りランダムな数値を掛け合わせて結果を返します。ループが回るたびに値はランダム化され続けます。
 
 ```python
 import random
@@ -38,47 +38,45 @@ V.add(RandPercent(), inputs=['var'], outputs=['var'])
 V.start(max_loops=5)
 ```
 
-## Parts
-A part is a Python class that wraps a functional component of a vehicle.
+## パーツ
+パーツとは車両の機能コンポーネントを包む Python クラスです。
 
-These include:
+以下が例です。
 
-* Sensors - Cameras, Lidar, Odometers, GPS ...
-* Actuators - Motor Controllers
-* Pilots - Lane Detectors, Behavioral Cloning models, ...
-* Controllers - Web based or Bluetooth.
-* Stores - Tub, or a way to save data.
+* センサー - カメラ、Lidar、オドメトリ、GPS など
+* アクチュエータ - モーターコントローラー
+* パイロット - レーン検出器、行動クローンモデルなど
+* コントローラー - Web ベースまたは Bluetooth
+* ストレージ - Tub などデータを保存する方法
 
-Tawn Kramer has created a video (actual two parts) that walks through [how to make a part](https://www.youtube.com/watch?v=YZ4ESrtfShs). Also, there is a video of a presentationat the Arm AIoT conference that shows [how the OLED part was created](https://youtu.be/GOkYPXheWSY?t=1213).
+Tawn Kramer は [パーツの作り方](https://www.youtube.com/watch?v=YZ4ESrtfShs) を説明する2部構成の動画を作成しています。また、Arm AIoT カンファレンスで [OLED パーツを作成した方法](https://youtu.be/GOkYPXheWSY?t=1213) を紹介する発表動画もあります。
 
-Each part is constructed and then added to the vehicle loop with its named inputs and named outputs and an optional `run_condition` specified.  The vehicle's parts are (for the most part) executed in the order that they are added to the vehicle loop.  Each time the vehicle loop runs the part's inputs are read from vehicle memory and passed to the part's `run()` method, the `run()` method does it's work, and it's return values are assigned to the output values.  If there is a `run_condition`, then the part's `run()` method is only called in the value of the `run_condition` property is True; so if the `run_condition` property is False then the part is 'turned off'.
+各パーツは作成された後、名前付きの入力と出力、そしてオプションの `run_condition` とともに車両ループに追加されます。車両のパーツは基本的に追加された順に実行されます。車両ループが回るたびに、パーツの入力は車両メモリから読み込まれて `run()` メソッドに渡され、`run()` メソッドが処理を行い、その戻り値が出力値として割り当てられます。`run_condition` がある場合は、その `run_condition` プロパティが True のときだけ `run()` メソッドが呼び出されます。False のときはそのパーツは「オフ」になります。
 
-- **memory**: Vehicle memory is a hash map of named values.  It is the 'state' of the vehicle.  In includes values uses as inputs, outputs and conditions.  It is shared by all parts.
-- **inputs**: inputs are memory values passed to the `run()` method of a part; they are declared when the part is added to the vehicle loop.  So for the aiLauncher example, when we add the part we include the argument, `inputs=['user/mode', 'pilot/throttle']`. Just before the `run()` method is called, the vehicle loop looks up the input values and then passes them to the part's `run()` method as arguments. So when the aiLauncher part's `run()` method is called it will be passed two arguments; the first will be the value of the `user/mode` property in vehicle memory and the second will be the value of the `pilot/throttle` property. Note that the number of inputs declared when the part is added must match the number of arguments in the part's `run()` method otherwise a runtime error results. 
-- **outputs**: outputs are memory values that are returned by the `run()` method of the part; they are declared when the part is added to the vehicle loop.  After the part's `run()` method is called, the return values are assigned to named output properties. So for the aiLauncher example, when we add the part we include the argument, `outputs=['pilot/throttle']`. When the aiLauncher part finishes running, it will return a single value and that value will be assigned to the `'pilot/throttle'` property in vehicle memory.  Note that the number of outputs declared when the part is added must match the number of returned values in the part's `run()` method otherwise a runtime error results. 
-- **run_condition**: the `run_condition` is a boolean memory value that can be used to decide if a part's `run()` method is called.  If the condition is True then the part's `run(`) method is called, otherwise it is not called.  This is a way to turn on and off a part.  So for instance, if we only ever wanted aiLauncher to run when in autopilot mode, we would maintain a named memory value, let's say `'run_pilot'`, that was True when running in autopilot mode and False when running in user (manual) mode.  Then we would pass `run_condition='run_pilot'` to the `V.add()` method when we added the aiLauncher part to the vehicle. The aiLaucher's `run()` method would only be called if the named memory value `'run_pilot'` was True.
+- **memory**: 車両メモリは名前付き値のハッシュマップで、車両の状態を表します。入力、出力、条件に使われる値を含み、すべてのパーツで共有されます。
+- **inputs**: `run()` メソッドに渡されるメモリ値で、パーツを車両ループに追加するときに宣言します。例として aiLauncher パーツを追加するとき `inputs=['user/mode', 'pilot/throttle']` を指定します。`run()` メソッドが呼ばれる直前に、車両ループは入力値を取得して `run()` メソッドに引数として渡します。従って aiLauncher の `run()` メソッドが呼ばれるとき、最初の引数は車両メモリの `user/mode` の値、2 番目の引数は `pilot/throttle` の値になります。パーツを追加するときに宣言した入力の数と `run()` メソッドの引数の数が一致しないと実行時エラーになります。
+- **outputs**: パーツの `run()` メソッドから返されるメモリ値で、パーツを車両ループに追加するときに宣言します。`run()` メソッドが呼ばれた後、その戻り値が名前付きの出力プロパティに割り当てられます。aiLauncher の例では `outputs=['pilot/throttle']` を指定します。aiLauncher が実行を終えると1つの値を返し、その値が車両メモリの `'pilot/throttle'` プロパティに代入されます。パーツを追加するときに宣言した出力の数と `run()` メソッドが返す値の数が一致しないと実行時エラーになります。
+- **run_condition**: `run_condition` はパーツの `run()` メソッドを呼び出すかどうかを決める真偽値のメモリ値です。条件が True のときに `run()` が呼び出され、そうでない場合は呼ばれません。これによりパーツをオン・オフできます。たとえば aiLauncher を自動運転モードのときだけ動かしたいなら、`'run_pilot'` という名前のメモリ値を用意して、自動運転時は True、手動運転時は False とします。そして aiLauncher を追加するとき `run_condition='run_pilot'` を指定すれば、`'run_pilot'` が True のときだけ aiLauncher の `run()` メソッドが呼ばれます。
 
-So you can see that you can control how a part operates by changing the value of its input properties.  One part can affect another parts by outputting values (and so changing them) that are used as inputs or run_conditions by other parts.
+このように入力プロパティの値を変えることでパーツの動作を制御できます。あるパーツが出力した値は、他のパーツの入力や `run_condition` として使われ、相互に影響し合います。
 
-Here is an example of adding a part; the [AiLaunch part](https://github.com/autorope/donkeycar/blob/main/donkeycar/parts/launch.py) overides the throttle when then driving mode transitions from manual driving to autopilot; it is used to provide a high throttle for a short time at the very start of a race.  In this case it does not have an explicit `run_condition` argument, so it defaults to True.  
+次にパーツを追加する例を示します。[AiLaunch パーツ](https://github.com/autorope/donkeycar/blob/main/donkeycar/parts/launch.py) は、運転モードが手動から自動運転へ切り替わったときにスロットルを上書きし、レース開始直後に短時間だけ大きなスロットルを与えるために使われます。この例では明示的な `run_condition` 引数はなく、デフォルトで True になります。
 
 ```python
-    aiLauncher = AiLaunch(cfg.AI_LAUNCH_DURATION, cfg.AI_LAUNCH_THROTTLE, cfg.AI_LAUNCH_KEEP_ENABLED)
-    V.add(aiLauncher,
-          inputs=['user/mode', 'pilot/throttle'],
-          outputs=['pilot/throttle'])
+a iLauncher = AiLaunch(cfg.AI_LAUNCH_DURATION, cfg.AI_LAUNCH_THROTTLE, cfg.AI_LAUNCH_KEEP_ENABLED)
+V.add(aiLauncher,
+      inputs=['user/mode', 'pilot/throttle'],
+      outputs=['pilot/throttle'])
 ```
 
-To implement this 'launch' it needs to know the current driving mode and the current autopilot throttle value; those are its inputs.  If it is not launching then it just passes the throttle value through without modifying it, but when it is launching it outputs a throttle valud equal to `cfg.AI_LAUNCH_THROTTLE`. So the throttle is it's only output. The part's `run()` method must take in these two inputs in the correct order and return the one output.  You can see this in part's code;
+この「ランチ」を実装するには、現在の運転モードと自動運転スロットル値を知る必要があります。これらが入力です。ランチしていないときはスロットル値をそのまま通しますが、ランチ中は `cfg.AI_LAUNCH_THROTTLE` と同じスロットル値を出力します。したがって出力はスロットルのみです。パーツの `run()` メソッドは、これら2つの入力を正しい順序で受け取り、1つの出力を返す必要があります。コードを見れば分かります。
 
 ```python
 import time
 
 class AiLaunch():
     '''
-    This part will apply a large thrust on initial activation. This is to help
-    in racing to start fast and then the ai will take over quickly when it's
-    up to speed.
+    このパーツは初回の起動時に大きな推力を加えます。これはレースで素早くスタートし、その後すぐに AI が引き継げるようにするためです。
     '''
 
     def __init__(self, launch_duration=1.0, launch_throttle=1.0, keep_enabled=False):
@@ -89,7 +87,7 @@ class AiLaunch():
         self.launch_throttle = launch_throttle
         self.prev_mode = None
         self.trigger_on_switch = keep_enabled
-        
+
     def enable_ai_launch(self):
         self.enabled = True
         print('AiLauncher is enabled.')
@@ -121,34 +119,34 @@ class AiLaunch():
         return new_throttle
 ```
 
-It is common for configuration values to be passed as arguments to a part's constructor, as they are in this example.  Also, if the part grabs some hardware resource, such as a camera or a serial port, it should also have a `shutdown()` function that releases those resources properly when donkey is stopped.
+設定値をこの例のようにパーツのコンストラクタ引数として渡すことがよくあります。また、パーツがカメラやシリアルポートのようなハードウェアリソースを取得する場合は、donkey を停止したときに適切にリソースを解放する `shutdown()` 関数も用意すべきです。
 
-So as we said, the part's `run()` method is called each time the vehicle loop is run; the input values are read from vehicle memory and passed as arguments to the `run()` method, which does it's work and then returns values that are then written to vehicle memory as outputs.  Since parts are run in the order they are added (for the most part) then you can see that you need to add a part that provides an output ahead of any part that needs that value as an input. 
+先ほど述べたように、パーツの `run()` メソッドは車両ループが回るたびに呼び出されます。入力値は車両メモリから読み取られて `run()` メソッドに引数として渡され、処理結果が戻り値として返されて車両メモリに出力として書き込まれます。パーツは基本的に追加された順に実行されるため、ある値を入力として必要とするパーツよりも先に、その値を出力するパーツを追加する必要があります。
 
-## Threaded Parts
+## スレッドパーツ
 
-I say parts run in the order they were added 'for the most part' because you can also specify that a part is to be run in it's own thread so it can operate at it's own rate.  A threaded part has a `run_threaded()` method rather than a `run()` method; the inputs are arguments and the return values are outputs just like the `run()` method.  Also similar to the run() method, the run_threaded() method is called once each time the vehicle loop runs.  
+パーツは追加された順に実行されると言いましたが、パーツを独自のスレッドで実行して独自の速度で動かすよう指定することもできます。スレッドパーツは `run()` の代わりに `run_threaded()` メソッドを持ち、入力と出力の扱いは `run()` と同様です。また `run()` 同様、`run_threaded()` も車両ループが回るたびに1回呼び出されます。
 
-So if `run_threaded()` is called each time through the vehicle loop, just like the `run()` method, and it's inputs and outputs are organized just the like a non-threaded part, then what is the difference between a threaded part and a non-threaded part?  One difference you can see below is that when you add a threaded part you pass `threaded=True`.  But the most important difference with a threaded part is that it must have a no-argument `update()` method.  When the threaded part is launched a thread is created and the part's `update()` method is registered as the method that is executed on the thread.  The `update()` method will run separately from the vehicle loop and it will run as fast as python's scheduler will allow; generally much faster than the vehicle loop runs.  The `update()` method should not return until the part is told to `shutdown()`; it should run a loop that does its work over and over; such as reading from a device like the TFMini part does. In a threaded part the `run_threaded()` method is usually quite simple; it typically just sets class properties used by the `update()` method and returns class properties that are maintained by the `update()` method. 
+`run_threaded()` が `run()` と同様に毎回呼び出され、入力と出力も非スレッドパーツと同じなら、両者の違いは何でしょうか。下の例でも分かるように、スレッドパーツを追加するときは `threaded=True` を渡します。最大の違いは、引数を取らない `update()` メソッドを必ず持たなければならないことです。スレッドパーツが起動されるとスレッドが生成され、そのスレッドで実行されるメソッドとして `update()` が登録されます。`update()` メソッドは車両ループとは別に実行され、Python のスケジューラが許す限り速く実行されるため、通常は車両ループよりずっと高速です。`update()` メソッドは `shutdown()` を指示されるまで戻ってはいけません。TFMini パーツのようにデバイスから読み続けるループなど、同じ処理を繰り返す形にします。スレッドパーツの `run_threaded()` メソッドは通常非常に単純で、`update()` メソッドで使用されるクラスプロパティを設定したり、`update()` メソッドが管理するクラスプロパティを返したりするだけです。
 
-Here is an example of adding a threaded part to the vehicle loop.  This part interfaces to a TF-Mini single-beam lidar via a serial port; it reports a distance.  The part takes no input arguments and outputs just the distance value.  Note that the argument `inputs=[]` is not really necessary; that is the default for inputs so it can be left off.
+次に、スレッドパーツを車両ループに追加する例を示します。このパーツは TF-Mini 単一ビーム Lidar をシリアルポート経由で使用し、距離を報告します。入力引数はなく、出力は距離値だけです。`inputs=[]` はデフォルト値なので省略できます。
 
 ```python
-    if cfg.HAVE_TFMINI:
-        from donkeycar.parts.tfmini import TFMini
-        lidar = TFMini(port=cfg.TFMINI_SERIAL_PORT)
-        V.add(lidar, inputs=[], outputs=['lidar/dist'], threaded=True)
+if cfg.HAVE_TFMINI:
+    from donkeycar.parts.tfmini import TFMini
+    lidar = TFMini(port=cfg.TFMINI_SERIAL_PORT)
+    V.add(lidar, inputs=[], outputs=['lidar/dist'], threaded=True)
 ```
 
-Here is a listing of the [TFMini part](https://github.com/autorope/donkeycar/blob/main/donkeycar/parts/tfmini.py); 
+以下は [TFMini パーツ](https://github.com/autorope/donkeycar/blob/main/donkeycar/parts/tfmini.py) のリストです。
 
 ```python
 class TFMini:
     """
-    Class for TFMini and TFMini-Plus distance sensors.
-    See wiring and installation instructions at https://github.com/TFmini/TFmini-RaspberryPi
+    TFMini および TFMini-Plus 距離センサー用のクラス。
+    配線とインストール手順は https://github.com/TFmini/TFmini-RaspberryPi を参照してください。
 
-    Returns distance in centimeters. 
+    距離をセンチメートルで返します。
     """
 
     def __init__(self, port="/dev/serial0", baudrate=115200, poll_delay=0.01, init_delay=0.1):
@@ -158,7 +156,7 @@ class TFMini:
         self.dist = 0
 
         if not self.ser.is_open:
-            self.ser.close() # in case it is still open, we do not want to open it twice
+            self.ser.close()  # まだ開いている場合は二重に開かないよう閉じる
             self.ser.open()
 
         self.logger = logging.getLogger(__name__)
@@ -176,10 +174,10 @@ class TFMini:
         try:
             count = self.ser.in_waiting
             if count > 8:
-                recv = self.ser.read(9)   
-                self.ser.reset_input_buffer() 
+                recv = self.ser.read(9)
+                self.ser.reset_input_buffer()
 
-                if recv[0] == 0x59 and recv[1] == 0x59:     
+                if recv[0] == 0x59 and recv[1] == 0x59:
                     dist = recv[2] + recv[3] * 256
                     strength = recv[4] + recv[5] * 256
 
@@ -203,14 +201,13 @@ class TFMini:
         self.ser.close()
 ```
 
-> NOTE: The TFMini part manages a serial port itself; it is recommend to use the [SerialPort part](https://github.com/autorope/donkeycar/blob/main/donkeycar/parts/serial_port.py) to read line oriented data from a serial port instead of managing the port in your part. The SerialPort part can handle all the details of the serial port and outputing the resulting data; then your part only needs to take that data as input and use it.
+> NOTE: TFMini パーツは自分でシリアルポートを管理していますが、シリアルポートから行単位のデータを読み取るには、ポートを自分で扱うのではなく [SerialPort パーツ](https://github.com/autorope/donkeycar/blob/main/donkeycar/parts/serial_port.py) を使うことをお勧めします。SerialPort パーツはシリアルポートの詳細をすべて処理して結果のデータを出力してくれるので、あなたのパーツはそのデータを入力として使うだけで済みます。
 
+TFMini パーツでは `update()` メソッドがシリアルポートが開いている間ずっとループします。シリアルポートはコンストラクタで開かれ、`shutdown()` メソッドで閉じられます。スレッドパーツでは `update()` メソッドはほとんど無限ループのように、Python が実行時間を与える限り何度も実行されます。ここが車両ループよりもはるかに速く実行できる部分です。
 
-In the TFMini part the `update()` method runs a loop as long as the serial port remains open.  The serial port is opened in the constructor and closed when the `shutdown()` method is called.  In a threaded part, the `update()` method is almost like an infinite loop, running over and over as much as python will give it time to run.  This is the section of code that can run much faster than the vehicle loop runs.  
+スレッドパーツを使う理由は、パーツが車両ループより速く動作する必要がある場合や、デバイスにほぼリアルタイムで応答する必要がある場合です。`update()` メソッド内のループは Python インタプリタが許す限り速く動作し、通常は車両ループよりずっと速いです。`update()` メソッドはパーツのスレッドから呼ばれますが、`run_threaded()` メソッドはメインの車両ループスレッドから呼ばれることを理解することが重要です。つまり、この2つのメソッドは処理の途中で互いに割り込む可能性があります。
 
-The reason to use a threaded part is if your part needs to go faster than the vehicle loop or needs to respond to a device in close to real time.  The loop in the `update()` method will run as fast as the python interpreter can let it, which will usually be much faster than the vehicle loop.  It's important to understand that the `update()` method is called by the part's thread BUT the `run_threaded()` method is called by the main vehicle loop thread.  This means that these two methods may interupt each other in the middle of what they are doing.  
-
-You should use approprate thread-safe patterns, such as locks, to make sure that data updates and/or reads and other critical sections of code are safely isolated and atomic.  In some cases this requires a Lock to make sure resources are accessed safely from threads or that multiple lines of code are executated atomically.  It is worth remembering that assignment in Python is atomic (so there is one good thing about that Global Interpreter Lock, GIL).  So while this is NOT atomic;
+データの更新や読み取り、その他のクリティカルセクションを安全に分離して原子性を保つためには、ロックなど適切なスレッドセーフのパターンを使用すべきです。場合によってはリソースへ安全にアクセスするための Lock が必要だったり、複数行のコードを原子的に実行する必要があります。Python では代入が原子的であること（グローバルインタプリタロック、GIL の良いところ）を覚えておく価値があります。したがって次のコードは**原子的ではありません**。
 
 ```
 x = 12.34
@@ -218,10 +215,10 @@ y = 34.56
 angle = 1.34
 ```
 
-because your code could be interrupted in between those assignments.  This IS atomic;
+なぜならこれらの代入の間でコードが割り込まれる可能性があるからです。次のコードは**原子的**です。
 
 ```
 pose = (12.34, 34.56, 1.34)
 ```
 
-So if you have aggregate internal state that may be mutated in a thread, then put it in a tuple and you can read and write it atomically without locks.
+このように、スレッド内で変更される可能性のある複合的な内部状態を持つ場合は、それをタプルにまとめればロックなしで原子的に読み書きできます。

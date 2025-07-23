@@ -1,36 +1,36 @@
-# Fastai(PyTorch) Parts
+# Fastai(PyTorch) パーツ
 
-These parts encapsulate models defined using the [FastAi](https://docs.fast.ai/) high level api. They are intended to be used with the PyTorch backend. This allows you to build models using PyTorch or transfer learning.
+これらのパーツは [FastAi](https://docs.fast.ai/) のハイレベルAPIで定義されたモデルを内包しています。PyTorch バックエンドで使用することを意図しており、PyTorch や転移学習を利用したモデル構築を可能にします。
 
- > _**Note**_ This part is interchangeable with the Keras part but does not have TensorRT or TfLite support.
- 
+ > _**注**_ このパーツは Keras パーツと互換性がありますが、TensorRT と TfLite には対応していません。
 
-The parts are designed to use the trained artificial neural network to reproduce the steering and throttle given the image the camera sees. They are created by using the [train command](/guide/deep_learning/train_autopilot/).
 
-## FastAi Linear
+これらのパーツは、カメラが捉えた画像に基づいてステアリングとスロットルを再現するために学習済みの人工ニューラルネットワークを利用するよう設計されています。これは [train コマンド](/guide/deep_learning/train_autopilot/) を使って作成されます。
 
-This model type is created with the `--type=fastai_linear`. 
+## FastAi 線形モデル
 
-The `FastAILinear` pilot uses one neuron to output a continuous value via the 
-PyTorch Dense layer with linear activation. One each for steering and throttle.
-The output is not bounded.
+このモデルタイプは `--type=fastai_linear` で作成されます。
 
-#### Pros
+`FastAILinear` パイロットは 1 つのニューロンで連続値を出力し、
+PyTorch の Dense レイヤを線形活性化で用いてステアリング用とスロットル用にそれぞれ 1 つずつ設けられています。
+出力には制限がありません。
 
-* Steers smoothly. 
-* It has been very robust.
-* Performs well in a limited compute environment like the Pi3.
-* No arbitrary limits to steering or throttle.
+#### 長所
 
-#### Cons
+* 滑らかに操舵します。
+* 非常に堅牢です。
+* Pi3 のような限られた計算環境でも良好に動作します。
+* ステアリングやスロットルに恣意的な制限がありません。
 
-* May sometimes fail to learn throttle well.
+#### 短所
 
-#### Model Summary
+* スロットルをうまく学習できない場合があります。
 
-Input: Image
+#### モデル概要
 
-Network: 5 Convolution layers followed by two dense layers before output
+入力: 画像
 
-Output: Two dense layers with one scalar output each with linear activation for steering and throttle.
+ネットワーク: 5 層の畳み込み層の後に 2 層の全結合層が続き、出力します。
+
+出力: 線形活性化を用いた 2 つの全結合層があり、それぞれステアリング用とスロットル用のスカラー値を出力します。
 

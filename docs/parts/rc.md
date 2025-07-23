@@ -1,96 +1,96 @@
-# RC control
+# RC制御
 ![Donkey RC connections](../assets/parts/rchat.png)
-(This only works with the RaspberryPi. The Jetson Nano does not provide the necessary GPIO pin support)
+（これはRaspberryPiでのみ動作します。Jetson Nanoでは必要なGPIOピンがサポートされていません）
 
-You can drive Donkey with nothing more than the RC controller your car probably came with! The secret is that, thanks to the cool Pigpio library, the RaspberryPi pins can read and generate the RC signals necessary to read your RC receiver and drive your servo and motor controllers. 
+あなたのRCカーに付属しているであろうRCコントローラーだけでDonkeyを操作できます。Pigpioライブラリのおかげで、RaspberryPiのピンはRC受信機からの信号を読み取り、サーボやモーターコントローラーを駆動するRC信号を生成できます。
 
-To do this you need to either connect some jumper cables from your RC receiver to the RPi GPIO pins and then do the same for your steering servo and motor controller (it's a little fiddly but works fine) or use our [Donkeycar RC Hat](../parts/rc_hat.md) (shown above), which is plug and play and includes other nice stuff like a OLED screen, a fan, encoder support and even an e-stop option (like a remote kill switch) if you happen to have a 3Ch (or more) RC transmitter.
+これを行うには、RC受信機からRPiのGPIOピンへジャンパー線を接続し、同様にステアリングサーボやモーターコントローラーにも接続します（少し面倒ですが問題なく動作します）。もしくは、プラグアンドプレイで使える[Donkeycar RC Hat](../parts/rc_hat.md)（上図参照）を利用します。これはOLEDスクリーン、ファン、エンコーダーサポート、さらに3チャンネル以上の送信機があればe-stop（緊急停止スイッチ）機能も備えています。
 
 
-## Hardware Setup
+## ハードウェア設定
 
-**If you're using the RC Hat above, you can skip this hardware part -- the hat does it all for you!**
+**上記のRC Hatを使用する場合、このハードウェア設定は不要です。Hatがすべて処理してくれます。**
 
-Note that you will want your RC controller to be well trimmed prior to using it to control your Donkeycar. You want the throttle trim, steering trim and steering range to be well adjusted; see this [video](https://www.youtube.com/watch?v=NuVQz7FCAZk) for how to do that.
+Donkeycarを操作する前に、RCコントローラーのトリムをしっかり調整しておくと良いでしょう。スロットルトリム、ステアリングトリム、ステアリングの可動範囲を適切に合わせておいてください。調整方法は[こちらの動画](https://www.youtube.com/watch?v=NuVQz7FCAZk)が参考になります。
 
-You can use the GPIO pins for RC input, output or both. In the case of RC input, the RC controller replaces a bluetooth joystick. In the case of RC output, it replaces the I2C servo driver board. 
+GPIOピンはRC入力・RC出力のどちらにも、または両方に使用できます。RC入力の場合はBluetoothジョイスティックの代わりとなり、RC出力の場合はI2Cサーボドライバーボードの代わりとして機能します。
 
-The easiest way to connect RC is via the custom "hat" that we've designed (see above). But if you're doing it yourself, follow this wiring guide. It's a bit of a forest of jumper cables if you're doing both input and output, but remember that you only have to connect one ground and V+ cable to the RC reciever (on any channel), rather than one for every channel. 
+最も簡単な接続方法は、上記で紹介した専用の"hat"を使うことです。自分で配線する場合は、以下の配線ガイドに従ってください。入力と出力の両方を行う場合はジャンパー線が多くなりますが、各チャンネルごとではなく、RC受信機には1本だけグラウンドとV+を接続すればよいことを覚えておきましょう。
 
-Also note the the RC receiver should be connected to the 3.3v pins, while the output servo and motor controller are connected to the 5v pins.
+また、RC受信機は3.3Vピンに接続し、サーボやモーターコントローラーは5Vピンに接続する点に注意してください。
 
-**_Warning:_** The RC receiver PWM signal is generated from the receiver input voltage, so connecting the RC receiver to 5V or even 6V from the ESC will fry the RPi!
+**警告:** RC受信機のPWM信号は受信機の入力電圧から生成されます。したがって、RC受信機をESCからの5Vや6Vに接続するとRPiが故障します。
 
 ![Donkey RC connections](../assets/rc.png)
 
-Here's what the RC receiver connection should look like
+以下はRC受信機を接続したときのイメージです
 
 ![Donkey RC connections](../assets/rc.jpg)
 
-## Software Setup
+## ソフトウェア設定
 
-First, make sure PIGPIO is installed; see [pins](pins.md#pigpio) You probably want the PIGPIO daemon to allows be started whe the RaspberrpyPi start.  On the command line enter this to set the PIGPIO daemon to always run on startup:
+まず、PIGPIOがインストールされていることを確認してください。[pins](pins.md#pigpio)を参照してください。PIGPIOデーモンをRaspberryPi起動時に自動で開始させたい場合、以下のコマンドで設定します。
 
 ```bash
 sudo systemctl enable pigpiod & sudo systemctl start pigpiod
 ```
 
-Next, in your `mycar` directory, edit the myconfig.py files as follows:
+続いて、`mycar`ディレクトリ内の`myconfig.py`を次のように編集します。
 
-* For RC input, select `pigpio_rc` as your controller type in your myconfig.py file. Uncomment the line (remove the leading `#`) and edit it as follows:
+* RC入力を使用する場合、`myconfig.py`のコントローラータイプを`pigpio_rc`に設定します。コメントを外し、次のように記述します。
 
 ```python
 CONTROLLER_TYPE = 'pigpio_rc'
 ```
 
-Also set `use joystick` to True
+さらに`use joystick`をTrueに設定します。
 
 ```python
 USE_JOYSTICK_AS_DEFAULT = True
 ```
 
-* For RC output, select `PWM_STEERING_THROTTLE` as your drive train type in your myconfig.py file. Uncomment the line (remove the leading `#`) and edit it as follows:
+* RC出力を使用する場合、`myconfig.py`の駆動方式を`PWM_STEERING_THROTTLE`に設定します。コメントを外し、次のように記述します。
 
 ```python
 DRIVE_TRAIN_TYPE =  "PWM_STEERING_THROTTLE"
 ```
 
-For both of these, there are additional settings you can change, such as reversing the direction of output or the pins connected: 
+いずれの場合も、出力方向を反転させたり接続ピンを変更したりする追加設定が可能です。
 
-Input options:
+入力の設定例:
  
 ```python
-#PIGPIO RC control
+#PIGPIOによるRC制御
 STEERING_RC_GPIO = 26
 THROTTLE_RC_GPIO = 20
 DATA_WIPER_RC_GPIO = 19
-PIGPIO_STEERING_MID = 1500         # Adjust this value if your car cannot run in a straight line
-PIGPIO_MAX_FORWARD = 2000          # Max throttle to go fowrward. The bigger the faster
+PIGPIO_STEERING_MID = 1500         # 真っ直ぐ走らない場合はこの値を調整
+PIGPIO_MAX_FORWARD = 2000          # 前進時の最大スロットル値。大きいほど速くなる
 PIGPIO_STOPPED_PWM = 1500
-PIGPIO_MAX_REVERSE = 1000          # Max throttle to go reverse. The smaller the faster
+PIGPIO_MAX_REVERSE = 1000          # 後退時の最大スロットル値。小さいほど速くなる
 PIGPIO_SHOW_STEERING_VALUE = False
 PIGPIO_INVERT = False
-PIGPIO_JITTER = 0.025   # threshold below which no signal is reported
+PIGPIO_JITTER = 0.025   # この値以下の変化は無視する
 ```
 
-If you are using the RC hat then the PWM output pins shown below (and defaulted in myconfig.py) must be used.
-If you are not using the RC hat then you are free to choose different PWM output pins.
-NOTE: you must install pigpio to use this configuration.  See [PIGPIO](pins.md#pigpio)
+RC Hatを使う場合、以下に示すPWM出力ピン（myconfig.pyのデフォルト値）を必ず使用してください。
+RC Hatを使用しない場合は、他のPWM出力ピンを選択しても構いません。
+※この設定を使用するにはpigpioのインストールが必要です。[PIGPIO](pins.md#pigpio)を参照してください。
 
-Output options:
+出力の設定例:
 
 ```python
-PWM_STEERING_PIN = "PIGPIO.BCM.13"           # PWM output pin for steering servo
-PWM_THROTTLE_PIN = "PIGPIO.BCM.18"           # PWM output pin for ESC
+PWM_STEERING_PIN = "PIGPIO.BCM.13"           # ステアリングサーボ用PWM出力ピン
+PWM_THROTTLE_PIN = "PIGPIO.BCM.18"           # ESC用PWM出力ピン
 
-STEERING_LEFT_PWM = int(4096 * 1 / 20)       # pwm value for full left steering (1ms pulse)
-STEERING_RIGHT_PWM = int(4096 * 2 / 20)      # pwm value for full right steering (2ms pulse)
+STEERING_LEFT_PWM = int(4096 * 1 / 20)       # 左一杯のPWM値（1msパルス）
+STEERING_RIGHT_PWM = int(4096 * 2 / 20)      # 右一杯のPWM値（2msパルス）
 
-THROTTLE_FORWARD_PWM = int(4096 * 2 / 20)    # pwm value for max forward (2ms pulse)
-THROTTLE_STOPPED_PWM = int(4096 * 1.5 / 20)  # pwm value for no movement (1.5ms pulse)
-THROTTLE_REVERSE_PWM = int(4096 * 1 / 20)    # pwm value for max reverse throttle (1ms pulse)
+THROTTLE_FORWARD_PWM = int(4096 * 2 / 20)    # 最大前進時のPWM値（2msパルス）
+THROTTLE_STOPPED_PWM = int(4096 * 1.5 / 20)  # 停止時のPWM値（1.5msパルス）
+THROTTLE_REVERSE_PWM = int(4096 * 1 / 20)    # 最大後退時のPWM値（1msパルス）
 ```
 
-## Troubleshooting
+## トラブルシューティング
 
-If one channel is reversed (steering left goes right, etc), either reverse that channel on your RC transmitter (that's usually a switch or setting) or change it in the output options shown above by channging the PWM_INVERTED value for that channel to `True`.
+ステアリングを左に切ると右に動くなど、チャンネルが逆転してしまう場合は、RC送信機側で該当チャンネルをリバース設定にするか、上記の出力設定でPWM_INVERTEDを`True`に変更してください。

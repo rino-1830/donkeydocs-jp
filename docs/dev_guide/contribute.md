@@ -1,46 +1,46 @@
 
-# Contribute to Donkey
+# Donkey への貢献
 
-Donkey is an open source project to help accelerate the development of
-self driving autos.
+Donkey はオープンソースプロジェクトであり、
+自動運転車の開発を加速することを目的としています。
 
-There is a very good explanation of the DonkeyCar software architecture and theory [here](https://robocaresslingen.github.io/BookDownDocu/donkeyCarSoftwareAnalysis.html#how-to-add-parts-to-a-vehicle)
+DonkeyCar のソフトウェアアーキテクチャと理論についての非常に良い解説が [こちら](https://robocaresslingen.github.io/BookDownDocu/donkeyCarSoftwareAnalysis.html#how-to-add-parts-to-a-vehicle) にあります。
 
-## Guiding Development Principles
+## 開発指針
 
-* **Modularity**: A self driving system is composed of standalone,
-independently configurable components that can be combined to make a car.
-* **Minimalism**: Each component should be kept short (<100 lines of code).
-Each piece of code should be transparent upon first reading. No black magic,
-it slows the speed of innovation.
-* **Extensibility**: New components should be simple to create by following a
-template.
-* **Python**: Keep it simple.
+* **モジュール性**: 自動運転システムはスタンドアロンで、
+独立して設定可能なコンポーネントから構成され、組み合わせることで車を作ることができます。
+* **最小主義**: 各コンポーネントは短く(100行未満)保つべきです。
+コードの各部分は一読して理解できる透明性を備えている必要があります。ブラックマジックは禁止です、
+それはイノベーションの速度を遅くします。
+* **拡張性**: 新しいコンポーネントはテンプレートに従うことで
+簡単に作成できるべきです。
+* **Python**: シンプルに保ちましょう。
 
-***These guidelines are nearly copied from [Keras](http://keras.io),
-   because they are so good***
+***これらのガイドラインはほぼ [Keras](http://keras.io) からの引用です、
+   優れているためです***
 
-## Add a part
+## パーツを追加する
 
-Are you a hardware specialist that can write a donkey part wrapper for a
-GPS unit or a data scientist that can write an recursive neural net autopilot?
-If so please write a part so other people driving donkeys can use the part. How do parts work? Check out [this overview](/parts/about)
+GPS ユニット用の Donkey パーツラッパーを書けるハードウェアの専門家や、
+再帰型ニューラルネットのオートパイロットを書けるデータサイエンティストですか？
+もしそうなら、他の Donkey ユーザーが利用できるようにパーツを書いてください。パーツの仕組みは [こちらの概要](/parts/about) を参照してください。
 
-## Fix or report a bug
+## バグを修正・報告する
 
-If you find a problem with the code and you know how to fix it then please
-clone the repo, make your fix, and submit your pull request.
+もしコードに問題を見つけて修正方法が分かるなら、
+リポジトリをクローンし、修正を加えてプルリクエストを送ってください。
 
-## Reply to issues
+## Issue に返信する
 
-Helping close or triage the issues is a good way to help.
+Issue をクローズしたりトリアージしたりすることは貢献になります。
 
-## If You Need An Inspiration
+## インスピレーションが欲しい場合
 
-Search the code or docs for `TODO` to find places where you might be able
-to find a better solution.
+`TODO` をコードやドキュメントから検索して、
+より良い解決策が見つかりそうな箇所を探してください。
 
-## Improve the documentation
+## ドキュメントを改善する
 
-You can fix grammar or provide clarity by clicking the the *Edit on GitHub*
-link in the top right corner. Here's [a guide](./docs.md) to how to create and edit docs.
+*Edit on GitHub* リンクを右上でクリックして文法を修正したり、よりわかりやすくすることができます。
+ドキュメントの作成・編集方法は [こちらのガイド](./docs.md) を参照してください。

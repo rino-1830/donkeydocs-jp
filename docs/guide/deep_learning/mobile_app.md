@@ -1,92 +1,93 @@
 # Robocar Controller
 
-Robocar Controller is a mobile app designed to provide a “commandless” user experience to get started with the Donkey Car. 
+Robocar Controller は、Donkey Car を手軽に始められるよう「コマンド入力不要」のユーザー体験を提供するモバイルアプリです。
 
 ![cover](/docs/assets/mobile_app/cover.png)
 
 ## Features
-- Commandless experience - No SSH or text editor
-- Built-in Hotspot 
-- Search vehicle on the network
-- Real-time Calibration
-- Virtual joystick
-- Visualize the data
-- Drive Summary
-- Free GPU training
-- Autopilot
-- Advanced configuration
-- Battery level
+- コマンド不要の操作 ― SSH やテキストエディターは不要
+- 内蔵ホットスポット
+- ネットワーク上で車両を検索
+- リアルタイムキャリブレーション
+- バーチャルジョイスティック
+- データの可視化
+- 走行サマリー
+- 無料 GPU トレーニング
+- 自動運転
+- 詳細設定
+- バッテリー残量表示
 
 ## Requirements
-- A Donkey Car with Pi 4B (Jetson Nano is not yet supported)
-- A Mobile phone with iOS or Android
+- Pi 4B を搭載した Donkey Car（Jetson Nano は未対応）
+- iOS または Android を搭載したスマートフォン
 
 ## Quickstart Guide
-Please refer to the <a href="https://medium.com/robocar-store/robocar-controller-quick-start-guide-bdf8cb16d7ce?source=friends_link&sk=8f21a5792f81a1d340abe9433d78cf5b" target="_blank">quick start guide here</a>.
+<a href="https://medium.com/robocar-store/robocar-controller-quick-start-guide-bdf8cb16d7ce?source=friends_link&sk=8f21a5792f81a1d340abe9433d78cf5b" target="_blank">クイックスタートガイド</a> を参照してください。
 
-> If you do not want to use the prebuilt image then you can install the server component onto your Donkey Car manually.  See [Optional Manual Installation](#optional-manual-installation) below.
+> 既成イメージを使用したくない場合は、サーバーコンポーネントを手動で Donkey Car にインストールすることも可能です。詳しくは下記の [Optional Manual Installation](#optional-manual-installation) を参照してください。
 
 
 ## Features Details
-### Built-in Hotspot 
-The car will become a hotspot when there is no known Wifi network to connect. After connecting your phone to this hotspot, you can use the app to configure the car to join the Wifi network you want. 
+### Built-in Hotspot
+既知の Wi-Fi ネットワークがない場合、車はホットスポットとして動作します。携帯電話をこのホットスポットに接続した後、アプリを使って車を希望の Wi-Fi ネットワークへ参加させることができます。
 
 ### Search vehicle on the network
-Once your car connects to the same network as your phone, the app will scan the whole network to discover it. The app will also show you the IP address of the car in case you want to connect to it via SSH.
+車がスマートフォンと同じネットワークに接続すると、アプリがネットワーク全体をスキャンして車両を見つけます。SSH で接続したい場合に備えて IP アドレスも表示されます。
 
 ![Search Vehicle](/docs/assets/mobile_app/search-vehicle.png)
 
 ### Real-time Calibration
-Sometimes it is quite annoying if the car goes too fast or does not run in a straight line. The calibration UI assists you to find the right settings so that your car could be properly calibrated. With the enhanced calibration function, the change will take place in real time and you could observe the change immediately.
+車が速すぎたりまっすぐ走らなかったりすると不便です。キャリブレーション UI は適切な設定を見つける手助けをし、車を正しく調整できます。強化されたキャリブレーション機能により変更はリアルタイムで反映され、すぐに効果を確認できます。
 
 ![Real-time calibration](/docs/assets/mobile_app/calibration.png)
 
 ### Virtual Joystick
-The virtual joystick offers a quick way to test drive the car if you don't have a physical gamepad controller. It also streams the video captured from the camera in real time. You can just look at the screen and start driving.
+物理的なゲームパッドコントローラーがない場合でも、バーチャルジョイスティックを使えばすぐに走行テストができます。カメラからの映像もリアルタイムでストリーミングされるため、画面を見ながらそのまま運転できます。
 
 ![Drive UI](/docs/assets/mobile_app/drive-ui.gif)
 
 
 ### Drive Summary
-The app presents a drive summary with histogram, the size and the number of images you have collected. The histogram is generated automatically by calling the ```tubhist``` function in the Donkey car software. 
+アプリはヒストグラムとともに収集した画像の数や容量をまとめた走行サマリーを表示します。ヒストグラムは Donkey Car ソフトウェアの ```tubhist``` 関数により自動生成されます。
 
 ![Drive summary](/docs/assets/mobile_app/drive-summary.png)
 
-### Visualize the data 
-The app shows all the data(tubs) and the metadata you have collected on the Pi. The metadata includes number of images, size of the tub, the resolutions, the histogram and the location. The app will make use of the donkey makemovie command to generate a video so you can review how the data look like.
+### Visualize the data
+アプリでは Pi に保存されたすべてのデータ（tub）とメタデータを確認できます。メタデータには画像枚数、tub のサイズ、解像度、ヒストグラム、保存場所が含まれます。`donkey makemovie` コマンドを利用して動画を生成し、データの内容を振り返ることも可能です。
 
 ![Data](/docs/assets/mobile_app/data.png)
 
 ### Free GPU Training
-Free GPU training is available to user who use the app. You can train a model by selecting the data(tubs) you wish to train. The data will be uploaded to our server to start the training process. Once the training is completed, the app will show you the training loss and accuracy graph. At the same time, the app will download the model to your car and you can test the model right away.
+アプリ利用者は無料で GPU トレーニングを行えます。トレーニングしたいデータ（tub）を選択すると、データがサーバーへアップロードされ学習が開始されます。学習完了後、アプリには損失と精度のグラフが表示され、同時にモデルが車にダウンロードされるので、すぐにテストできます。
 
-Note: We keep the data and models for a period of time. After that, we will delete it from our storage. 
+注: データとモデルは一定期間のみ保存され、その後ストレージから削除されます。
 
 ![Train](/docs/assets/mobile_app/train.png)
 
 #### More on Free GPU Training
 
-We are using AWS [g4dn.xlarge](https://aws.amazon.com/ec2/instance-types/g4/) instance to train the model. It feautres [NVIDIA T4 GPU](https://www.nvidia.com/en-us/data-center/tesla-t4/) and up to 16GB GPU memory. Increase the batch size to 256 or more to fully utilize the powerful GPU.
+トレーニングには AWS の [g4dn.xlarge](https://aws.amazon.com/ec2/instance-types/g4/) インスタンスを利用しています。これは [NVIDIA T4 GPU](https://www.nvidia.com/en-us/data-center/tesla-t4/) を搭載し、最大 16GB の GPU メモリを持ちます。GPU の性能を最大限活用するため、バッチサイズを 256 以上に設定することを推奨します。
 
 #### Limitation
-N.B.: To protect our equipment from being abused, we have the following rules to use the training service.
+悪用を防ぐため、トレーニングサービスには以下のルールがあります。
 
-- Each training is limited to a maximum of 15 minutes. The training job will timeout if it last more than 15 minutes
-- Each device could train 5 times per 24 hours.
-- Max data size is 100MB per training
+- 各トレーニングは最大 15 分までで、それを超えるとタイムアウトになります
+- 1 つのデバイスが利用できるのは 24 時間で 5 回まで
+- トレーニングに使用できるデータの上限は 100MB
 
 ### Autopilot
 
-The app will list all models inside the Pi, no matter it is generated from the training function or just a model copied to the Pi. You can start the autopilot mode using a similar UI as the Drive UI.
+Pi 内にあるすべてのモデルが一覧表示され、トレーニング機能で生成したものでもコピーしただけのモデルでも利用できます。Drive UI と同様の画面から自動運転モードを開始できます。
 
 ![Autopilot](/docs/assets/mobile_app/autopilot.gif)
 
 ### Advanced configuration
-The Doneky car software comes with a vast of configuration that you can experiment. We have included some of the popular options that you may want to change.
+### Advanced configuration
+Donkey Car ソフトウェアには多数の設定項目があり、さまざまな実験が行えます。よく変更されるオプションをいくつかアプリ内に用意しました。
 
-- Camera size 
-- Training configuration 
-- Drive train settings
+- カメラ解像度
+- トレーニング設定
+- ドライブトレイン設定
 
 ![Advanced configuration](/docs/assets/mobile_app/advanced-configuration.png)
 
@@ -94,28 +95,30 @@ The Doneky car software comes with a vast of configuration that you can experime
 
 ### Battery level
 
-If you are using MM1, the app shows you the current battery level in percentage. We have also added an OS tweak that if battery level fall below 7V, the system will shutdown automatically.
+MM1 を使用している場合、アプリは現在のバッテリー残量をパーセンテージで表示します。バッテリー電圧が 7V を下回った際に自動的にシステムをシャットダウンする OS の調整も追加しています。
 
 
 
 ## Upcoming features
+## Upcoming features
 - Salient visualization
-- Auto throttle compensation based on battery level
-- Transfer learning 
+- バッテリー残量に基づく自動スロットル補正
+- 転移学習
 
 
 
 ## Report a problem
-If you encountered a problem, please file an issue on [this github project](https://github.com/robocarstore/donkeycar_controller).
+問題が発生した場合は、[こちらの GitHub プロジェクト](https://github.com/robocarstore/donkeycar_controller) で issue を登録してください。
 
 ## Optional Manual Installation
-If you can not or do not want to use the prebuild SD image for you Donkey Car, then you can install the server component onto your Donkey car manually.
-[Donkey Car console](https://github.com/robocarstore/donkeycar-console) is a management software of the donkey car that provides a rest-based API to support Donkey Car mobile app. 
+## Optional Manual Installation
+プリビルドの SD イメージを使用できない、または使用したくない場合は、サーバーコンポーネントを手動で Donkey Car にインストールできます。
+[Donkey Car console](https://github.com/robocarstore/donkeycar-console) は Donkey Car を管理するソフトウェアで、モバイルアプリをサポートする REST ベースの API を提供します。
 
-> _**Note**_ This software currently supports **RaspberryPi 4B only**.
+> _**Note**_ このソフトウェアは **RaspberryPi 4B のみ** に対応しています。
 
-#### 1. Complete the [Setup for RaspberryPi](/docs/guide/robot_sbc/setup_raspberry_pi.md)
-#### 2. Clone the Donkey Car Console project
+#### 1. [RaspberryPi のセットアップ](/docs/guide/robot_sbc/setup_raspberry_pi.md) を完了する
+#### 2. Donkey Car Console プロジェクトをクローンする
 
 ```bash
 git clone https://github.com/robocarstore/donkeycar-console
@@ -123,46 +126,46 @@ sudo mv donkeycar-console /opt
 cd /opt/donkeycar-console
 ```
 
-#### 3. Install dependencies
+#### 3. 依存関係をインストールする
 
 ```bash
 pip install -r requirements/production.txt
 ```
 
-#### 4. Run the init script to set up the database
+#### 4. データベースを初期化するスクリプトを実行
 
 ```bash
 python manage.py migrate
 ```
 
-#### 5. Test the server if it is running properly
+#### 5. サーバーが正しく動作するかテストする
 
 ```bash
 python manage.py runserver 0.0.0.0:8000
 ```
 
-Go to http://your_pi_ip:8000/vehicle/status. If it returns something without error, it works.
+ブラウザーで http://your_pi_ip:8000/vehicle/status にアクセスし、エラーが表示されなければ成功です。
 
-#### 6. Install the server as a service
+#### 6. サーバーをサービスとしてインストール
 
 ```bash
 sudo ln -s gunicorn.service /etc/systemd/system/gunicorn.service
 ```
 
-#### 7. Install the mobile app on your phone
+#### 7. スマートフォンにモバイルアプリをインストール
 
 - [iOS](https://apps.apple.com/app/robocar-controller/id1508125501)
 - [Android](https://play.google.com/store/apps/details?id=com.robocarLtd.RobocarController)
 
-Make sure your phone is connected to the same network as your Pi (if it won't connect, try turning off your cell data). Fire up the mobile app and you can search your car using the mobile app.
+携帯電話が Pi と同じネットワークに接続されていることを確認してください（接続できない場合はモバイルデータ通信をオフにしてみてください）。アプリを起動すれば、車両を検索できます。
 
 
 ## FAQ
-- Why the app is called Robocar Controller instead of Donkeycar Controller?
+- なぜアプリ名が Donkeycar Controller ではなく Robocar Controller なのですか？
 
-We would love to call the app Donkeycar Controller but Apple does not allow us to do so. We are working with Adam to submit a proof to Apple that we can use the Donkeycar trademark in our app. In the meanwhile, we will be using the name Robocar Controller.
+私たちはアプリを Donkeycar Controller と名付けたいのですが、Apple から許可が得られていません。現在、Adam と協力して Apple に商標使用の証明を提出する準備を進めています。それまでは Robocar Controller の名称を使用します。
 
 
 
 ## Commercial Usage
-This app is developed by [Robocar Store](https://www.robocarstore.com). If you plan to use this app to make money, please follow the [Donkey Car guideline](https://www.donkeycar.com/make-money.html) and send an email to [Robocar Store](mailto:sales@robocarstore.com).
+このアプリは [Robocar Store](https://www.robocarstore.com) によって開発されています。営利目的で本アプリを使用する場合は、[Donkey Car ガイドライン](https://www.donkeycar.com/make-money.html) に従い、[Robocar Store](mailto:sales@robocarstore.com) までご連絡ください。

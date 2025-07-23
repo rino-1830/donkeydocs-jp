@@ -1,102 +1,102 @@
-# Calibrate your Car
+# 車をキャリブレーションする
 
-The point of calibrating your car is to make it drive consistently.  If you have a steering servo then donkey needs to know the PWM values associated with full left and full right turns.  If you have an ESC, then donkey needs to know the PWM values for full forward throttle, stopped and full reverse throttle.  You figure out those values in the calibration process, then save them to your myconfig.py file so they can be used then the car is driving.
+車をキャリブレーションする目的は、車を常に同じように走らせることです。ステアリングサーボを使用している場合、Donkeyはハンドルを最大に左または右に切った際のPWM値を知る必要があります。ESCを使用している場合、全開スロットル、停止状態、全開リバーススロットルに対応するPWM値を把握する必要があります。キャリブレーション作業でこれらの値を求め、`myconfig.py` ファイルに保存することで、走行時にその値が利用されます。
 
-**Some kinds of drivetrains do not need to be calibrated**.  If you are using any drivetrain that uses an L298N motor controller or similar (rather than and ESC), then no calibration is necessary; those drivetrains do not use PWM; they use a duty cycle that does not need to be calibrated.  Most of the [differential drivetrains](../parts/actuators.md#differential-drive-cars) (those whose name begins with `DC_TWO_WHEEL`) are of that type.  If your drivetrain uses an L298N motor controller or similar for throttle, but uses a servo for steering, then you will need to calibrate steering, but not throttle.
+**一部の駆動系ではキャリブレーションは不要です。** L298Nモーターコントローラなど（ESCではなく）を使用する駆動系であればキャリブレーションは必要ありません。これらの駆動系はPWMを使わず、キャリブレーション不要のデューティサイクルを使います。 [差動駆動](../parts/actuators.md#differential-drive-cars)の大半（名前が`DC_TWO_WHEEL`で始まるもの）はこのタイプです。スロットルにL298Nモーターコントローラを使い、ステアリングにサーボを使っている場合は、ステアリングだけをキャリブレーションする必要があります。
 
-There is a more complete discussion of drivetrains in [Actuators](../parts/actuators.md)
+駆動系についてのより詳しい説明は [アクチュエータ](../parts/actuators.md) にあります。
 
-## How to adjust your car's settings
+## 車の設定を調整する方法
 
->You will need to ssh into your Pi to do the calibration.
+>キャリブレーションを行うには、PiにSSH接続する必要があります。
 
-All of the car's default settings are in the `config.py`.  You can override the default settings by editing the `myconfig.py` script in your car directory.  This was generated when you ran the `donkey createcar --path ~/mycar` command. You can edit this file on your car by running:
+車のすべてのデフォルト設定は `config.py` にあります。これらの設定は、車ディレクトリにある `myconfig.py` スクリプトを編集することで上書きできます。このファイルは `donkey createcar --path ~/mycar` を実行したときに生成されました。以下のコマンドで車上のこのファイルを編集できます。
 
 ```bash
 nano ~/mycar/myconfig.py
 ```
 
-## Steering Calibration
+## ステアリングのキャリブレーション
 
-> **Make sure your car is off the ground to prevent a runaway situation.**  
+> **暴走を防ぐため、車を地面から浮かせておいてください。**
 
-1. Turn on your car.
-2. Find the servo's 3-pin cable and make sure it is connected property to the PWM output pins. 
-    - if using the Donkey Hat, the 3-pin servo cable will be plugged into the hat.  See [Controlling ESC and Steering Servo with RC Hat](../parts/rc_hat.md/#controlling-esc-and-steering-servo-with-rc-hat) for a complete description on the connections.
-    - if using a PCA9685, the servo cable will be connected to one of the PCA9685's 3-pin input channels.  See [Connect Servo Shield to Raspberry Pi](build_hardware.md/#step-4-connect-servo-shield-to-raspberry-pi) for a description.
-3. Run `donkey calibrate ...` and provide it with arguments to specify which pin will produce the PWM
-    - When calibrating a drivetrain that uses pin specifiers, like `PWM_STEERING_THROTTLE`, then use `--pwm-pin` argument to specify the target pin,  like `RPI_GPIO.BOARD.33` or `PCA9685.1:40.13`.  If you are using the [Donkey Hat](../parts/rc_hat.md/#controlling-esc-and-steering-servo-with-rc-hat) then you would use `donkey calibrate --pwm-pin=PIGPIO.BCM.13` to calibrate steering.  See [Pins](../parts/pins.md) for a more complete discussion of pins and pin specifiers.
-    - When using a legacy PCA9685 drivetrain, like `I2C_SERVO`, then specify the PCA9685 channel (the index of the 3-pin connector that cable in connected to) and the I2C bus the PCA9685 is connected to; `donkey calibrate --channel <your_steering_channel> --bus=<your_i2c_bus>`
-4. First **find the value that turns the tires all the way to the left** extreme. When calibrating steering you want to **choose the value that just turns the wheels to the maximum**; the wheels should turn all the way but **the servo should _NOT_ make a whining noise**.  Try the value `360` and you should see the wheels on your car move slightly. If not try `400` or `300`.  Next enter values +/- 10 from your starting value to find the PWM setting that makes your car turn all the way left, again making sure the motor is not making a whining sound. Remember this value.
-5. Next **find the value that turns the tires all the way to the right** extreme.  Enter values +/- 10 from your starting value to find the PWM setting that makes your car turn all the way right, again making sure the motor is not making a whining sound. Remember this value.
+1. 車の電源を入れます。
+2. サーボの3ピンケーブルを確認し、PWM出力ピンに正しく接続されているか確かめます。
+    - Donkey Hatを使用している場合、サーボの3ピンケーブルはHatに接続します。接続の詳細は[RC HatでESCとステアリングサーボを制御する](../parts/rc_hat.md/#controlling-esc-and-steering-servo-with-rc-hat)を参照してください。
+    - PCA9685を使用する場合、サーボケーブルはPCA9685の3ピン入力チャンネルのどれかに接続します。詳しくは[サーボシールドをRaspberry Piに接続する](build_hardware.md/#step-4-connect-servo-shield-to-raspberry-pi)を参照してください。
+3. `donkey calibrate ...` を実行し、どのピンからPWMを出力するか指定する引数を与えます。
+    - `PWM_STEERING_THROTTLE` のようにピン指定子を用いる駆動系をキャリブレーションする場合は、`--pwm-pin` 引数で対象ピンを指定します。たとえば `RPI_GPIO.BOARD.33` や `PCA9685.1:40.13` です。[Donkey Hat](../parts/rc_hat.md/#controlling-esc-and-steering-servo-with-rc-hat) を使うなら `donkey calibrate --pwm-pin=PIGPIO.BCM.13` でステアリングをキャリブレーションします。ピンとピン指定子については [Pins](../parts/pins.md) を参照してください。
+    - `I2C_SERVO` などのレガシーPCA9685駆動系を使用する場合、PCA9685のチャンネル（3ピンコネクタの番号）と接続しているI2Cバスを指定します。`donkey calibrate --channel <your_steering_channel> --bus=<your_i2c_bus>`
+4. まず **タイヤが完全に左に切れる値** を探します。ステアリングをキャリブレーションする際には、**ちょうど最大までタイヤが回る値** を選びます。タイヤは端まで回るものの、**サーボが唸る音を出さない** ようにしてください。まずは `360` を試し、車輪が少し動くか確認します。動かなければ `400` や `300` を試してください。次に開始値から±10の範囲で値を入力し、車輪が完全に左へ切れるPWM設定を探します。このときもモーターが唸らないことを確認します。この値を覚えておきます。
+5. 次に **タイヤが完全に右に切れる値** を探します。開始値から±10の範囲で値を入力して、車輪が完全に右へ切れるPWM値を見つけます。このときもモーターが唸らないことを確認します。この値を覚えておきます。
 
-**Edit the `myconfig.py` script on your car** and enter these values as `STEERING_LEFT_PWM` and `STEERING_RIGHT_PWM` respectively.
+**車上の `myconfig.py` を編集し**, これらの値をそれぞれ `STEERING_LEFT_PWM` と `STEERING_RIGHT_PWM` に設定します。
 
-- `STEERING_LEFT_PWM`  = PWM for full left turn
-- `STEERING_RIGHT_PWM` = PWM value for full right turn
+- `STEERING_LEFT_PWM`  = 左に全開で切るときのPWM値
+- `STEERING_RIGHT_PWM` = 右に全開で切るときのPWM値
 
-## Throttle Calibration
+## スロットルのキャリブレーション
 
-1. Find the ESC's 3-pin cable and make sure it is connected property to the PWM output pins. 
-    - if using the Donkey Hat, the ESC's 3-pin cable will be plugged into the hat.  See [Controlling ESC and Steering Servo with RC Hat](../parts/rc_hat.md/#controlling-esc-and-steering-servo-with-rc-hat) for a complete description on the connections.
-    - if using a PCA9685, the ESC's 3-pin cable will be connected to one of the PCA9685's 3-pin input channels.  See [Connect Servo Shield to Raspberry Pi](build_hardware.md/#step-4-connect-servo-shield-to-raspberry-pi) for a description.
-2. Run `donkey calibrate ...` and provide it with arguments to specify which pin will produce the PWM
-    - When calibrating a drivetrain that uses pin specifiers, like `PWM_STEERING_THROTTLE`, then use `--pwm-pin` argument to specify the target pin, like `RPI_GPIO.BOARD.33` or `PCA9685.1:40.13`.  If you are using the [Donkey Hat](../parts/rc_hat/#controlling-esc-and-steering-servo-with-rc-hat) then you would use `donkey calibrate --pwm-pin=PIGPIO.BCM.18` to calibrate throttle.  See [Pins](../parts/pins.md) for a more complete discussion of pins and pin specifiers.
-    - When using a legacy PCA9685 drivetrain, like `I2C_SERVO`, then specify the PCA9685 channel (the index of the 3-pin connector that cable in connected to) and the I2C bus the PCA9685 is connected to; `donkey calibrate --channel <your_throttle_channel> --bus=<your_i2c_bus>`
-3. Enter `370` when prompted for a PWM value.
-4. You should hear your ESC beep indicating that it's calibrated.
-5. Enter `400` and you should see your cars wheels start to go forward. If not,
-its likely that this is reverse, try entering `330` instead.
-6. Keep trying different values until you've found a reasonable max speed and remember this PWM value.
+1. ESCの3ピンケーブルを確認し、PWM出力ピンに正しく接続されているか確かめます。
+    - Donkey Hatを使用している場合、ESCの3ピンケーブルはHatに接続します。接続の詳細は[RC HatでESCとステアリングサーボを制御する](../parts/rc_hat.md/#controlling-esc-and-steering-servo-with-rc-hat)を参照してください。
+    - PCA9685を使用する場合、ESCの3ピンケーブルはPCA9685の3ピン入力チャンネルのどれかに接続します。詳しくは[サーボシールドをRaspberry Piに接続する](build_hardware.md/#step-4-connect-servo-shield-to-raspberry-pi)を参照してください。
+2. `donkey calibrate ...` を実行し、どのピンからPWMを出力するか指定する引数を与えます。
+    - `PWM_STEERING_THROTTLE` のようにピン指定子を用いる駆動系をキャリブレーションする場合は、`--pwm-pin` 引数で対象ピンを指定します。たとえば `RPI_GPIO.BOARD.33` や `PCA9685.1:40.13` です。[Donkey Hat](./parts/rc_hat/#controlling-esc-and-steering-servo-with-rc-hat) を使うなら `donkey calibrate --pwm-pin=PIGPIO.BCM.18` でスロットルをキャリブレーションします。ピンとピン指定子については [Pins](../parts/pins.md) を参照してください。
+    - `I2C_SERVO` などのレガシーPCA9685駆動系を使用する場合、PCA9685のチャンネル（3ピンコネクタの番号）と接続しているI2Cバスを指定します。`donkey calibrate --channel <your_throttle_channel> --bus=<your_i2c_bus>`
+3. PWM値の入力を求められたら `370` を入力します。
+4. ESCがビープ音を鳴らし、キャリブレーションが完了したことを知らせます。
+5. `400` を入力すると、車輪が前進し始めるはずです。もしそうでなければ
+逆方向になっている可能性があるので、代わりに `330` を試してください。
+6. 適切な最高速度になるまでさまざまな値を試し、そのPWM値を覚えておきます。
 
-Reverse on RC cars is a little tricky because the ESC must receive a reverse pulse, zero pulse, reverse pulse to start to go backwards. To calibrate a reverse PWM setting...
+RCカーでのリバースは少し厄介で、後退するにはESCが「逆転パルス → ゼロパルス → 逆転パルス」の順で信号を受け取る必要があります。リバース用のPWM値をキャリブレーションするには...
 
-1. Use the same technique as above set the PWM setting to your zero throttle.
-2. Enter the reverse value, then the zero throttle value, then the reverse value again.
-3. Enter values +/- 10 of the reverse value to find a reasonable reverse speed. Remember this reverse PWM value.
+1. 先ほどと同じ方法でPWM値をゼロスロットルの設定にします。
+2. 逆転値を入力し、続けてゼロスロットルの値、さらにもう一度逆転値を入力します。
+3. 逆転値から±10の範囲で値を入力し、適切な後退速度を見つけます。このリバースPWM値を覚えておきます。
 
-Now open your `myconfig.py` script and enter the PWM values for your car into the throttle_controller part:
+次に `myconfig.py` を開き、以下のスロットルコントローラー関連の項目にあなたの車のPWM値を入力します。
 
-* `THROTTLE_FORWARD_PWM` = PWM value for full throttle forward
-* `THROTTLE_STOPPED_PWM` = PWM value for zero throttle
-* `THROTTLE_REVERSE_PWM` = PWM value at full reverse throttle
+* `THROTTLE_FORWARD_PWM` = 前進全開時のPWM値
+* `THROTTLE_STOPPED_PWM` = スロットルゼロ時のPWM値
+* `THROTTLE_REVERSE_PWM` = 後退全開時のPWM値
 
-## Fine tuning your calibration
+## キャリブレーションを微調整する
 
-![fine calibration](../assets/fine_calibration.gif)
+![細かなキャリブレーション](../assets/fine_calibration.gif)
 
-Now that you have your car roughly calibrated you can try driving it to verify that it drives as expected. Here's how to fine tune your car's calibration.
+車を大まかにキャリブレーションできたら、走行させて想定通りに走るか確認してみましょう。ここではキャリブレーションを微調整する方法を説明します。
 
-First and most importantly, **make sure your car goes perfectly straight** when no steering input is applied.
+まず最も重要なのは、**ステアリング入力がないときに車が完全に直進するか確認すること**です。
 
-1. Start your car by running `python manage.py drive`.
-2. Go to `<your_cars_hostname.local>:8887` in a browser.
-3. Press the `i` key on your keyboard a couple of times to get the car to move forward.  This is best done if you have your car on a very flat floor with some kind of grid, so you can guage if it going straight.  Be careful not to confuse driving off at an angle versus driving along an arc. Driving at an angle may simply mean you pointed the car at an angle when starting it.  Driving a curved arc indicates the car is steering.
-4. If your car tends to turn left without steering applied then update the `STEERING_LEFT_PWM` in your **myconfig.py** file so it is closer to neutral.  For example, if `STEERING_LEFT_PWM` is 460 and `STEERING_RIGHT_PWM` is 290, then reduce `STEERING_LEFT_PWM` a little, maybe 458.
-5. If your car tends to steer right with no steering applied, then update `STEERING_RIGHT_PWM` in your **myconfig.py** file so it is closer to neutral.  For example, if `STEERING_LEFT_PWM` is 460 and `STEERING_RIGHT_PWM` is 290, then increase `STEERING_RIGHT_PWM` a little, maybe 292.
-6. Repeat this process a couple of times until you have your car driving straight.
+1. `python manage.py drive` を実行して車を起動します。
+2. ブラウザで `<your_cars_hostname.local>:8887` にアクセスします。
+3. キーボードの `i` キーを数回押して車を前進させます。できれば床が平らでグリッドがある場所で行うと、真っすぐ走っているか判断しやすくなります。斜めに走り出すのと円弧を描いて走るのを混同しないよう注意してください。斜めに走るだけなら、スタート時に車の向きが斜めだっただけかもしれません。円弧を描く場合は車がステアリングを切っているということです。
+4. ステアリング操作なしで左に曲がる傾向がある場合、**myconfig.py** 内の `STEERING_LEFT_PWM` をニュートラルに近付けるよう調整します。たとえば `STEERING_LEFT_PWM` が460、`STEERING_RIGHT_PWM` が290なら、`STEERING_LEFT_PWM` を少し下げて458などにします。
+5. ステアリング操作なしで右に曲がる場合は、**myconfig.py** 内の `STEERING_RIGHT_PWM` をニュートラルに近付けます。たとえば `STEERING_LEFT_PWM` が460、`STEERING_RIGHT_PWM` が290なら、`STEERING_RIGHT_PWM` を少し上げて292などにします。
+6. この作業を何度か繰り返し、車が直進するようになるまで調整します。
 
-Next, try to make it so that a full left turn and a full right turn are the same turn angle (they make the same diameter circle when driven all the way around). 
+次に、左に全開で曲がったときと右に全開で曲がったときの角度が同じになるように調整します（ぐるりと回ったときの円の直径が左右で同じになるようにします）。
 
-> Note : optional
+> 注意：任意
 
-1. Start your car by running `python manage.py drive`.
-2. Go to `<your_cars_hostname.local>:8887` in a browser.
-3. Press `j` until the cars steering is all the way right.
-4. Press `i` a couple of times to get the car to go forward.
-5. Measure the diameter of the turn and record it on a spreadsheet.
-6. Repeat this measurement for different steering values for turning each direction.
-7. Chart these so you can see if your car turns the same in each direction.
+1. `python manage.py drive` を実行して車を起動します。
+2. ブラウザで `<your_cars_hostname.local>:8887` にアクセスします。
+3. `j` キーを押して、ステアリングが右いっぱいになるまで回します。
+4. `i` キーを数回押して車を前進させます。
+5. 円を描いたときの直径を測定し、スプレッドシートに記録します。
+6. 左右それぞれのステアリング値を変えながら同様の測定を繰り返します。
+7. これらの値をグラフ化し、左右で同じように曲がるかどうかを確認します。
 
-Corrections:
+補正方法:
 
-* If your car turns the same amount at an 80% turn and a 100% turn, change the PWM setting for that turn direction to be the PWM value at 80%.
-* If your car is biased to turn one direction, change the PWM values of your turns in the opposite direction of the bias.
+* 80%の舵角と100%の舵角で同じように曲がる場合、その方向のPWM値を80%の値に変更します。
+* どちらかに曲がりやすい場合は、偏っていない側のPWM値を調整してバランスを取ります。
 
-After you've fine tuned your car the steering chart should look something like this.
+微調整後は、ステアリングのグラフが次のようになるはずです。
 
-![calibration graph](../assets/calibration_graph.png)
+![キャリブレーショングラフ](../assets/calibration_graph.png)
 
-You may need to iterate making sure the car is driving straight and that the left and right turns are the same to get those both to work.  Prioritize making sure the car drives straight.
+車がまっすぐ走り、左右のターンが同じになるまで、何度か調整を繰り返す必要があるかもしれません。まずは直進できることを最優先してください。
 
-### Next let's [get driving!](/guide/get_driving)
+### 次は [走行を始めましょう！](/guide/get_driving)

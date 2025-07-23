@@ -1,154 +1,140 @@
-# Odometry
+# オドメトリ
 
-Odometry is a way to calculate the speed and distance travelled of the car by measuring the rotation of its wheels using a sensor called an rotary encoder. This encoder can be on the motor, on the main drive shaft or on individual wheels. The advantage of using an encoder is that it "closes the loop" with your throttle, so your car can reliably command an actual velocity rather than just issuing a motor control which will produce a faster or slower velocity depending on the slope of the track, the surface or mechanical friction in your drive train while turning. In short, an encoder gives you much better control over your speed.
+オドメトリとは、ロータリーエンコーダーと呼ばれるセンサーでホイールの回転を計測し、車が移動した速度と距離を求める方法です。エンコーダーはモーターやメインドライブシャフト、あるいは各ホイールに取り付けられます。エンコーダーを使うとスロットルとのループを閉じることができるため、路面の傾斜や摩擦、旋回時の機械抵抗に左右されず実際の速度を確実に指示できます。要するに、エンコーダーを使えば速度をより細かく制御できます。
 
-Encoders come in various forms
+エンコーダーにはさまざまな形式があります
 
-* **Quadrature encoders** use dual sensors to measure pulses as the shaft turns and have the advantage of being very precise as well as being able to tell the difference between forward and reverse rotation.  These may use hall-effect sensors that measure magnetic pulses or optical sensors that pass light through a slotted disk that is fully enclosed to eliminate external interference.
-* **Mono encoders** use a single sensor to count pulses so they can not determine the direction of motion.  They are typically smaller and cheaper than quadrature encoders.  A common example is an optical version that uses a LED emitter/receiver sensor with a slotted disk that is attached to the output shaft. as the output shaft rotates it rotates the slotted disk, and so the light is interrupted and those pulses are counted. These sensors are cheap and easy to install but cannot determine the direction of rotation
+* **クアドラチャエンコーダー** は二つのセンサーで回転パルスを計測するため非常に精度が高く、前進と後退の区別もできます。磁気パルスを検出するホールセンサーや、外部の影響を受けないよう完全に覆われたスリットディスクに光を通す光学式センサーなどがあります。
+* **モノエンコーダー** は一つのセンサーでパルスを数えるだけなので進行方向は分かりません。一般的にクアドラチャエンコーダーより小型で安価です。よくある例として、LED 送受信センサーとスリットディスクを組み合わせた光学式があり、出力シャフトが回転するとディスクを通る光が遮られ、その回数を数えます。安価で取り付けも簡単ですが回転方向は判別できません。
 
-There are several ways to read encoders with Donkey:
+Donkey でエンコーダーを読み取る方法はいくつかあります。
 
 **Arduino**:
-The recommended way is with an **Arduino compatible microcontroller** running one of the Arduino sketches included with Donkeycar.  Since the microcontroller is dedicated to counting pulses it can maintain an accurate count event with very high resolution encoders.  This is critical if you are using a high resolution encoder so it does not drop any encoder pulses and so undercount.  There are two Arduino sketches available:
+推奨されるのは、Donkeycar に付属する Arduino スケッチを実行する **Arduino 互換マイコン** を利用する方法です。マイコンはパルス計測専用となるため高分解能のエンコーダーでも正確にカウントできます。パルスを取りこぼすと過小カウントになるので高分解能エンコーダーでは特に重要です。利用できる Arduino スケッチは次の二つです。
 
-- [mono_encoder.ino](https://github.com/autorope/donkeycar/blob/main/arduino/mono_encoder/mono_encoder.ino) supports single-channel encoders like the simple encoders with the 20 slot encoder disk. 
-- [quadrature_encoder.ino](https://github.com/autorope/donkeycar/blob/main/arduino/quadrature_encoder/quadrature_encoder.ino) support two-channel quadrature encoders that can detect direction as well as encoder counts.  
+- [mono_encoder.ino](https://github.com/autorope/donkeycar/blob/main/arduino/mono_encoder/mono_encoder.ino) は 20 スロットのディスクを使うような単一チャンネルエンコーダーをサポートします。
+- [quadrature_encoder.ino](https://github.com/autorope/donkeycar/blob/main/arduino/quadrature_encoder/quadrature_encoder.ino) は方向検出も可能な二チャンネルのクアドラチャエンコーダーをサポートします。
 
-Both sketches support a single encoder or two encoders in a differential drive arrangement. They can be compiled using interrupts for high resolution encoders or as polled-encoders with robust debouncing.  Both sketches transmit the count to the RPi via the USB serial port when requested by Donkeycar, which lightens the processing load for the Rpi.
+どちらのスケッチも単一エンコーダーまたは二つのエンコーダーを用いた差動駆動に対応しています。高分解能エンコーダーでは割り込みを利用したり、ポーリング方式でデバウンスを強化したりできます。どちらも Donkeycar から要求があったときに USB シリアル経由でカウント値を Raspberry Pi に送信するため、Pi の負荷を軽減できます。
 
 **GPIO**:
-If you are using a low-resolution mono-encoder attached to the output shaft of the motor or to the drive shaft then the Raspberry Pi's GPIO pins may be adequate to count the pulses.  Remember that the GPIO pins only support 3.3v devices; if you can supply your encoder's VCC at 3.3v then it will generally output 3.3v pulses, in which case you can directly connect it to the RaspberryPi's GPIO pins. 
+低分解能のモノエンコーダーをモーターの出力シャフトや駆動シャフトに取り付けている場合、Raspberry Pi の GPIO ピンでパルスを数えるだけで十分かもしれません。GPIO ピンは 3.3V デバイスのみ対応しているので、エンコーダーの VCC を 3.3V で供給できれば、出力も 3.3V パルスになるため直接接続できます。
 
 
-## Supported Encoders
+## 対応エンコーダー
 
-Examples of rotary encoders that are supported:
+対応しているロータリーエンコーダーの例:
 
-* Optical encoder sensors and discs [Available from many sources on Amazon](https://amzn.to/3s05QmG)
-* Quadrature encoders. [Larger, cheaper](https://amzn.to/3liBUjj), [Smaller, more expensive](https://www.sparkfun.com/products/10932)
+* 光学式エンコーダーセンサーとディスク [Amazon でも多数販売](https://amzn.to/3s05QmG)
+* クアドラチャエンコーダー。[大型で安価](https://amzn.to/3liBUjj) と [小型で高価](https://www.sparkfun.com/products/10932)
 
-## Hardware Setup
+## ハードウェアのセットアップ
 
-How you attach your encoder is up to you and which kind of encoder you're using. For example, [here's](https://diyrobocars.com/2020/01/31/how-to-add-an-encoder-to-the-donkeycar-chassis/) one way to put a quadrature encoder on the main drive shaft. [Here](https://guitar.ucsd.edu/maeece148/index.php/Project_encoders) is a more complex setup with dual encoders. 
+エンコーダーをどこに取り付けるかは使用する種類によって異なります。例えば [こちら](https://diyrobocars.com/2020/01/31/how-to-add-an-encoder-to-the-donkeycar-chassis/) はメインドライブシャフトにクアドラチャエンコーダーを取り付ける方法です。また [こちら](https://guitar.ucsd.edu/maeece148/index.php/Project_encoders) には二つのエンコーダーを用いた複雑な例があります。
 
-But this is the easiest way to do it, with a cheap and simple optical encoder on the main drive shaft of a standard Donkeycar chassis (if your chassis is different, the same overall approach should work, although you may have to find a different place to mount the sensor):
+ここでは標準の Donkeycar シャーシのメインドライブシャフトに安価で簡単な光学式エンコーダーを取り付ける最も手軽な方法を紹介します。シャーシが異なる場合でも大まかな手順は同じですが、センサーの設置場所を工夫してください。
 
-First, unscrew the plate over the main drive shaft. Tilt the rear wheels back a bit and you should be able to remove the shaft.
+まず、メインドライブシャフトを覆うプレートのネジを外します。後輪を少し後ろに傾けるとシャフトを取り外せます。
 
 ![drive shaft](../assets/driveshaft.jpg)
 
-Now enlarge the hole in the optical encoder disc that came with your sensor (use a drill or Dremel grinding stone) so you can slip it onto the shaft. Stretch a rubber grommet (you can use the sort typically included with servos to mount them, but any one of the right size will do) over the shaft and push it into the encoder disc hole. If you don't have a grommet, you can wrap tape around the shaft until it's large enough to hold the disc firmly. Once you've ensured it's in the right place, use a few drops of superglue or hot glue to hold it in place)
+次に、センサーに付属する光学式エンコーダーディスクの穴をドリルやリューターで広げ、シャフトに通せるようにします。サーボ取り付け用などのゴムグロメットをシャフトにかぶせてディスクの穴に押し込みます。グロメットがない場合はシャフトにテープを巻き、ディスクがしっかり固定できる太さに調整します。位置が決まったら瞬間接着剤やホットグルーで固定してください。
 
 ![drive shaft](../assets/encoder1.jpg)
 
 ![drive shaft](../assets/encoder2.jpg)
 
-Cut out a small notch (marked in pencil here) in the plate covering the drive shaft, so you can mount the encoder sensor there, ensuring that the disc can turn freely in the gap in front of the steering servo
+ドライブシャフトを覆うプレートに小さな切り欠きを作り（写真では鉛筆で印を付けています）、そこにエンコーダーセンサーを取り付けます。ディスクがステアリングサーボ前の隙間で自由に回転できるようにしてください。
 
 ![drive plate](../assets/cuthere.jpg)
 
-Now replace the plate and drill two holes so you can screw in the encoder sensor. Slide the disc along the shaft so that it doesn't bind on the sensor. 
+プレートを戻し、エンコーダーセンサーを固定するための穴を二つ開けます。ディスクがセンサーと擦れないよう、シャフト上で位置を調整します。
 
 ![drive plate](../assets/encoder_inplace.jpg)
 
-Use three female-to-female jumper cables and connect the sensor to your RPi GPIO pins as follows. Connect the GND, V+ (which might say 5V or 3.3V) and data pin (which will say "Out or "D0") to the RPi 5V, Ground and GPIO 13 as shown here (if your sensor encoder has four pins, ignore the one that says "A0"):
+三本のメス―メスジャンパー線を使い、センサーの GND、V+（5V または 3.3V と表示されている場合があります）およびデータピン（"Out" または "D0" と書かれている）を RPi の 5V、Ground、GPIO 13 に接続します。センサーに四つ目のピン "A0" がある場合は無視してください。
 ![wiring diagram](../assets/encoder_wiring.jpg)
 
-Note: if you're already using GPIO 13 for another reason, such as RC input or output, you can use any other free GPIO pin. Just change the `ODOM_PIN` number accordingly in the `myconfig.py` file as shown below.
+注意: すでに GPIO 13 を RC 入出力などに使っている場合は、空いている別の GPIO ピンを使用できます。その際は `myconfig.py` の `ODOM_PIN` を下記のように変更してください。
 
 
-## Software Setup
+## ソフトウェアセットアップ
 
-Enable odometry in `myconfig.py`.
+`myconfig.py` でオドメトリを有効にします。
 
 ```
 #
 # ODOMETRY
 #
-HAVE_ODOM = False               # Do you have an odometer/encoder
-HAVE_ODOM_2 = False             # Do you have a second odometer/encoder as in a differential drive robot.
-                                # In this case, the 'first' encoder is the left wheel encoder and
-                                # the second encoder is the right wheel encoder.
-ENCODER_TYPE = 'GPIO'           # What kind of encoder? GPIO|arduino.
-                                # - 'GPIO' refers to direct connect of a single-channel encoder to an RPi/Jetson GPIO header pin.
-                                #   Set ODOM_PIN to the gpio pin, based on board numbering.
-                                # - 'arduino' generically refers to any microcontroller connected over a serial port.
-                                #   Set ODOM_SERIAL to the serial port that connects the microcontroller.
-                                #   See 'arduino/encoder/encoder.ino' for an Arduino sketch that implements both a continuous and
-                                #    on demand protocol for sending readings from the microcontroller to the host.
-ENCODER_PPR = 20                # encoder's pulses (ticks) per revolution of encoder shaft.
-ENCODER_DEBOUNCE_NS = 0         # nanoseconds to wait before integrating subsequence encoder pulses.
-                                # For encoders with noisy transitions, this can be used to reject extra interrupts caused by noise.
-                                # If necessary, the exact value can be determined using an oscilliscope or logic analyzer or
-                                # simply by experimenting with various values.
+HAVE_ODOM = False               # オドメーター／エンコーダーを搭載しているか
+HAVE_ODOM_2 = False             # 差動駆動ロボットのように二つ目のオドメーターを搭載しているか
+                                # この場合、1 つ目のエンコーダーは左輪、2 つ目は右輪となる
+ENCODER_TYPE = 'GPIO'           # エンコーダーの種類: GPIO または arduino
+                                # - 'GPIO' は単一チャンネルエンコーダーを RPi/Jetson の GPIO ヘッダーに直結
+                                #   ボード番号に基づいて ODOM_PIN を設定する
+                                # - 'arduino' はシリアル接続された任意のマイコンを指す
+                                #   マイコンを接続するシリアルポートを ODOM_SERIAL に設定する
+                                #   'arduino/encoder/encoder.ino' を参照すると継続送信と要求送信の両方を実装したスケッチがある
+ENCODER_PPR = 20                # エンコーダー軸一回転あたりのパルス数
+ENCODER_DEBOUNCE_NS = 0         # 次のパルスを取り込む前に待機するナノ秒
+                                # ノイズの多いエンコーダーでは割り込みの誤発生を防ぐために利用
+                                # 必要に応じてオシロスコープ等で測定するか試行して値を決める
 FORWARD_ONLY = 1
 FORWARD_REVERSE = 2
 FORWARD_REVERSE_STOP = 3
-TACHOMETER_MODE=FORWARD_REVERSE # FORWARD_ONLY, FORWARD_REVERSE or FORWARD_REVERSE_STOP
-                                # For dual channel quadrature encoders, 'FORWARD_ONLY' is always the correct mode.
-                                # For single-channel encoders, the tachometer mode depends upon the application.
-                                # - FORWARD_ONLY always increments ticks; effectively assuming the car is always moving forward
-                                #   and always has a positive throttle. This is best for racing on wide open circuits where
-                                #   the car is always under throttle and where we are not trying to model driving backwards or stopping.
-                                # - FORWARD_REVERSE uses the throttle value to decide if the car is moving forward or reverse
-                                #   increments or decrements ticks accordingly.  In the case of a zero throttle, ticks will be
-                                #   incremented or decremented based on the last non-zero throttle; effectively modelling 'coasting'.
-                                #   This can work well in situations where the car will be making progress even when the throttle
-                                #   drops to zero.  For instance, in a race situatino where the car may coast to slow down but not
-                                #   actually stop.
-                                # - FORWARD_REVERSE_STOP uses the throttle value to decide if the car is moving forward or reverse or stopped.
-                                #   This works well for a slower moving robot in situations where the robot is changing direction; for instance4
-                                #   when doing SLAM, the robot will explore the room slowly and may need to backup.
-MM_PER_TICK = WHEEL_RADIUS * 2 * 3.141592653589793 * 1000 / ENCODER_PPR           # How much travel with a single encoder tick, in mm. Roll you car a meter and divide total ticks measured by 1,000
-ODOM_SERIAL = '/dev/ttyACM0'    # serial port when ENCODER_TYPE is 'arduino'
-ODOM_SERIAL_BAUDRATE = 115200   # baud rate for serial port encoder
-ODOM_PIN = 13                   # if using ENCODER_TYPE=GPIO, which GPIO board mode pin to use as input
-ODOM_PIN_2 = 14                 # GPIO for second encoder in differential drivetrains
-ODOM_SMOOTHING = 1              # number of odometer readings to use when calculating velocity
-ODOM_DEBUG = False              # Write out values on vel and distance as it runs
+TACHOMETER_MODE=FORWARD_REVERSE # FORWARD_ONLY, FORWARD_REVERSE, FORWARD_REVERSE_STOP のいずれか
+                                # 二チャンネルのクアドラチャエンコーダーでは常に FORWARD_ONLY が正しい
+                                # 単一チャンネルの場合は用途に応じて選択
+                                # - FORWARD_ONLY は常にティックを加算し、車が常に前進していると仮定する
+                                #   オープンなコースで後退や停止を考慮しないレース向き
+                                # - FORWARD_REVERSE はスロットル値から前進か後退かを判断し、その通りにティックを増減する
+                                #   スロットルが 0 のときは最後の非 0 スロットルに基づいて増減し、惰性走行を表す
+                                #   例えばレースで減速のために惰性で進む状況に適している
+                                # - FORWARD_REVERSE_STOP はスロットル値で前進・後退・停止を判断する
+                                #   SLAM のように方向転換や後退を行う遅速ロボットに向く
+MM_PER_TICK = WHEEL_RADIUS * 2 * 3.141592653589793 * 1000 / ENCODER_PPR  # 1 ティックあたりの走行距離(mm)。車を1m進め、得られたティック数を1000で割る
+ODOM_SERIAL = '/dev/ttyACM0'    # ENCODER_TYPE='arduino' の場合のシリアルポート
+ODOM_SERIAL_BAUDRATE = 115200   # シリアルポート型エンコーダーのボーレート
+ODOM_PIN = 13                   # ENCODER_TYPE=GPIO の場合の入力ピン番号
+ODOM_PIN_2 = 14                 # 差動駆動で 2 つ目を使う場合の GPIO ピン
+ODOM_SMOOTHING = 1              # 速度計算に用いるオドメーター読取数
+ODOM_DEBUG = False              # 実行中に速度と距離を表示するか
 ```
 
+Arduino 互換マイコンでエンコーダーを読み取る場合は `myconfig.py` で `ENCODER_TYPE = 'arduino'` に設定します。マイコンには [arduino フォルダー](https://github.com/autorope/donkeycar/tree/main/arduino) のスケッチを Arduino IDE で書き込みます。書き込み後、シリアルコンソールで動作確認できます。これらのスケッチは r/p/c コマンドプロトコルを実装しており、要求に応じて値を返す方式と、指定した遅延で連続送信する方式の両方に対応しています。コマンドは 1 行ごと（末尾に '\n'）で送信します。
 
-If you are using an Arduino compatible microcontroller to read your encoder, set `ENCODER_TYPE = 'arduino'` in the myconfig.py file. The microcontroller should be flashed using the Arduino IDE with one of the sketches in the [arduino folder](https://github.com/autorope/donkeycar/tree/main/arduino). The sketches can be checked in the Arduino IDE by using the serial console after flashing the microcontroller.  The sketches implement the r/p/c command protocol for on-demand sending of encoder value and continuous sending with provided delay.  Commands are sent one per line (ending in '\n'):
+- `r` コマンド: 位置をゼロにリセット
+- `p` コマンド: 位置を即座に送信
+- `c` コマンド: 連続モードの開始／停止
+    - 整数が続く場合は読み取り間隔(ミリ秒)として使用
+    - 整数が続かない場合は連続モードを停止
 
-- `r` command resets position to zero
-- `p` command sends position immediately
-- `c` command starts/stops continuous mode
-    - if it is followed by an integer, then use this as the delay in ms between readings.
-    - if it is not followed by an integer then stop continuous mode
-
-With a single encoder setup the encoder sends the tick count and a timestamp as a comma delimited pair over the serial/USB port:
+単一エンコーダー構成では、ティック数とタイムスタンプをカンマ区切りのペアでシリアル／USB ポートに送信します:
 
 ```{ticks},{ticksMs}```
 
-In a dual encoder setup the second encoder values as separated from the first by a semicolon:
+二つのエンコーダーを使う場合、二つ目の値はセミコロンで区切られます:
 
 ```{ticks},{ticksMs};{ticks},{ticksMs}```
 
-The [`tachometer.py`](https://github.com/autorope/donkeycar/blob/main/donkeycar/parts/tachometer.py) file that implements the encoder parts also has a [`__main__`](https://github.com/autorope/donkeycar/blob/5e234c3101cc5f54935c240819e3840596c753a3/donkeycar/parts/tachometer.py#L597) function, so it can be run directly.  After activating the `donkey` python environment the file can be run to check your hookup and to determine configuration parameters.  Run this to get the available arguments:
+エンコーダーの部品を実装している [`tachometer.py`](https://github.com/autorope/donkeycar/blob/main/donkeycar/parts/tachometer.py) には [`__main__`](https://github.com/autorope/donkeycar/blob/5e234c3101cc5f54935c240819e3840596c753a3/donkeycar/parts/tachometer.py#L597) 関数があり、直接実行できます。`donkey` Python 環境を有効にしてこのファイルを実行すると、配線確認や設定値の検討に役立ちます。利用可能な引数は次のコマンドで確認できます。
 
 ```
-python donkeycar/parts/tachometer.py 
+python donkeycar/parts/tachometer.py
 ```
 
-## Odometer and Kinematics for Pose Estimation and Path Following
-An encoder setup can be used to estimate not only the vehicle's speed, but its position.  This requires a few configurations to be set in the `myconfig.py`; basically measurements of the wheel diameter, the length of the wheel base and the length of the axle.  This then allows encoders to be used with the [Path Follow](/guide/path_follow/path_follow) template in place of GPS, so it can be used indoors.
+## 姿勢推定とパスフォローのためのオドメーターと運動学
+エンコーダーを使えば車両の速度だけでなく位置も推定できます。そのためには `myconfig.py` にホイール径やホイールベース、車軸長などを設定しておく必要があります。これにより、GPS の代わりにエンコーダーを使って [Path Follow](/guide/path_follow/path_follow) テンプレートを屋内で利用できます。
 
 ```
 #
-# MEASURED ROBOT PROPERTIES
+# 計測済みロボット特性
 #
-AXLE_LENGTH = 0.03     # length of axle; distance between left and right wheels in meters
-WHEEL_BASE = 0.1       # distance between front and back wheels in meters
-WHEEL_RADIUS = 0.0315  # radius of wheel in meters
-MIN_SPEED = 0.1        # minimum speed in meters per second; speed below which car stalls
-MAX_SPEED = 3.0        # maximum speed in meters per second; speed at maximum throttle (1.0)
-MIN_THROTTLE = 0.1     # throttle (0 to 1.0) that corresponds to MIN_SPEED, throttle below which car stalls
-MAX_STEERING_ANGLE = 3.141592653589793 / 4  # for car-like robot; maximum steering angle in radians (corresponding to tire angle at steering == -1)
+AXLE_LENGTH = 0.03     # 車軸の長さ(左右のホイール間) [m]
+WHEEL_BASE = 0.1       # 前輪と後輪の間隔 [m]
+WHEEL_RADIUS = 0.0315  # ホイール半径 [m]
+MIN_SPEED = 0.1        # 最低速度[m/s]; これを下回ると停止
+MAX_SPEED = 3.0        # 最高速度[m/s]; スロットル1.0時
+MIN_THROTTLE = 0.1     # MIN_SPEED に対応するスロットル値(0〜1.0)
+MAX_STEERING_ANGLE = 3.141592653589793 / 4  # 車型ロボットの最大操舵角[rad] (steering==-1 に相当)
 ```
-
-
-
-
-

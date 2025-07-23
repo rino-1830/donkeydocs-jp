@@ -1,30 +1,27 @@
-# Get Your Jetson Nano/Xavier NX Working
+# Jetson Nano/Xavier NX を使えるようにする
 
 ![donkey](/assets/logos/nvidia_logo.png)
 
-We have a different approaches to installing the software depending on the
-version of Donkey Car. For Donkey Car <= 4.5.X we are using Jetpack 4.5.X
-which comes with Tensorflow 2.3.1. The python installation is using virtual
-env, i.e. it is based on the system python with version 3.6. This is the 
-only version that is working on the old Jetson Nano.
+Donkey Car のバージョンによってソフトウェアのインストール方法が異なります。
+Donkey Car <= 4.5.X では Jetpack 4.5.X を使用します。
+これは Tensorflow 2.3.1 が同梱されており、Python はシステムの Python 3.6 を基にした
+virtualenv を利用します。古い Jetson Nano で動作するのはこのバージョンだけです。
 
-For the `main` branch we have updated Tensorflow to 2.9 and python to 3.8 or
-3.9. This is running on a newer version of Jetpack. You will need a Jetson 
-Xavier or any of the newer Jetsons like the Orin, to use Jetpack 5.0.2. To 
-decouple the python installation from the system python we are using Miniforge 
-which is a mamba based version of Miniconda that works on the aarm architecture.
+`main` ブランチでは Tensorflow 2.9 と Python 3.8 もしくは 3.9 を使用しています。
+これはより新しい Jetpack 上で動作し、利用するには Jetson Xavier や Orin といった
+新しい Jetson が必要で、Jetpack 5.0.2 を使います。システム Python から切り離すため、
+arm アーキテクチャで動作する mamba ベースの Miniconda である Miniforge を利用します。
 
-For Donkey Car <= 4.5.X please go to the next section. For the latest
-version on the `main` branch please jump
-to [this section](#installation-for-donkey-car-main).
+Donkey Car <= 4.5.X の場合は次のセクションへ進んでください。`main` ブランチの最新
+バージョンを使用する場合は[こちらのセクション](#installation-for-donkey-car-main)
+を参照してください。
 
-We recommend to use 4GB version of the Jetson Nano or the Jetson Xavier to
-run the software without issues. It's also recommended using a 128GB
-microSD card with U3 speed, like for example
-[this SanDisk SD Card.](https://www.amazon.com/SanDisk-128GB-Extreme-microSD-Adapter/dp/B07FCMKK5X/ref=sr_1_4?crid=1J19V1ZZ4EVQ5&keywords=SanDisk+128GB+Extreme+microSDXC+UHS-I&qid=1676908353&sprefix=sandisk+128gb+extreme+microsdxc+uhs-i%2Caps%2C121&sr=8-4)
+ソフトウェアを問題なく動かすためには Jetson Nano 4GB 版または Jetson Xavier の使用を
+推奨します。また U3 スピードの 128GB microSD カードを用意してください。
+例としては[この SanDisk SD カード](https://www.amazon.com/SanDisk-128GB-Extreme-microSD-Adapter/dp/B07FCMKK5X/ref=sr_1_4?crid=1J19V1ZZ4EVQ5&keywords=SanDisk+128GB+Extreme+microSDXC+UHS-I&qid=1676908353&sprefix=sandisk+128gb+extreme+microsdxc+uhs-i%2Caps%2C121&sr=8-4)などがあります。
 
 
-These are the supported versions:
+以下のバージョンがサポートされています:
 
 | Jetson      | Jetpack | Python | Donkey   | Tensorflow |
 |-------------|---------|--------|----------|------------|
@@ -32,47 +29,38 @@ These are the supported versions:
 | Xavier/Orin | 5.0.2   | 3.8    | >= 5.X   | 2.9        | 
 
 
-Then [Create your Donkeycar Application](/guide/create_application/)
+次に [Donkeycar アプリケーションを作成](/guide/create_application/) してください。
 
 
-## Installation for Donkey Car <= 4.5.X
+## Donkey Car <= 4.5.X のインストール
 
-> Note: These instructions are working for DC 4.3.6 and DC 4.4.0 only at the 
-> moment. We are working on a patch to have support for 4.5.X too. 
-
-
-* [Step 1a: Flash Operating System](#step-1a-flash-operating-system)
-* [Step 2a: Free up the serial port](#step-2a-free-up-the-serial-port-optional-only-needed-if-youre-using-the-robohat-mm1)
-* [Step 3a: Install Dependencies](#step-3a-install-system-wide-dependencies)
-* [Step 4a: Setup Python Environment](#step-4a-setup-python-environment)
-* [Step 5a: (Optional) Install PyGame for USB camera](#step-5a-optional-install-pygame-for-usb-camera)
+> 注: この手順は現在 DC 4.3.6 と DC 4.4.0 のみで動作します。4.5.X への対応も進行中です。
 
 
-### Step 1a: Flash Operating System
+* [Step 1a: OS の書き込み](#step-1a-flash-operating-system)
+* [Step 2a: シリアルポートを開放する](#step-2a-free-up-the-serial-port-optional-only-needed-if-youre-using-the-robohat-mm1)
+* [Step 3a: 依存パッケージのインストール](#step-3a-install-system-wide-dependencies)
+* [Step 4a: Python 環境の設定](#step-4a-setup-python-environment)
+* [Step 5a: (任意) USB カメラ用に PyGame をインストール](#step-5a-optional-install-pygame-for-usb-camera)
 
 
-These instructions work for Jetpack 4.5.1. 
+### Step 1a: OS を書き込む
 
-* If you have a 4gb Jetson Nano then download Jetpack 4.5.1 from Nvidia
-  here; [jetson-nano-jp451-sd-card-image.zip](https://developer.nvidia.com/embedded/l4t/r32_release_v5.1/r32_release_v5.1/jeston_nano/jetson-nano-jp451-sd-card-image.zip)
-* If you have a 2gb Jetson Nano the download Jetpack 4.5.1from Nvidia
-  here; [jetson-nano-2gb-jp451-sd-card-image.zip](https://developer.nvidia.com/embedded/l4t/r32_release_v5.1/r32_release_v5.1/jeston_nano_2gb/jetson-nano-2gb-jp451-sd-card-image.zip)
 
-This installs the official Nvidia build of Tensorflow 2.3.1; make sure you are
-using the same version of Tensorflow on your host PC if you are using one. Using
-a different version of Tensorflow to train your network may result in errors
-when you attempt to use it as an autopilot.
+以下の手順は Jetpack 4.5.1 で動作します。
 
-Visit the official [Nvidia Jetson Nano Getting Started Guide](https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#prepare)
-or [Nvidia Xavier NX Getting Started Guide](https://developer.nvidia.com/embedded/learn/get-started-jetson-xavier-nx-devkit).
-Work through the __Prepare for Setup__, __Writing Image to the microSD Card__,
-and __Setup and First Boot__ instructions, then return here.
+* 4GB版 Jetson Nano をお持ちの場合は [jetson-nano-jp451-sd-card-image.zip](https://developer.nvidia.com/embedded/l4t/r32_release_v5.1/r32_release_v5.1/jeston_nano/jetson-nano-jp451-sd-card-image.zip) をダウンロードしてください。
+* 2GB版 Jetson Nano の場合は [jetson-nano-2gb-jp451-sd-card-image.zip](https://developer.nvidia.com/embedded/l4t/r32_release_v5.1/r32_release_v5.1/jeston_nano_2gb/jetson-nano-2gb-jp451-sd-card-image.zip) をダウンロードしてください。
 
-Once you're done with the setup, ssh into your vehicle. Use the terminal for
-Ubuntu or Mac. [Putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html)
-for windows.
+これにより公式の Nvidia 製 Tensorflow 2.3.1 がインストールされます。ホスト PC を使う場合は同じバージョンの Tensorflow を使用してください。異なるバージョンで学習したネットワークを使用すると、オートパイロットとして利用する際にエラーが発生することがあります。
 
-Remove Libre Office:
+公式の [Nvidia Jetson Nano Getting Started Guide](https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#prepare)
+または [Nvidia Xavier NX Getting Started Guide](https://developer.nvidia.com/embedded/learn/get-started-jetson-xavier-nx-devkit) を参照し、
+__Prepare for Setup__、__Writing Image to the microSD Card__、__Setup and First Boot__ の各手順を実行してから戻ってきてください。
+
+セットアップが完了したら車体へ SSH 接続します。Ubuntu や Mac ではターミナルを、Windows では [Putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) を使用してください。
+
+Libre Office を削除します:
 
 ```bash
 sudo apt-get remove --purge libreoffice*
@@ -80,7 +68,7 @@ sudo apt-get clean
 sudo apt-get autoremove
 ```
 
-And add a 8GB swap file:
+続いて 8GB のスワップファイルを追加します:
 
 ```bash
 git clone https://github.com/JetsonHacksNano/installSwapfile
@@ -89,16 +77,16 @@ cd installSwapfile
 sudo reboot now 
 ```
 
-### Step 2a: Free up the serial port (optional. Only needed if you're using the Robohat MM1)
+### Step 2a: シリアルポートを開放する (任意、RoboHat MM1 を使用する場合のみ)
 
 ```bash
 sudo usermod -aG dialout <your username>
 sudo systemctl disable nvgetty
 ```
 
-### Step 3a: Install System-Wide Dependencies
+### Step 3a: システム全体の依存パッケージをインストール
 
-First install some packages with `apt-get`.
+まず `apt-get` で以下のパッケージをインストールします。
 
 ```bash
 sudo apt-get update -y
@@ -110,9 +98,9 @@ sudo apt-get install -y git nano
 sudo apt-get install -y openmpi-doc openmpi-bin libopenmpi-dev libopenblas-dev
 ```
 
-### Step 4a: Setup Python Environment.
+### Step 4a: Python 環境の設定
 
-#### Setup Virtual Environment
+#### 仮想環境の準備
 
 ```bash
 pip3 install virtualenv
@@ -121,9 +109,9 @@ echo "source ~/env/bin/activate" >> ~/.bashrc
 source ~/.bashrc
 ```
 
-#### Setup Python Dependencies
+#### Python 依存パッケージのインストール
 
-Next, you will need to install packages with `pip`:
+次に `pip` でパッケージをインストールします:
 
 ```bash
 pip3 install -U pip testresources setuptools
@@ -137,11 +125,9 @@ pip3 install -U gdown
 pip3 install --pre --extra-index-url https://developer.download.nvidia.com/compute/redist/jp/v45 tensorflow==2.5
 ```
 
-#### Install Donkeycar Python Code
+#### Donkeycar の Python コードをインストール
 
-Change to a dir you would like to use as the head of your projects. Assuming
-you've already made the `projects` directory above, you can use that. Get
-the latest 4.5.X release and install that into the venv.
+プロジェクトのルートにしたいディレクトリへ移動します。前述の `projects` ディレクトリを使い、最新の 4.5.X リリースを取得して仮想環境にインストールします。
 
 ```bash
 mkdir projects
@@ -154,50 +140,45 @@ pip install -e .[nano]
 
 ```
 
-### Step 5a: (Optional) Install PyGame for USB camera
+### Step 5a: (任意) USB カメラ用に PyGame をインストール
 
-If you plan to use a USB camera, you will also want to setup pygame:
+USB カメラを使用する予定がある場合は pygame をセットアップします:
 
 ```bash
 sudo apt-get install python-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsdl1.2-dev libsmpeg-dev python-numpy subversion libportmidi-dev ffmpeg libswscale-dev libavformat-dev libavcodec-dev libfreetype6-dev
 pip install pygame
 ```
 
-Later on you can add the `CAMERA_TYPE="WEBCAM"` in myconfig.py.
+後で `myconfig.py` に `CAMERA_TYPE="WEBCAM"` を追加してください。
 
 
 
-## Installation for Donkey Car >= 5.X
+## Donkey Car >= 5.X のインストール
 
-Instructions for the latest code from the `main` branch or newer releases >= 
-5.X. Note the installation differs between the two available OSs. On Jetson 
-you need to install Jetpack 5.0.2.
+`main` ブランチの最新コードや 5.X 以上のリリース向けの手順です。利用可能な 2 種類の OS でインストール方法が異なります。Jetson では Jetpack 5.0.2 をインストールする必要があります。
 
 
-### Installation on Jetson Xavier (or newer Jetson boards)
+### Jetson Xavier (またはそれ以降の Jetson ボード) へのインストール
 
-* [Step 1b: Flash Operating System](#step-1c-flash-operating-system)
-* [Step 2b: Free up the serial port](#step-2c-free-up-the-serial-port-optional-only-needed-if-youre-using-the-robohat-mm1)
-* [Step 3b: Setup Python Environment](#step-3c-setup-python-environment)
-* [Step 4b: (Optional) Install PyGame for USB camera](#step-4c-optional-install-pygame-for-usb-camera)
-
-
-#### Step 1b: Flash Operating System
-
-These instructions work for Jetpack 5.0.2.
-
-Please install the Jetpack image from [jetson-nx-developer-kit-sd-card-image.zip](https://developer.nvidia.com/jetson-nx-developer-kit-sd-card-image).
+* [Step 1b: OS の書き込み](#step-1c-flash-operating-system)
+* [Step 2b: シリアルポートを開放する](#step-2c-free-up-the-serial-port-optional-only-needed-if-youre-using-the-robohat-mm1)
+* [Step 3b: Python 環境を設定](#step-3c-setup-python-environment)
+* [Step 4b: (任意) USB カメラ用に PyGame をインストール](#step-4c-optional-install-pygame-for-usb-camera)
 
 
-Visit the official [Nvidia Xavier NX Getting Started Guide](https://developer.nvidia.com/embedded/learn/get-started-jetson-xavier-nx-devkit).
-Work through the __Prepare for Setup__, __Writing Image to the microSD Card__,
-and __Setup and First Boot__ instructions, then return here.
+#### Step 1b: OS を書き込む
 
-Once you're done with the setup, ssh into your vehicle. Use the terminal for
-Ubuntu or Mac. [Putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html)
-for windows.
+これらの手順は Jetpack 5.0.2 用です。
 
-Remove Libre Office:
+[jetson-nx-developer-kit-sd-card-image.zip](https://developer.nvidia.com/jetson-nx-developer-kit-sd-card-image) から Jetpack イメージをインストールしてください。
+
+
+公式の [Nvidia Xavier NX Getting Started Guide](https://developer.nvidia.com/embedded/learn/get-started-jetson-xavier-nx-devkit) を参照し、
+__Prepare for Setup__、__Writing Image to the microSD Card__、__Setup and First Boot__ の手順を実行したらここへ戻ってきてください。
+
+セットアップが完了したら車体へ SSH 接続します。Ubuntu または Mac ではターミナルを、Windows では [Putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) を使用してください。
+
+Libre Office を削除します:
 
 ```bash
 sudo apt-get remove --purge libreoffice*
@@ -205,8 +186,7 @@ sudo apt-get clean
 sudo apt-get autoremove
 ```
 
-And add a 8GB swap file. Note, if you intend to run from an SSD, perform the 
-swap file setup only after booting from the SSD:
+続いて 8GB のスワップファイルを追加します。SSD から起動する予定の場合は、SSD で起動した後にこの作業を行ってください。
 
 ```bash
 git clone https://github.com/JetsonHacksNano/installSwapfile
@@ -215,20 +195,20 @@ cd installSwapfile
 reboot 
 ```
 
-#### Step 2b: Free up the serial port (optional. Only needed if you're using the Robohat MM1)
+#### Step 2b: シリアルポートを開放する (任意、RoboHat MM1 を使用する場合のみ)
 
 ```bash
 sudo usermod -aG dialout <your username>
 sudo systemctl disable nvgetty
 ```
 
-#### Step 3b: Setup python environment
+#### Step 3b: Python 環境を設定
 
-* Step 3b-1: Install tensorflow into the system python environment
+* Step 3b-1: システム Python 環境に tensorflow をインストール
 
-To install tensorflow and its dependencies for JP5.1.2 follow the NVIDIA instructions [here](https://docs.nvidia.com/deeplearning/frameworks/install-tf-jetson-platform/index.html#overview__section_z4r_vjd_v2c) 
+JP5.1.2 向け tensorflow とその依存関係のインストールは、NVIDIA の[こちらの手順](https://docs.nvidia.com/deeplearning/frameworks/install-tf-jetson-platform/index.html#overview__section_z4r_vjd_v2c)に従ってください。
 
-* Step 3b-2: Set up a venv
+* Step 3b-2: venv を設定
 
 ```bash
 python3 -m venv env --system-site-packages
@@ -236,18 +216,15 @@ echo "source ~/env/bin/activate" >> ~/.bashrc
 source ~/.bashrc
 ```
 
-* Step 3b-3: Install Donkey Car
+* Step 3b-3: Donkey Car をインストール
 
-There are two different installations possible. Very likely you will 
-want to do the user install. Then you will perform Step 2a. In case you want 
-to debug or edit the source code, you will need to do the more advanced 
-developer install. But you can do only one.
+インストール方法は 2 種類あります。通常はユーザーインストールを行い Step 2a を実行します。ソースコードをデバッグや編集したい場合は、より高度な開発者インストールを行いますが、両方を同時には実施できません。
 
-> _**Note**_: Only do Step 3b-4 or 3b-5 but not both!
+> _**注意**_: Step 3b-4 と 3b-5 のどちらか一方のみを実行してください。
 
-* Step 3b-4: User install
+* Step 3b-4: ユーザーインストール
 
-As you have activated the new `env` env already you type:
+`env` をすでに有効にした状態で次を実行します:
 
 ```bash
 pip install donkeycar[nano]
@@ -259,15 +236,13 @@ cd scikit-learn/
 python setup.py install
 sudo chmod 666 /dev/gpiochip*
 ```
-This will install the latest release.
+これで最新リリースがインストールされます。
 
-* Step 3b-5: Developer install
+* Step 3b-5: 開発者インストール
 
-Only do this if you have not done the user install in 3b-4. 
+3b-4 のユーザーインストールを行っていない場合のみ実施してください。
 
-Here you can choose which branch or tag you want to install, and you can 
-edit and/or debug the code, by downloading the source code from GitHub. Do this
-for getting the latest version from the `main` branch.
+インストールするブランチやタグを選択し、GitHub からソースコードを取得してコードの編集やデバッグを行うことができます。`main` ブランチの最新版を入手する場合はこちらを行います。
 
 ```bash
 mkdir projects
@@ -285,18 +260,16 @@ python setup.py install
 sudo chmod 666 /dev/gpiochip*
 ```
 
-* Step 3b-6: Check the TF and OpenCV installation
+* Step 3b-6: TensorFlow と OpenCV のインストールを確認
 
-Run python and verify that tensorflow is version 2.9 and trt is version 8.2.1.
-To get the tensorrt shared libraries to load correctly we must set the
-environment variable `LD_PRELOAD` as:
+Python を実行し、TensorFlow がバージョン 2.9、TensorRT がバージョン 8.2.1 であることを確認します。
+TensorRT の共有ライブラリを正しく読み込むため、次のように環境変数 `LD_PRELOAD` を設定します:
 
 ```bash
 export LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libnvinfer.so.8:/usr/lib/aarch64-linux-gnu/libgomp.so.1
 ```
 
-Note, this has to be done either every time you run donkeycar or tensorflow, or
-you put the above line into your `.bashrc`.
+この設定は donkeycar や tensorflow を実行するたびに行うか、`.bashrc` に上記の行を追加してください。
 
 ```bash
 python
@@ -308,22 +281,19 @@ python
 >>> print(cv2.getBuildInformation())
 ```
 
-#### Step 4b: (Optional) Install PyGame for USB camera
+#### Step 4b: (任意) USB カメラ用に PyGame をインストール
 
-If you plan to use a USB camera, you will also want to setup pygame:
+USB カメラを使用する予定がある場合は pygame をインストールします:
 
 ```bash
 pip install pygame
 ```
-Later on you can add the `CAMERA_TYPE="WEBCAM"` in myconfig.py.
+後で `myconfig.py` に `CAMERA_TYPE="WEBCAM"` を追加してください。
 
 
-## (Optional) Fix for pink tint on CSIC cameras
+## (任意) CSIC カメラのピンク色問題を修正する
 
-This applies to any installation you did above, either JP 4.6.X or 5.0.X.
-If you're using a CSIC camera you may have a pink tint on the images. As
-described [here](https://jonathantse.medium.com/fix-pink-tint-on-jetson-nano-wide-angle-camera-a8ce5fbd797f),
-this fix will remove it.
+上記のいずれのインストール (JP 4.6.X または 5.0.X) にも適用できます。CSIC カメラを使用している場合、画像がピンク色になることがあります。[こちら](https://jonathantse.medium.com/fix-pink-tint-on-jetson-nano-wide-angle-camera-a8ce5fbd797f) に記載されている方法でこの問題を解決できます。
 
 ```bash
 wget https://www.dropbox.com/s/u80hr1o8n9hqeaj/camera_overrides.isp
@@ -335,4 +305,4 @@ sudo chown root:root /var/nvidia/nvcam/settings/camera_overrides.isp
 
 ----
 
-## Next, [create your Donkeycar application](/guide/create_application).
+## 次に、[Donkeycar アプリケーションを作成](/guide/create_application)します。

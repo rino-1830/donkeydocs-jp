@@ -1,203 +1,199 @@
-# Roll Your Own Car
+# 自作カーを作ろう
 
 ![Crunch](../assets/build_hardware/Crunch.png)
 
-## The Quick and Dirty
+## 手っ取り早いポイント
 
-* Your car needs to be easy to control from a Raspberry Pi
-* Your car needs to be not too large, because it will be too heavy and dangerous (and expensive)
-* Your car needs to be not too small, because it needs to carry a certain minimum amount of equipment
-* Your car needs to meet minimum performance standards in power and control for the model to make sense for it
-* Your car needs to be smooth to control even at low speeds
+* Raspberry Pi から簡単に制御できること
+* 車体が大きすぎないこと。大きすぎると重く危険（そして高価）になる
+* 最低限の機材を載せられるよう、車体が小さすぎないこと
+* モデルが意味を持つだけの電力と制御性能の最低要件を満たすこと
+* 低速でも滑らかに制御できること
 
-This generally means:
+つまり、次のような条件を満たす必要があります。
 
-* Your car needs to have a speed controller for the motor (ESC) that takes a standard RC 3-pin control signal (RC PWM style)
-* Your car needs to have a steering servo that takes a standard RC 3-pin control signal (RC PWM style)
-* Your car needs to have a radio receiver that contains standard 100-mil (2.54 mm) pin headers for each of the ESC and the steering servo.
-* Your car needs to be between 1/18th scale (smallest end) and 1/8th scale (largest end) if you want to race in the DIYRobocars race.
-* Your car needs to either use a brushed motor, or a sensored brushless motor. Sensorless brushless motors are too rough at low speeds.  If you buy a car with a brushless motor included it is invariably a sensorless brushless motor and will need to be replaced along with the ESC.
+* モーター用のスピードコントローラー（ESC）が標準的なRC 3ピン制御信号（RC PWM方式）を受け付けること
+* ステアリング用サーボが標準的なRC 3ピン制御信号（RC PWM方式）を受け付けること
+* ESC とステアリングサーボそれぞれに接続できる標準の100ミル（2.54 mm）ピンヘッダーを備えた受信機があること
+* DIYRobocars レースに参加するなら、スケールが1/18〜1/8程度であること
+* モーターはブラシモーターかセンサー付きブラシレスモーターを使用すること。センサーなしブラシレスモーターは低速域で荒すぎます。ブラシレスモーター付きの車を購入した場合、ほとんどがセンサーなしブラシレスなので、ESC とともに交換する必要があります。
 
-Other options are perhaps possible, see the end of this document.
+他にも選択肢はあるかもしれません。詳細はこの文書の最後を参照してください。
 
-Many car builders end up looking at "integrated" RC hobby cars, because they
-are typically cheaper. However, the reason these are cheaper, is that they will
-integrate many parts of electronics and mechanics into a single package, which
-means that we can't intersect the appropriate signals to control the car with a
-Raspberry Pi. In fact, the expected signals may not even exist at all in an
-integrated car.
+多くの車両製作者は「一体型」のRCカーに目を向けがちです。
+それらが安いのは、
+多くの電子部品や機械部品を一つのパッケージに統合しており、
+そのため Raspberry Pi から車を制御するための適切な信号を途中で取り出せず、
+実際、そのような信号が一体型車には
+まったく存在しないこともあります。
 
-Here is an example of an integrated RX and ESC - typically these should be avoided:
+こちらは受信機とESCが一体となった例です。通常、これは避けるべきです。
 ![RX ESC example](../assets/ESC_RX.png)
 
-You also need to know some things about electronics, such as the difference
-between power rails and control signals, what the duration of a microsecond is,
-and how Volts, Amperes, Watts, Hours, Ohms, and other measurement units relate.
+さらに電子工作の知識も必要です。例えば、電源ラインと制御信号の違い、
+マイクロ秒の長さ、
+そしてボルト・アンペア・ワット・アワー・オームなどの単位がどう関係するかといった内容です。
 
-## Chassis build
+## シャーシの製作
 
-While there are lots of designs out there besides the Donkeycar, but two stand out and are worth mentioning specifically.
+Donkeycar 以外にも多くの設計がありますが、特に注目すべきものを2つ紹介します。
 
-### Chilicorn rail
+### Chilicorn レール
 
-This is a flexible mounting system developed by Markku.ai.
+これは Markku.ai が開発した柔軟なマウントシステムです。
 
 * [markku.ai](http://markku.ai)
 * [markku-ai github](https://github.com/markku-ai)
 
-### sCAD Files
+### sCAD ファイル
 
-Doug LaRue, a long time community member has extensive designs for making your own chassis in sCAD.  If you want to roll your own but are not comfortable with CAD this is a good place to start.  
+長年コミュニティに参加している Doug LaRue 氏は、sCAD で自分のシャーシを作るための詳細な設計を公開しています。自作したいが CAD に慣れていない場合は、ここから始めると良いでしょう。
 
 * [Basic Donkeycar](https://www.thingiverse.com/thing:2781404)
 * [1/28 scale car](https://www.thingiverse.com/thing:3428003)
 * [inverted donkey car](https://www.thingiverse.com/thing:2774944)
 
-## Servo Specifics
+## サーボの詳細
 
-An RC servo is used for controlling the steering wheels of the car. This servo
-typically expects around 4.8V to 6V input on the power wire (varies by car) and
-a PWM control signal on the signal wire. Typically, the three wires are colored
-black-red-white, or brown-red-yellow, where the dark wire (black/brown) is ground,
-and the center wire (red) is power, and the light wire (white/yellow) is control.
+RC サーボは車の前輪の舵を取るために使われます。
+このサーボの電源線には通常 4.8V〜6V（車種により異なる）が供給され、
+信号線には PWM 制御信号が送られます。一般的に3本の線は
+黒・赤・白、あるいは茶・赤・黄の組み合わせで、暗い色（黒/茶）が GND、
+中央の赤が電源、明るい色（白/黄）が制御信号です。
 
-The control signal is RC-style PWM, where one pulse is sent 60 times a second,
-and the width of this pulse controls how left/right the servo turns. When this
-pulse is 1500 microseconds, the servo is centered; when the pulse is 1000
-microseconds, the servo is turned all the way left (or right) and when the pulse
-is 2000 microseconds, the servo is turned all the way in the other direction.
-This is NOT the same kind of PWM that you would use to control the duty cycle of
-a motor, or the brightness of a LED.
+制御信号は RC 用 PWM で、1秒間に60回パルスが送られます。
+このパルス幅によってサーボの左右位置が決まります。
+パルスが1500マイクロ秒のときサーボは中央になり、1000
+マイクロ秒なら一方に全開、
+2000マイクロ秒なら反対側に全開となります。
+これはモーターのデューティ比や LED の明るさを制御する PWM とは
+別物である点に注意してください。
 
-The power for the servo typically comes from the motor ESC, which has a BEC
-(Battery Eliminator Circuit) built in.
+サーボへの電源は、通常モーターの ESC に内蔵された BEC
+（Battery Eliminator Circuit）から供給されます。
 
-## ESC Specifics
+## ESC の詳細
 
-The role of the ESC is to take a RC PWM control signal (pulse between 1000 and
-2000 microseconds) in, and use that to control the power to the motor so the
-motor spins with different amounts of power in forward or reverse. Again, 1500
-microseconds typically means "center" which for the motor means "dead stop."
+ESC の役割は、1000〜2000マイクロ秒の RC PWM 信号を受け取り、
+それに応じてモーターへの電力を制御し、
+前後進で異なる出力で回転させることです。1500
+マイクロ秒はモーターにとっての『停止』を意味します。
 
-The battery typically connects straight to the ESC using thicker wiring than the
-simple control signals, because the motor draws many more amps than the control.
-The ESC then connects on to the motor with equally thick power wiring. The
-standard Donkey motor and ESC probably have a peak current of about 12A; a
-1/8th scale RC car with powerful brushless motor can have a peak draw up to
-200A!
+バッテリーは通常、制御信号より太い配線で ESC に直接接続されます。
+モーターは制御信号よりはるかに大きな電流を流すためです。
+ESC からモーターへも同様に太い電源線がつながります。
+標準的な Donkey のモーターと ESC のピーク電流はおよそ12Aですが、
+1/8 スケールの強力なブラシレスモーター搭載車では、
+200A に達することもあります。
 
-Additionally, the ESC typically contains a linear or switching voltage converter
-that outputs the power needed to control the steering servo; this is typically
-somewhere in the 4.8V to 6V range. Most BECs built into ESCs will not deliver
-more than about 1A of current, so it is not typically possible to power both the
-steering servo and the Raspberry Pi from the BEC.
+さらに ESC には、線形またはスイッチング方式の電圧コンバーターが内蔵され、
+ステアリングサーボを動かすための電源を供給します。これは通常
+4.8V〜6V 程度で、ESC 内蔵 BEC の多くは
+1A 以上の電流を供給できません。そのためサーボと Raspberry Pi を
+同時に BEC から給電することは通常できません。
 
-## Receiver Specifics
+## 受信機の詳細
 
-If you buy a "kit car" that is listed as "needs a receiver," then you don't need
-to buy a receiver. The Raspberry Pi plus the PCA9685 board take the role of the
-receiver, outputting control signals to the car. Buying a "kit car" that comes
-with steering servo, motor, and ESC, but not with radio, is actually a great way
-to make sure that the car you build will have the right signalling, because any
-RC car with separate receiver will be designed for the appropriate PWM signals.
+「受信機が必要」と記載されたキットカーを購入した場合、受信機を別途買う必要はありません。
+Raspberry Pi と PCA9685 ボードが受信機の役割を果たし、
+車へ制御信号を出力します。ステアリングサーボ、モーター、ESC は備えるが
+無線だけ付属していないキットカーを購入するのは、
+適切な信号系を持った車を作る上で好都合です。
+受信機が独立している RC カーなら、適切な PWM 信号を想定して設計されているためです。
 
-If your car comes with a receiver, make sure it has the appropriate three-pin
-headers next to each other for steering servo and for ESC control. Some receivers
-may have additional three-pin headers for additional channels, which may be empty
-or may control fancy attachments like horns, lights, and so forth.
+もし受信機が付属している場合は、ステアリングサーボと ESC 用の3ピン端子が並んでいるか確認してください。
+受信機によっては、
+追加チャンネル用の3ピン端子が空いている場合や、
+ホーンやライトなどの付属装置を制御している場合もあります。
 
-There is a modification to the Donkey car which uses the RC radio to drive the
-car when collecting training data; this will give better control of the car than
-you typically get with a PlayStation controller, or cell phone. However, it also
-requires replacing the PCA9685 board with an external micro-controller, and
-changing the software of the Donkey to use it.
+学習用データを収集する際に RC 無線で車を操縦する改造方法もあります。
+これにより、PlayStation コントローラーやスマートフォンよりも精密に車を操作できます。
+ただしこの方法では、PCA9685 ボードを外部マイコンに置き換え、
+さらに Donkey のソフトウェアを
+そのマイコン用に変更する必要があります。
 
-Finally, some receivers can output, in addition to the PWM control signals, a
-serial data packet that contains the control signals. An example of such a receiver
-is the FS-i6B, which has 6 output channels for PWM signals, but can output 10
-channels of data at 115,200 bps as serial data, which you can read with an external
-micro-controller, or perhaps even with the Raspberry Pi (requires re-configuration
-of the Pi boot loader, and custom modifications to the donkey software.)
+最後に、PWM 制御信号に加えて
+制御内容をまとめたシリアルデータを出力できる受信機もあります。
+その例が FS-i6B で、PWM 信号用に6チャンネル出力を持つほか、
+115,200bps のシリアルデータとして10チャンネル分を出力可能です。
+これを外部マイコンや、ブートローダの設定変更とソフトのカスタマイズを行った
+Raspberry Pi で読み取ることもできます。
 
-## Batteries
+## バッテリー
 
-The Donkey comes with a Nickel Metal Hydride battery (NiMH) which is just enough
-to make its motor go, for a little bit of time (5-10 minutes) before needing a
-recharge. The specifications on this battery are 6 cells, 1100 mAh. Because
-NiHM batteries range from 0.9V to 1.35V with a "nominal" voltage of 1.2V, you can
-expect to see voltages in the 5.4V to 8.1V range.
+Donkey にはニッケル水素電池（NiMH）が付属しており、
+これはモーターを5〜10分ほど動かせる程度の容量しかありません。
+この電池は6セル構成で容量は1100mAhです。
+NiMH 電池の電圧は0.9〜1.35Vで、標準電圧は1.2Vなので、
+5.4〜8.1V 程度の電圧が得られると考えられます。
 
-NiHM batteries have medium energy capacity per weight and volume. Thus, you can
-improve the runtime and performance of the Magnet car by upgrading to a Lithium
-Polymer battery (LiPo.) Typically, you will get a 2 cell battery (2S) and
-Lithium batteries have 3.2V to 4.2V per cell, so you will see voltages in the
-6.4V to 8.4V range. Additionally, Lithium Polymer batteries generally have higher
-current capacity (amount of Amps the battery can deliver at one point while
-driving) as well as energy storage (number of Amp Hours the battery stores when
-fully charged) so it may also last longer.
+NiMH 電池は重量と体積あたりのエネルギー密度が中程度です。
+そのため Magnet 車の稼働時間や性能を向上させたい場合は、
+リチウムポリマー電池（LiPo）にアップグレードするとよいでしょう。通常は2セル（2S）を選びます。
+リチウム電池は1セルあたり3.2〜4.2Vなので、6.4〜8.4Vとなります。
+また LiPo は一般に、瞬間的に出せる電流量も、
+蓄えられる電力量（Ah）も大きいため、より長時間走行できるでしょう。
 
-Note that the amount of charge a battery can hold (how long it runs) is measured
-in Ampere-hours (Ah), or milli-Ampere-hours (mAh), whereas the amount of current a battery
-can instantaneously deliver while driving is measured simply in Amperes. But to
-make things more confusing, Amperes are often re-calculated in terms of multiples
-of the energy content, divided by one hour; this ratio is often called "C." Thus,
-a LiPo rated for 10C and 2000 mAh, can deliver 20 Amperes of current while
-driving. A NiHM rated for 5C and 1100 mAh can deliver 5.5 Amperes of current while
-driving. Batteries typically will deliver more than the C rating for very short
-amounts of time, but will heat up or build up internal resistance such that that
-is not something you can rely on for normal operation.
+バッテリーが保持できる電気量（稼働時間）は
+アンペア時（Ah）またはミリアンペア時（mAh）で表されます。
+一方、走行中に瞬間的に供給できる電流量は単にアンペアで示されます。
+さらにややこしいことに、このアンペア値を1時間あたりのエネルギー量で割った
+倍率として表したものを「C」と呼ぶことが多いです。
+例えば10C 2000mAh の LiPo なら20A を、
+5C 1100mAh の NiMH なら5.5A を出せます。
+バッテリーは瞬間的には公称 C 値以上を出せることもありますが、
+発熱や内部抵抗の上昇が起こるため、
+常用できるものではありません。
 
-For your custom car, be aware of the voltages needed for the ESC and motor of the
-car, and make sure to get a battery that matches in voltage. Smaller RC cars will
-come with NiMH for affordability, or 2S LiPo for power. Larger RC cars will use 3S
-(11.1V) or 4S (14.8V) or even 6S (22.2V) Lithium batteries, and thus need to have
-ESC and motor combinations to match.
+カスタムカーを作る際は、ESC とモーターが必要とする電圧を把握し、
+それに合った電圧のバッテリーを必ず選びましょう。小型の RC カーなら手頃な NiMH か 2S LiPo が、
+大型の RC カーなら 3S（11.1V）、4S（14.8V）、場合によっては 6S（22.2V）の LiPo が使われます。
+これに合わせて ESC とモーターの組み合わせも揃える必要があります。
 
-Finally, be sure to get a charger that matches your battery. If you have a LiPo
-battery, get a good Lithium battery charger, with a balancing plug that matches
-your battery. Never discharge a Lithium battery below 3.2V per cell; if you let it
-run dead, it will not want to be charged up to normal voltage again, and trying to
-do so may very well overheat the batter and light it on fire! See YouTube pictures
-of burning Teslas for what that can look like. Seriously, houses have burned down
-because people have tried to save $10 by re-charging a Lithium battery that they
-forgot to disconnect and it ran down too much. It's not worth it. Instead, get a
-battery alarm, that you plug into the battery balance connector, and it beeps when
-the battery has discharged so much that you should disconnect and recharge it.
+最後に、バッテリーに合った充電器を必ず入手してください。
+LiPo を使用する場合は、バランス端子を備えた信頼性の高いリチウム充電器を用意しましょう。
+LiPo を1セルあたり3.2V以下まで放電してはいけません。
+完全に放電させると正常な電圧まで充電できなくなり、
+無理に充電すれば電池が過熱し発火する可能性があります。
+燃えるテスラの映像を見ればその危険さが分かります。
+わずか10ドルを節約しようとして、放電し過ぎた LiPo を再充電しようとした結果、家が焼けた例もあります。
+そんな事態を避けるため、バッテリーのバランス端子に接続するアラームを用意し、
+電圧が下がりすぎたら警告音が鳴るようにして、
+すぐに切り離して充電するようにしてください。
 
-## Physical Constraints
+## 物理的な制約
 
-Adding the additional battery and electronics for self-driving to a toy car will
-add more load than the car was initially designed for. For a large, 1/8th scale
-car, this may not be much of a problem. For a small car, 1/18th scale or below, the
-additional weight and top-heaviness will cause the car to not react well to the
-steering output, which may cause the self-driving model to be less able to control
-the car.
+おもちゃの車に自動運転用のバッテリーや電子装置を追加すると、
+車が本来想定していたより重くなります。1/8スケール程度の大きさなら
+大きな問題にはならないかもしれませんが、1/18スケール以下の小さな車では、
+追加された重量や上部の重みで車の反応が鈍り、
+自動運転モデルがステアリングを制御しにくくなる場合があります。
+車体を制御しづらくなります。
 
-If you use a car that's not the standard Magnet, at a minimum, you will have to
-figure out how to mount all the hardware securely. Just piling things on and hoping
-wiring will keep it in place will not work for things that actually drive and turn.
-Finding good mounting points, and making your own "base plate" with measurements
-from the car you have, is likely to be necessary. You can build this base plate
-using 3D printing, laser cutting, CNC milling, or even just drilling into a thin
-piece of plywood, but getting a good fit to your chassis is important, so don't
-rush it or try to cut corners.
+標準の Magnet 以外の車を使用する場合は、最低でも
+すべてのハードウェアをしっかり固定する方法を考える必要があります。
+単に積み重ねて配線だけで固定しようとしても、実際に走行・旋回するものではうまくいきません。
+適切な取り付けポイントを見つけ、
+手持ちの車体の寸法を測って独自の「ベースプレート」を作る必要があるでしょう。
+このベースプレートは、3Dプリントやレーザーカット、CNC加工、あるいは薄い合板に穴を開ける方法でも構いませんが、
+シャーシにぴったり合わせることが重要なので、
+急いだり手を抜いたりしないようにしてください。
 
-Doug LaRue also built a [configurator](https://www.thingiverse.com/thing:2781404) in Thingiverse that enables people to easily make custom 3D printed plates.
+Doug LaRue は Thingiverse で[コンフィギュレーター](https://www.thingiverse.com/thing:2781404)も公開しており、簡単にカスタム3Dプリントプレートを作成できます。
 
-## Other Options
+## その他の選択肢
 
-Yes, you can make a self-driving car out of your 1/5th scale Nitro Dragster. You
-will just have to learn even more about the different bits and pieces of the
-solution, and figure out all the necessary integration yourself. The control
-signals for a Nitro car are the same, so this might not even be hard. However, the
-indoors arenas used for Donkey Racing Meetups do not allow fuel-burning cars, only
-electric.
+もちろん、1/5 スケールのニトロドラッグスターを自動運転化することも可能です。
+ただしその場合は、各種部品についてさらに理解を深め、必要な統合作業を自分で行わなければなりません。
+ニトロカーの制御信号自体は同じなので難しくはないかもしれませんが、
+Donkey Racing ミートアップが行われる屋内会場では燃料車が禁止されており、
+電動車のみ許可されている点に注意してください。
 
-Yes, you can make a self-driving car out of a cheap two-wheel chassis that uses
-a LM298 H-bridge with direct PWM control to "tank steer" two wheels. However, you
-will have to adapt the Donkey software to output the right steering controls, and
-you will additionally have to figure out how to wire up the H-bridge to the Pi in
-a way that makes sense to you; the PWM signals output by the PCA9685 board are the
-RC control kind, NOT the motor control kind! Also, most affordable two-wheel-drive
-robot chassis are not actually big enough, strong enough, and mechanically
-consistent enough to make for good Donkey Car candidates.
+また、安価な二輪シャーシに LM298 H ブリッジを用い、
+直接 PWM で2輪を戦車式に操舵する自動運転車を作ることも可能です。
+しかしこの場合、Donkey ソフトウェアを正しい操舵出力に合わせて改造し、
+さらに H ブリッジを Raspberry Pi にどのように配線するか自分で決める必要があります。
+PCA9685 ボードが出力する PWM 信号は RC 用であってモーター制御用ではないことを理解してください。
+また、手ごろな価格の二輪駆動ロボットシャーシの多くはサイズや強度、
+機械的な精度が足りず、
+ドンキーカーとして適していない場合がほとんどです.

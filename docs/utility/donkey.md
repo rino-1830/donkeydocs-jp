@@ -1,10 +1,10 @@
-# Donkey Command-line Utilities
+# Donkey コマンドラインユーティリティ
 
-The `donkey` command is created when you install the donkeycar Python package. This is a Python script that adds some important functionality. The operations here are vehicle independent, and should work on any hardware configuration.
+`donkey` コマンドは donkeycar の Python パッケージをインストールすると利用できるようになります。これは重要な機能を追加する Python スクリプトで、車両固有のものではなく、どのようなハードウェア構成でも動作します。
 
 ## Create Car
 
-This command creates a new dir which will contain the files needed to run and train your robot.
+このコマンドは、ロボットを動かしたり学習させたりするために必要なファイルを格納する新しいディレクトリを作成します。
 
 Usage:
 
@@ -12,18 +12,18 @@ Usage:
 donkey createcar --path <dir> [--overwrite] [--template <donkey2>]
 ```
 
-* This command may be run from any dir
-* Run on the host computer or the robot
-* It uses the `--path` as the destination dir to create. If `.py` files exist there, it will not overwrite them, unless the optional `--overwrite` is used.
-* `--overwrite` will update the files in the destination directory _except_ the `myconfig.py`. This is useful if you have update donkeycar and you want those changes reflected in you `mycar` folder but you don't want to have to recreate your `myconfig.py`.
-* The optional `--template` will specify the template file to start from. For a list of templates, see the `donkeycar/templates` dir. This source template will be copied over the `manage.py` for the user.  Common templates are:
+* このコマンドはどのディレクトリからでも実行できます。
+* ホストコンピュータ上でもロボット上でも実行可能です。
+* `--path` で指定した場所にディレクトリを作成します。既に `.py` ファイルが存在する場合は上書きしませんが、`--overwrite` オプションを付ければ上書きします。
+* `--overwrite` を付けると、`myconfig.py` 以外のファイルを目的のディレクトリに上書きします。donkeycar をアップデートした際に変更を `mycar` フォルダへ反映させたいが、`myconfig.py` は再生成したくない場合に便利です。
+* オプションの `--template` で開始時に使用するテンプレートファイルを指定できます。利用可能なテンプレートは `donkeycar/templates` ディレクトリを参照してください。このテンプレートはユーザーの `manage.py` としてコピーされます。よく使われるテンプレートは以下のとおりです：
     - `--template=complete`: the [Deep Learning Autopilot](/guide/train_autopilot/#deep-learning-autopilot)
     - `--template=path_follow`: the [Path Follow Autopilot](/guide/train_autopilot/#path-follow-autopilot)
     - `--template=cv_control`: the [Computer Vision Autopilot](/guide/train_autopilot/#computer-vision-autopilot)
 
 ## Find Car
 
-This command attempts to locate your car on the local network using nmap.
+このコマンドは nmap を使用してローカルネットワーク上の車両を探します。
 
 Usage:
 
@@ -31,9 +31,9 @@ Usage:
 donkey findcar
 ```
 
-* Run on the host computer
-* Prints the host computer IP address and the car IP address if found
-* Requires the nmap utility:
+* ホストコンピュータ上で実行します。
+* ホストコンピュータの IP アドレスおよび見つかった場合は車両の IP アドレスを表示します。
+* 実行には nmap ユーティリティが必要です：
 
 ```bash
 sudo apt install nmap
@@ -41,8 +41,8 @@ sudo apt install nmap
 
 ## Calibrate Car
 
-This command allows you to manually enter values to interactively set the PWM values and experiment with how your robot responds.
-See also [more information.](/guide/calibrate/)
+このコマンドでは、PWM 値を手動で入力しながらインタラクティブにロボットの反応を確認できます。
+詳しくは [こちら](/guide/calibrate/) も参照してください。
 
 Usage:
 
@@ -50,14 +50,14 @@ Usage:
 donkey calibrate --channel <0-15 channel id>
 ```
 
-* Run on the host computer
-* Opens the PWM channel specified by `--channel`
-* Type integer values to specify PWM values and hit enter
-* Hit `Ctrl + C` to exit
+* ホストコンピュータ上で実行します。
+* `--channel` で指定した PWM チャンネルを開きます。
+* 整数値を入力して PWM 値を指定し、Enter キーを押します。
+* 終了するには `Ctrl + C` を押します。
 
 ## Clean data in Tub
 
-Opens a web server to delete bad data from a tub.
+Tub から不要なデータを削除するための Web サーバーを開きます。
 
 Usage:
 
@@ -65,24 +65,23 @@ Usage:
 donkey tubclean <folder containing tubs>
 ```
 
-* Run on pi or host computer.
-* Opens the web server to delete bad data.
-* Hit `Ctrl + C` to exit
+* Raspberry Pi でもホストコンピュータでも実行できます。
+* 不良データを削除するための Web サーバーを開きます。
+* `Ctrl + C` で終了します。
 
 ## Train the model
-**Note:** _This section only applies to version >= 4.1_
-This command trains the model.  There is more detail in [Deep Learning Autopilot](/guide/deep_learning/train_autopilot/#train-a-model).
+**注:** _このセクションはバージョン 4.1 以降にのみ適用されます_
+このコマンドはモデルを学習させます。詳細は [Deep Learning Autopilot](/guide/deep_learning/train_autopilot/#train-a-model) を参照してください。
 
 ```bash
 donkey train --tub=<tub_path> [--config=<config.py>] [--model=<model path>] [--type=(linear|categorical|inferred)] [--transfer=<transfer model path>]
 ```
-* Uses the data from the `--tub` datastore.  You may specify more than one tub using a comma separated list `--tub=foo/data,bar/data` or just leaving spaces like `--tub foo/data bar/data`.
-* Uses the config file from the `--config` path (optionally)
-* Saves the model into path provided by `--model`. Auto-generates a model name if omitted. _**Note:**_ There was a regression in version 4.2 where you only had to provide the model name in the model argument, like `--model mypilot.h5`. This got resolved in version 4.2.1. Please update to that version.
-* Uses the model type `--type`
-* Allows to continue training a model given by `--transfer`
-* Supports filtering of records using a function defined in the variable 
-  `TRAIN_FILTER` in the `myconfig.py` file. For example: 
+* `--tub` で指定したデータストアのデータを使用します。複数の Tub を使う場合は `--tub=foo/data,bar/data` のようにカンマ区切りで指定するか、`--tub foo/data bar/data` とスペースで区切って指定できます。
+* `--config` で指定した設定ファイルを使用します（省略可能）。
+* `--model` で指定したパスにモデルを保存します。省略した場合は自動的にモデル名が生成されます。_**注意:**_ バージョン 4.2 では `--model mypilot.h5` のようにモデル名だけを指定できる回帰がありましたが、4.2.1 で修正されています。最新版を使用してください。
+* `--type` でモデルタイプを指定します。
+* `--transfer` を使うと既存モデルを引き継いで学習を継続できます。
+* `myconfig.py` の `TRAIN_FILTER` 変数に定義した関数でレコードをフィルタリングできます。例：
 
 ```bash
 def filter_record(record):
@@ -91,22 +90,22 @@ def filter_record(record):
 TRAIN_FILTER = filter_record
 ```
   
-  only uses records with positive throttle in training.
+  学習にはスロットル値が正のレコードのみを使用します。
  
-* In version 4.3.0 and later all 3.x models are supported again:
+* バージョン 4.3.0 以降ではすべての 3.x モデルが再びサポートされました：
 
 ```bash
 donkey train --tub=<tub_path> [--config=<config.py>] [--model=<model path>] [--type=(linear|categorical|inferred|rnn|imu|behavior|localizer|3d)] [--transfer=<transfer model path>]
 ```
 
-In addition, a Tflite model is automatically generated in training. This can be suppressed by setting `CREATE_TF_LITE = False` in your config. Also Tensorrt models can now be generated. To do so, you set `CREATE_TENSOR_RT = True`.
+さらに、トレーニング時には自動で Tflite モデルが生成されます。これを抑制したい場合は設定で `CREATE_TF_LITE = False` とします。また Tensorrt モデルも生成可能で、`CREATE_TENSOR_RT = True` を設定します。
 
-* Note: The `createcar` command still creates a `train.py` file for backward  compatibility, but it's not required for training.
+* 注意：`createcar` コマンドは後方互換のため `train.py` ファイルを生成しますが、学習には必須ではありません。
 
 
 ## Make Movie from Tub
 
-This command allows you to create a movie file from the images in a Tub.
+このコマンドは Tub 内の画像から動画を作成します。
 
 Usage:
 
@@ -114,39 +113,39 @@ Usage:
 donkey makemovie --tub=<tub_path> [--out=<tub_movie.mp4>] [--config=<config.py>] [--model=<model path>] [--model_type=(linear|categorical|inferred|rnn|imu|behavior|localizer|3d)] [--start=0] [--end=-1] [--scale=2] [--salient]
 ```
 
-* Run on the host computer or the robot
-* Uses the image records from `--tub` dir path given
-* Creates a movie given by `--out`. Codec is inferred from file extension. Default: `tub_movie.mp4`
-* Optional argument to specify a different `config.py` other than default: `config.py`
-* Optional model argument will load the keras model and display prediction as lines on the movie
-* model_type may optionally give a hint about what model type we are loading. Categorical is default.
-* optional `--salient` will overlay a visualization of which pixels excited the NN the most
-* optional `--start` and/or `--end` can specify a range of frame numbers to use.
-* scale will cause ouput image to be scaled by this amount
+* ホストコンピュータまたはロボット上で実行します。
+* 指定した `--tub` ディレクトリの画像レコードを使用します。
+* `--out` で指定した名前の動画を作成します。コーデックは拡張子から自動判断され、デフォルトは `tub_movie.mp4` です。
+* `config.py` 以外の設定ファイルを使用したい場合は `--config` で指定します。
+* `--model` を指定すると Keras モデルを読み込み、予測値を線として動画に重ねます。
+* `--model_type` で読み込むモデルタイプを指定できます。省略時は categorical です。
+* `--salient` を付けるとニューラルネットワークが特に反応したピクセルを可視化して重ねます。
+* `--start` と `--end` を指定すると使用するフレーム番号の範囲を限定できます。
+* `--scale` を指定すると出力画像をその倍率で拡大します。
 
 
 ## Plot Predictions
 
-This command allows you to plot steering and throttle against predictions coming from a trained model.
+このコマンドは、学習済みモデルの予測と実際のステアリングおよびスロットルを比較するグラフを表示します。
 
 Usage:
 
 ```bash
-donkey tubplot --tub=<tub_path> --model=<model_path> [--limit=<end_index>] [--type=<model_type>] 
+donkey tubplot --tub=<tub_path> --model=<model_path> [--limit=<end_index>] [--type=<model_type>]
 ```
 
-* This command may be run from `~/mycar` dir
-* Run on the host computer
-* Will show a pop-up window showing the plot of steering values in a given tub compared to NN predictions from the trained model
-* Optional `--limit=<end_index>` will use all records up to that index, defaults to 1000.
-* Optional `--type=<model_type>` will use a different model type than the `DEFAULT_MODEL_TYPE`
+* `~/mycar` ディレクトリから実行できます。
+* ホストコンピュータ上で実行します。
+* 指定した tub のステアリング値と学習済みモデルによる予測値を比較したグラフをポップアップ表示します。
+* `--limit=<end_index>` を指定すると、そのインデックスまでのレコードのみ使用します。デフォルトは 1000。
+* `--type=<model_type>` を指定すると `DEFAULT_MODEL_TYPE` とは異なるモデルタイプを使用できます。
 
 
 ## Tub Histogram
 
-**_Note_**: Requires version >= 4.3
+**_注_**: バージョン 4.3 以上が必要です。
 
-This command allows you to plot tub data (usually steering and throttle) as a histogram.
+このコマンドは tub のデータ（通常はステアリングとスロットル）をヒストグラムとして表示します。
 
 Usage:
 
@@ -154,16 +153,16 @@ Usage:
 donkey tubhist --tub=<tub_path> --record=<record_name> --out=<output_filename>
 ```
 
-* This command may be run from `~/mycar` dir
-* Run on the host computer
-* Will show a pop-up window showing the histogram plot of tub values in a given tub
-* Optional `--record=<record_name>` will only show the histogram of a certain data series, for example "user/throttle"
-* Optional `--out=<output_filename>` saves histogram under that name, otherwise the name is auto-generated from the tub path
+* `~/mycar` ディレクトリから実行できます。
+* ホストコンピュータ上で実行します。
+* 指定した tub のデータをヒストグラムとしてポップアップ表示します。
+* `--record=<record_name>` を指定すると特定のデータ系列のみを表示します。例: "user/throttle"
+* `--out=<output_filename>` を指定するとヒストグラムをその名前で保存し、省略時は tub パスから自動生成されます。
 
 
 ## Joystick Wizard
 
-This command line wizard will walk you through the steps to create a custom/customized controller.  
+このコマンドラインウィザードでは、独自のコントローラーを作成する手順を案内します。
 
 Usage:
 
@@ -171,14 +170,14 @@ Usage:
 donkey createjs
 ```
 
-* Run the command from your `~/mycar` dir
-* First make sure the OS can access your device. The utility `jstest` can be useful here. Installed via: `sudo apt install joystick`  You must pass this utility the path to your controller's device.  Typically this is `/dev/input/js0`  However, it if is not, you must find the correct device path and provide it to the utility.  You will need this for the createjs command as well.
-* Run the command `donkey createjs` and it will create a file named my_joystick.py in your `~/mycar` folder, next to your manage.py
-* Modify myconfig.py to set `CONTROLLER_TYPE="custom"` to use your my_joystick.py controller
+* `~/mycar` ディレクトリから実行します。
+* まず OS がデバイスへアクセスできることを確認します。`jstest` ユーティリティが便利です。`sudo apt install joystick` でインストールし、コントローラーのデバイスパスを指定して実行します。通常は `/dev/input/js0` ですが異なる場合は正しいパスを調べてください。`createjs` コマンドでも同じパスを指定します。
+* `donkey createjs` を実行すると `~/mycar` フォルダに manage.py と並んで `my_joystick.py` が作成されます。
+* myconfig.py の `CONTROLLER_TYPE="custom"` を設定して `my_joystick.py` を使用します。
 
 ## Visualize CNN filter activations
 
-Shows feature maps of the provided image for each filter in each of the convolutional layers in the model provided. Debugging tool to visualize how well feature extraction is performing.
+指定した画像に対してモデル内の各畳み込み層のフィルターごとの特徴マップを表示します。特徴抽出の状態を確認するためのデバッグ用ツールです。
 
 Usage:
 
@@ -186,7 +185,7 @@ Usage:
 donkey cnnactivations [--tub=<data_path>] [--model=<path to model>]
 ```
 
-This will open a figure for each `Conv2d` layer in the model.
+実行するとモデル内の各 `Conv2d` 層ごとにウィンドウが開きます。
 
 Example:
 
@@ -196,29 +195,25 @@ donkey cnnactivations --model models/model.h5 --image data/tub/1_cam-image_array
 
 ## Show Models database
 
-**_Note:_** This is only available in donkeycar >= 4.3.1.
+**_注:_** この機能は donkeycar 4.3.1 以降でのみ利用できます。
 
-This lists the models that are stored in `models/database.json`. Displays information
-like model type, model name, tubs used in training, transfer model and a comment if
-`--comment` was used in training or the model was trained in the UI.
+`models/database.json` に保存されているモデル一覧を表示します。モデルタイプ、モデル名、学習に使った Tub、転移学習元のモデル、学習時に `--comment` を付けた場合や UI で学習した場合のコメントなどの情報を表示します。
 
 
 Usage:
 
 ```bash
-donkey models [--group] 
+donkey models [--group]
 ```
 
-* Run from your `~/mycar` directory
-* If the optional `--group` flag is given, then the tub path info is combined into groups, 
-if different models used different tubs. Useful, if you use multiple tubs, and the models 
-have used different tub combinations because it compresses the output information. 
-* You need to install `pandas` first if you want to run it on the car 
+* `~/mycar` ディレクトリで実行します。
+* `--group` フラグを付けると、モデルごとに使用した tub の組み合わせが異なる場合でも、同じ組み合わせをひとまとめにして表示します。複数の tub を使っていてモデルごとに組み合わせが異なる場合に情報を整理できます。
+* 車上でこのコマンドを実行する場合は事前に `pandas` をインストールする必要があります。
 
 
 ## Donkey UI
 
-**Note:** _This section only applies to version >= 4.2.0_
+**注:** _このセクションはバージョン 4.2.0 以降にのみ適用されます_
 
 
 Usage:
@@ -227,15 +222,15 @@ Usage:
 donkey ui
 ```
 
-This opens a UI to analyse tub data supporting following features:
+このコマンドで tub データを解析するための UI が起動し、以下の機能を利用できます。
 
-* show selected data fields live as values and graphical bars
-* delete or un-delete records
-* try filters for data selection
-* plot data of selected data fields
+* 選択したデータフィールドの値をリアルタイムに表示し、バーグラフでも確認できます。
+* レコードの削除や復元ができます。
+* データ選択用のフィルターを試すことができます。
+* 選択したデータフィールドのグラフを描画します。
 
-The UI is an alternative to the web based `donkey tubclean`.
+この UI は Web ベースの `donkey tubclean` の代替となります。
 
 ![Tub UI](../assets/ui-tub-manager.png)
 
-A full documentation of the UI is [here.](./ui.md)
+UI の詳細なドキュメントは[こちら](./ui.md)にあります。

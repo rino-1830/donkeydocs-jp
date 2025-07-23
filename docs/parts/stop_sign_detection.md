@@ -1,43 +1,43 @@
 
-# Stop Sign Detection
+# 一時停止標識検出
 
-This part utilize a Google Coral accelerator and a pre-trained object detection model by Coral project to perform stop sign detection. If the donkey car see a stop sign, it will override the ```pilot/throttle``` to 0. In addition, a bounding box will be annotated to the ```cam/image_array```.
+このパーツは Google Coral アクセラレータと Coral プロジェクトによる事前学習済みの物体検出モデルを用いて、一時停止標識の検出を行います。ドンキー・カーが停止標識を認識すると、`pilot/throttle` を 0 に上書きします。さらに、`cam/image_array` にバウンディングボックスが描画されます。
 
 <video style="width:50%" controls>
   <source src="../../assets/parts/stop_sign_detection/demo.mp4" type="video/mp4">
-Your browser does not support the video tag.
+お使いのブラウザでは video タグがサポートされていません。
 </video>
 
 ---------------
 
-## Requirement
-To use this part, you must have:
+## 必要なもの
+このパーツを使用するには次のものが必要です。
 
 - [Google Coral USB Accelerator](https://coral.ai/products/accelerator/)
 
-## How to use
-Put the following lines in ```myconfig.py```
+## 使用方法
+以下の行を `myconfig.py` に追加してください。
 ```
 STOP_SIGN_DETECTOR = True
 STOP_SIGN_MIN_SCORE = 0.2
 STOP_SIGN_SHOW_BOUNDING_BOX = True
 ```
 
-### Install Edge TPU dependencies
+### Edge TPU 依存関係のインストール
 
-Follow the Coral Edge TPU [get started](https://coral.ai/docs/accelerator/get-started) instructions to install the necessary software.  For the RaspberryPi follow the Linux instructions.
+必要なソフトウェアは Coral Edge TPU の [はじめに](https://coral.ai/docs/accelerator/get-started) の手順に従ってインストールします。Raspberry Pi の場合も Linux 用の手順に従ってください。
 
-The stop sign detector uses a pre-compiled model, so we only need the inference runtime to make this work.  However, if you are creating your own model then you will need the [Edge TPU Compiler](https://coral.ai/docs/edgetpu/compiler/) on your RaspberryPi (or Linux laptop if you are training on that).  Note that the compiler only runs on Linux.
+停止標識検出器では事前コンパイル済みのモデルを使用するため、推論用ランタイムさえあれば動作します。ただし、自分でモデルを作成する場合は、Raspberry Pi（あるいはトレーニングを行う Linux ノートPC）に [Edge TPU Compiler](https://coral.ai/docs/edgetpu/compiler/) が必要です。コンパイラは Linux でのみ動作する点に注意してください。
 
-## Detecting other objects
+## 他の物体を検出する
 
-Since the pre-trained model are trained on coco, there are 80 objects that the model is able to detect. You can simply change the ```STOP_SIGN_CLASS_ID``` in ```stop_sign_detector.py``` to try.
+事前学習済みモデルは COCO データセットで学習されているため、80 種類の物体を検出できます。試してみたい場合は、`stop_sign_detector.py` 内の `STOP_SIGN_CLASS_ID` を変更するだけです。
 
-## Accuracy
+## 精度
 
-Since SSD [is not good at detecting small objects](https://medium.com/@jonathan_hui/what-do-we-learn-from-single-shot-object-detectors-ssd-yolo-fpn-focal-loss-3888677c5f4d), the accuracy of detecting the stop sign from far away may not be good. There are some ways that we can make enhancement but this is out of the scope of this part.
+SSD は[小さい物体の検出が得意ではありません](https://medium.com/@jonathan_hui/what-do-we-learn-from-single-shot-object-detectors-ssd-yolo-fpn-focal-loss-3888677c5f4d)ので、遠くの停止標識を検出する精度はあまり高くない可能性があります。改善の方法はいくつかありますが、本パーツの範囲外です。
 
-### Getting this to work without the Coral Edge TPU
-There is an [issue in the Github](https://github.com/autorope/donkeycar/issues/953) for making this work without the Coral Edge TPU.  If you get this working please submit a pull request.  
+### Coral Edge TPU なしで動作させる
+Coral Edge TPU を使わずに動作させるための [issue が GitHub にあります](https://github.com/autorope/donkeycar/issues/953)。うまく動作した場合はぜひプルリクエストをお送りください。
 
 

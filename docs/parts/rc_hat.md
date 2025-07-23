@@ -1,28 +1,28 @@
-# Donkeycar RC Hat
-![RC Hat for RaspberryPi](../assets/PXL_20250527_030121313-600x338.jpg "The Donkey RC Hat for RaspberryPi")
+# Donkeycar RCハット
+![RaspberryPi用RCハット](../assets/PXL_20250527_030121313-600x338.jpg "RaspberryPi用Donkey RCハット")
 
-If you started with a ready-to-run RC car, it probably came with a RC controller. Good news: you can use it with Donkeycar, using the RC controller for manual driving. You can also plug in the car's servo and motor controller directly into the RaspberryPi without the need for a PCA9685 motor/servo controller board. 
+走行準備が整ったRCカーを購入した場合、たいていRC送信機が付属しています。朗報として、その送信機を使ってDonkeycarで手動走行が可能です。またPCA9685モーター／サーボ制御基板を用いなくても、車両のサーボとモーターコントローラーを直接Raspberry Piに接続できます。
 
-Note that you will want your RC controller to be well trimmed prior to using it with the RC hat.  You want the throttle trim, steering trim and steering range to be well adjusted; see this [video](https://www.youtube.com/watch?v=NuVQz7FCAZk) for how to do that.
+RCハットを使用する前に送信機のトリムを調整しておきましょう。スロットルトリム、ステアリングトリム、ステアリング範囲を適切に合わせてください。調整方法は[こちらの動画](https://www.youtube.com/watch?v=NuVQz7FCAZk)を参照してください。
 
-To do so, you can either wire up it up manually as shown in [this tutorial](rc.md) (which works, but has a lot of fiddly wires that can fall off) or do it far more neatly with the Donkeycar RC hat, shown above, which handles all the wiring for you, along with including an OLED screen. 
+配線する方法は、[このチュートリアル](rc.md)で説明されているように手作業で行うこともできますが、多くの細い配線が外れやすくなります。上記のDonkeycar RCハットを使用すれば、OLEDスクリーンも搭載されており、配線をすべてきれいにまとめられます。
 
-![RC Hat for RaspberryPi](../assets/PXL_20250527_030450600-600x509.jpg)
+![RaspberryPi用RCハット](../assets/PXL_20250527_030450600-600x509.jpg)
 
-The Donkeycar RC hat can be purchased from the [Donkeycar Store](https://www.diyrobocars.com/shop/).
+Donkeycar RCハットは[Donkeycarストア](https://www.diyrobocars.com/shop/)で購入できます。
 
-If you're using a standard [wheel encoder](odometry.md), you can plug it into the "Encoder" pins. You can also power the RaspberryPi from this board if you have a 5V source with the "Optional 5v power in" pins
+標準的な[ホイールエンコーダ](odometry.md)を使う場合は「Encoder」ピンに接続してください。また「Optional 5v power in」ピンから5Vを入力すれば、この基板からRaspberry Piに給電することも可能です。
 
-Once you've plugged in all the cables, you can move to the software setup. Instructions for using it are [here](https://www.diyrobocars.com/2024/12/22/using-the-rc-hat/)
+すべてのケーブルを接続したらソフトウェアの設定に進みます。設定方法は[こちら](https://www.diyrobocars.com/2024/12/22/using-the-rc-hat/)を参照してください。
 
 
-### Troubleshooting
+### トラブルシューティング
 
-If you are unable to start the car, ensure that the `Adafruit_SSD1306` package is installed in your virtual environment. This should automatically be installed, if you are using a recent version of `donkeycar`.
+車が起動しない場合は、仮想環境に`Adafruit_SSD1306`パッケージがインストールされているか確認してください。新しいバージョンの`donkeycar`を使用していれば自動的にインストールされているはずです。
 
 ```bash
 pip install Adafruit_SSD1306
 ```
 
-## Encoder
-If you're using a standard [wheel encoder](odometry.md), you can plug it into the "Encoder" pins, then setup the encoder configuration in your myconfig.py to use the pin that is exposed by the RC hat's encoder header.
+## エンコーダ
+標準的な[ホイールエンコーダ](odometry.md)を使う場合は「Encoder」ピンに接続し、続いて`myconfig.py`でRCハットのエンコーダ用ヘッダーが公開しているピンを使用するよう設定してください。

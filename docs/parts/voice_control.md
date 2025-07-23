@@ -1,38 +1,38 @@
-# Alexa Support
-## Overview
-This part works together with a public Alexa skill that we have released. When
-you say a command, the Alexa skill will forward this command to a server hosted
-by us to temporarily store it. Your donkey car, installed with this part and
-with proper configuration, poll our server for any new command from Alexa.
+# Alexaサポート
+## 概要
+このパーツは、私たちが公開しているAlexaスキルと連携して動作します。
+あなたがコマンドを話すと、Alexaスキルは当社がホストするサーバーにこのコマンドを転送し、
+そこで一時的に保存します。このパーツを組み込み、正しく設定されたあなたのドンキー・カーは、
+Alexaからの新しいコマンドがないか、当社のサーバーをポーリングします。
 
-![Overview](../assets/parts/voice_control/alexa_overview.png)
-
-
-## Demo
-Click the image below to open the video on youtube
-
-[![Demo](https://img.youtube.com/vi/Q3kYmy0yjmc/0.jpg)](https://www.youtube.com/watch?v=Q3kYmy0yjmc)
-
-## Command Supported
-- Report device code
-- autopilot
-- slowdown
-- speedup
-- stop/manual
-
-## Get Started
-1. Use your `Alexa app`, navigate to Skills and Games
-2. Search for "Donkey Car Control"
-3. Enable the Skill
-4. Say "Open car control and report device code". Use a pencil to write down the
-   device code.
-5. Follow the instructions below to install the part in donkey car software
-   running on Pi
+![概要](../assets/parts/voice_control/alexa_overview.png)
 
 
-## Installation
-To install this part, add the following lines to `manage.py`, right after the
-`controller` setup. In manage.py:
+## デモ
+下の画像をクリックすると、YouTubeで動画が開きます。
+
+[![デモ](https://img.youtube.com/vi/Q3kYmy0yjmc/0.jpg)](https://www.youtube.com/watch?v=Q3kYmy0yjmc)
+
+## 対応コマンド
+- デバイスコードを報告
+- 自動運転
+- 減速
+- 加速
+- 停止/マニュアル
+
+## はじめに
+1. `Alexaアプリ`を使用し、「スキルとゲーム」に移動します。
+2. "Donkey Car Control" を検索します。
+3. このスキルを有効にします。
+4. "Open car control and report device code" と話します。表示されたデバイスコードを
+   メモしてください。
+5. 以下の手順に従って、Raspberry Pi上で動作するドンキー・カーソフトウェアに
+   このパーツをインストールします。
+
+
+## インストール
+このパーツをインストールするには、`manage.py`の`controller`設定直後に以下の行を追加します。
+manage.py での設定例:
 ```python
 
 if cfg.USE_ALEXA_CONTROL:
@@ -40,47 +40,47 @@ if cfg.USE_ALEXA_CONTROL:
   V.add(AlexaController(ctr, cfg), threaded=True)
 ```
 
-In myconfig.py, add the following parameters:
+myconfig.py に次の設定を追加します:
 ```python
 USE_ALEXA_CONTROL = True
 ALEXA_DEVICE_CODE = "123456"
 ```
 
-## Commands
-### Autopilot
-`Phrases: autopilot, start autopilot`
+## コマンド
+### 自動運転
+`フレーズ: autopilot, start autopilot`
 
-If you use this command, it is expected that the donkey car is started with a
-model. This command will set the variable `mode` of the controller to `local`.
+このコマンドを使用する場合、ドンキー・カーはモデルを読み込んで起動していることが前提です。
+このコマンドはコントローラーの変数 `mode` を `local` に設定します。
 
-### Slowdown / Speedup
-`Phrases: slow down, speed up, go faster, go slower`
+### 減速 / 加速
+`フレーズ: slow down, speed up, go faster, go slower`
 
-This command alters the `cfg.AI_THROTTLE_MULT` variable passed from the
-constructor. Each time this command is received, the `AI_THROTTLE_MULT` is
-increased/decreased by 0.05.
+このコマンドはコンストラクタから渡された `cfg.AI_THROTTLE_MULT` 変数を変更します。
+コマンドを受け取るたびに、`AI_THROTTLE_MULT` が
+0.05 ずつ増減します。
 
-Note: Since this command alters `AI_THROTTLE_MULT`, it won't speed up when you
-are running in `user` or `local_angle` mode.
+注意: このコマンドは `AI_THROTTLE_MULT` を変更するため、
+`user` または `local_angle` モードでは加速しません。
 
-### Stop/Manual
-`Phrases: human control, user mode, stop autopilot, manual`
+### 停止/マニュアル
+`フレーズ: human control, user mode, stop autopilot, manual`
 
-This command will set the variable `mode` of the controller to `user`
+このコマンドはコントローラーの変数 `mode` を `user` に設定します。
 
-### Report device code
-`Phrases: report device code, what is your device code, device code`
+### デバイスコードを報告
+`フレーズ: report device code, what is your device code, device code`
 
-Device code is a 6-digit numeric string derived by a hash function from your
-Alexa device ID. In order to distinguish commands from multiple Alexa devices,
-commands sent to our server would require an identifier, which is the device code.
-When donkey car poll for new command, the part will use this device code to poll
-for new commands.
+デバイスコードは、あなたのAlexaデバイスIDからハッシュ関数によって生成される6桁の数字です。
+複数のAlexaデバイスから送られるコマンドを区別するため、
+当社のサーバーへ送信されるコマンドには、このデバイスコードという識別子が必要です。
+ドンキー・カーが新しいコマンドをポーリングする際、このデバイスコードを使用して
+問い合わせを行います。
 
-## Backend
-Check here for our web service source code, it is open source too.
+## バックエンド
+こちらでWebサービスのソースコードを公開しています。
 
 [https://github.com/robocarstore/donkeycar-alexa-backend](https://github.com/robocarstore/donkeycar-alexa-backend)
 
-## Copyright
+## 著作権
 Copyright (c) 2020 [Robocar Ltd](https://robocarstore.com)

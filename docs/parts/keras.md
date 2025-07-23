@@ -1,210 +1,210 @@
-# Keras Parts
+# Kerasパーツ
 
-These parts encapsulate models defined using the [Keras](https://keras.io/) high level api. They are intended to be used with the Tensorflow backend. The parts are designed to use the trained artificial neural network to reproduce the steering and throttle given the image the camera sees. They are created by using the [train command](/guide/deep_learning/train_autopilot/).
+これらのパーツは[Keras](https://keras.io/)の高水準APIで定義されたモデルをカプセル化します。TensorFlowバックエンドで使用することを想定しています。このパーツはカメラ映像からステアリングとスロットルを再現するために、学習済みのニューラルネットワークを使用します。これは[trainコマンド](/guide/deep_learning/train_autopilot/)によって作成されます。
 
 ## Keras Categorical
 
-This model type is created with the `--type=categorical`. 
+このモデルタイプは`--type=categorical`で作成されます。
 
-The `KerasCategorical` pilot breaks the steering and throttle decisions into discreet angles and then uses categorical cross entropy to train the network to activate a single neuron for each steering and throttle choice. This can be interesting because we get the confidence value as a distribution over all choices.
-This uses the `dk.utils.linear_bin` and `dk.utils.linear_unbin` to transform continuous real numbers into a range of discreet values for training and runtime.
-The input and output are therefore bounded and must be chosen wisely to match the data.
-The default ranges work for the default setup. But cars which go faster may want to enable a higher throttle range. And cars with larger steering throw may want more bins.
+`KerasCategorical`パイロットは、ステアリングとスロットルの判断を離散角度に分割し、各選択に対して1つのニューロンが活性化するようカテゴリカルクロスエントロピーで学習します。これにより全ての選択に対する分布として信頼度が得られるのが興味深い点です。
+`dk.utils.linear_bin` と `dk.utils.linear_unbin` を用いて連続値を離散値の範囲へ変換します。
+そのため入力と出力には範囲があり、データに合うよう慎重に選定する必要があります。
+デフォルトのレンジは標準構成で機能しますが、より高速に走る車ではスロットルの上限を上げる必要があるかもしれません。またステアリング角が大きい車ではより多くのビンを使いたくなるでしょう。
 
-This model was the original model, with some modifications, when Donkey was first created. 
+Donkeyが最初に作られた際、いくつかの改良を加えて使用されたのがこのモデルです。
 
-#### Pros
+#### 長所
 
-* It has some benefits of showing the confidense as a distribution via the makemovie command. 
-* It has been very robust.
-* In some cases this model has learned thottle control better than other models.
-* Performs well in a limited compute environment like the Pi3.
+* `makemovie`コマンドによって信頼度を分布として表示できるという利点があります。
+* 非常に堅牢です。
+* 場合によっては他のモデルよりもスロットル制御をうまく学習しています。
+* Pi3のような計算資源の限られた環境でも良好に動作します。
 
-#### Cons
+#### 短所
 
-* Suffers from some arbitrary limitations of the chosen limits for number of categories, and thottle upper limit. 
+* カテゴリ数やスロットル上限を任意に設定する必要がある点で、いくつか制約を受けます。
 
-#### Model Summary
+#### モデル概要
 
-Input: Image
+入力: 画像
 
-Network: 5 Convolution layers followed by two dense layers before output
+ネットワーク: 5つの畳み込み層と2つの全結合層を経て出力されます
 
-Output: Two dense layers, 16, and 20 w categorical output
+出力: 2つの全結合層、16と20のカテゴリカル出力
 
 ## Keras Linear
 
-This model type is created with the `--type=linear`. 
+このモデルタイプは`--type=linear`で作成されます。
 
-The `KerasLinear` pilot uses one neuron to output a continous value via the 
-Keras Dense layer with linear activation. One each for steering and throttle.
-The output is not bounded.
+`KerasLinear`パイロットは1つのニューロンを用いて連続値を出力し
+KerasのDenseレイヤを線形活性で使用します。ステアリング用とスロットル用に1つずつあります。
+出力には範囲制限がありません。
 
-#### Pros
+#### 長所
 
-* Steers smoothly. 
-* It has been very robust.
-* Performs well in a limited compute environment like the Pi3.
-* No arbitrary limits to steering or throttle.
+* スムーズに操舵します。
+* 非常に堅牢です。
+* Pi3のような計算資源の限られた環境でも良好に動作します。
+* ステアリングやスロットルに任意の制限がありません。
 
-#### Cons
+#### 短所
 
-* May sometimes fail to learn throttle well.
+* スロットルの学習がうまくいかない場合があります。
 
-#### Model Summary
+#### モデル概要
 
-Input: Image
+入力: 画像
 
-Network: 5 Convolution layers followed by two dense layers before output
+ネットワーク: 5つの畳み込み層と2つの全結合層を経て出力されます
 
-Output: Two dense layers with one scalar output each with linear activation for steering and throttle.
+出力: ステアリングとスロットルそれぞれに線形活性化されたスカラーを1つずつ出力する2つの全結合層
 
 ## Keras IMU
 
-This model type is created with the `--type=imu`. 
+このモデルタイプは`--type=imu`で作成されます。
 
-The `KerasIMU` pilot is very similar to the `KerasLinear` model, except that it takes intertial measurment data in addition to images when learning to drive.
-This gives our stateless model some additional information about the motion of the vehicle.
+`KerasIMU`パイロットは`KerasLinear`モデルによく似ていますが、画像に加えて慣性計測データも使用して学習を行う点が異なります。
+これによりステートレスなモデルでも車両の動きに関する追加情報を得ることができます。
 
-This can be a good starting point example of ingesting more data into your models.
+より多くのデータをモデルに取り込む際の良い出発点となる例です。
 
-#### Pros
+#### 長所
 
-* Steers very smoothly. 
-* Performs well in a limited compute environment like the Pi3.
-* No arbitrary limits to steering or throttle.
-* Gives additional state to the model, which might help it come to a stop at a stop sign.
+* 非常に滑らかに操舵します。
+* Pi3のような計算資源の限られた環境でも良好に動作します。
+* ステアリングやスロットルに任意の制限がありません。
+* モデルに追加の状態を与えるため、停止標識で停止するなどの挙動に役立つ可能性があります。
 
-#### Cons
+#### 短所
 
-* Driving quality will suffer if noisy imu is used.
+* IMUにノイズが多いと走行品質が悪化します。
 
-#### Model Summary
+#### モデル概要
 
-Input: Image, vector of linear and angular acceleration
+入力: 画像、線加速度と角加速度のベクトル
 
-Network: 5 Convolution layers followed by two dense layers before output, Vector data is followed by 3 dense layers then concatenating before 2 dense control layers and after conv2d layers.
+ネットワーク: 5つの畳み込み層の後に2つの全結合層が続きます。ベクトルデータには3つの全結合層を通してからConv2D層の後で連結され、2つの制御用全結合層へ入ります。
 
-Output: Two dense layers with one scalar output each with linear activation for steering and throttle.
+出力: ステアリングとスロットルそれぞれに線形活性化されたスカラーを1つずつ出力する2つの全結合層
 
 ## Keras Latent
 
-This model type is created with the `--type=latent`. 
+このモデルタイプは`--type=latent`で作成されます。
 
-The `KerasLatent` pilot tries to force the model to learn a latent vector in addition to driving. This latent vector is a bottleneck in a CNN that then tries to reproduce the given input image and produce driving commands. These dual tasks could produce a model that learns to distill the driving scene and perhaps better abstract to a new track.
+`KerasLatent`パイロットは、運転に加えて潜在ベクトルを学習させることを試みます。この潜在ベクトルはCNNのボトルネックとなり、入力画像の再現と運転指令の出力を同時に行います。この二重のタスクにより、走行シーンを抽象化し新しいコースへの適応がより容易になる可能性があります。
 
-#### Pros
+#### 長所
 
-* Steers smoothly. 
-* Performs well in a limited compute environment like the Pi3.
-* No arbitrary limits to steering or throttle.
-* Image output a measure of what the model has deemed important in the scene.
+* 滑らかに操舵します。
+* Pi3のような計算資源の限られた環境でも良好に動作します。
+* ステアリングやスロットルに任意の制限がありません。
+* モデルがシーンで重要と判断した箇所を画像出力で確認できます。
 
-#### Cons
+#### 短所
 
-* Needs more testing to prove theory.
+* 理論を実証するためにはさらなるテストが必要です。
 
-#### Model Summary
+#### モデル概要
 
-Input: Image
+入力: 画像
 
-Network: 5 Convolution layers bottleneck to a 10x1x1 vector, followed by 6Conv2dTranspose layers before outputing to a image and 3 dense layers and driving controls.
+ネットワーク: 5つの畳み込み層から10×1×1ベクトルへのボトルネックを経て、6つのConv2dTranspose層で画像を再構成し、さらに3つの全結合層と運転制御へ接続します。
 
-Output: Two dense layers with one scalar output each with linear activation for steering and throttle. Outputs an image.
+出力: ステアリングとスロットルそれぞれに線形活性化されたスカラーを1つずつ出力する2つの全結合層。さらに画像を出力します。
 
 ## Keras RNN
 
-This model type is created with the `--type=rnn`. 
+このモデルタイプは`--type=rnn`で作成されます。
 
-The `KerasRNN` pilot uses a sequence of images to control driving rather than just a single frame. The number of images used is controlled by the `SEQUENCE_LENGTH` value in myconfig.py.
+`KerasRNN`パイロットは単一フレームではなく画像のシーケンスを使って運転を制御します。使用する画像数はmyconfig.pyの`SEQUENCE_LENGTH`値で決まります。
 
-#### Pros
+#### 長所
 
-* Steers very smoothly. 
-* Can train to a lower loss
+* 非常に滑らかに操舵します。
+* より低い損失まで学習できます。
 
-#### Cons
+#### 短所
 
-* Performs worse in a limited compute environment like the Pi3.
-* Takes longer to train.
+* Pi3のような計算資源の限られた環境では性能が劣ります。
+* 学習に時間がかかります。
 
-#### Model Summary
+#### モデル概要
 
-Input: Image
+入力: 画像
 
-Network: 4 time distributed Convolution layers, followed by 2 LSTM layers, 3 dense layers, and driving controls.
+ネットワーク: 時間分割された4つの畳み込み層、2つのLSTM層、3つの全結合層を経て運転制御を行います。
 
-Output: One dense layer with two scalar outputs for steering and throttle.
+出力: ステアリングとスロットルの2つのスカラーを出力する1つの全結合層。
 
 ## Keras 3D
 
-This model type is created with the `--type=3d`. 
+このモデルタイプは`--type=3d`で作成されます。
 
-The Keras3D_CNN pilot uses a sequence of images to control driving rather than just a single frame. The number of images used is controlled by the SEQUENCE_LENGTH value in myconfig.py. Instead of 2d convolutions like most other models, this uses a 3D convolution across layers.
+Keras3D_CNNパイロットは単一フレームではなく画像のシーケンスを使って運転を制御します。使用する画像数はmyconfig.pyのSEQUENCE_LENGTH値で決まり、他の多くのモデルが2D畳み込みを使うのに対し、本モデルは層を横断する3D畳み込みを使用します。
 
-#### Pros
+#### 長所
 
-* Steers very smoothly.
-* Can train to a lower loss.
+* 非常に滑らかに操舵します。
+* より低い損失まで学習できます。
 
-#### Cons
+#### 短所
 
-* Performs worse in a limited compute environment like the Pi3.
-* Takes longer to train.
+* Pi3のような計算資源の限られた環境では性能が劣ります。
+* 学習に時間がかかります。
 
-#### Model Summary
+#### モデル概要
 
-Input: Image
+入力: 画像
 
-Network: 4 3D Convolution layers each followed by max pooling, followed by 2 dense layers, and driving controls.
+ネットワーク: 4つの3D畳み込み層それぞれの後にプーリングを行い、続いて2つの全結合層を経て運転制御を行います。
 
-Output: One dense layer with two scalar outputs for steering and throttle.
+出力: ステアリングとスロットルの2つのスカラーを出力する1つの全結合層。
 
 ## Keras Behavior
 
-This model type is created with the `--type=behavior`. 
+このモデルタイプは`--type=behavior`で作成されます。
 
-The KerasBehavioral pilot takes an image and a vector as input. The vector is one hot activated vector of commands. This vector might be of length two and have two states, one for left lane driving and one for right lane driving. Then during training one element of the vector is activated while the desired behavior is demonstrated. This vector is defined in myconfig.py `BEHAVIOR_LIST`. `BEHAVIOR_LED_COLORS` must match the same length and can be useful when showing the current state. `TRAIN_BEHAVIORS` must be set to True.
+KerasBehavioralパイロットは画像とベクターを入力として受け取ります。ベクターはコマンドをワンホット化したものです。例えば長さ2で左車線走行と右車線走行の2状態を表すことができます。学習中は望ましい挙動を示す際にベクターの該当要素を活性化させます。このベクターはmyconfig.pyの`BEHAVIOR_LIST`で定義され、`BEHAVIOR_LED_COLORS`も同じ長さに設定しておくと現在の状態表示に役立ちます。`TRAIN_BEHAVIORS`はTrueに設定する必要があります。
 
-#### Pros 
+#### 長所
 
-* Can create a model which can perform multiple tasks 
+* 複数のタスクを実行できるモデルを作成可能です。
 
-#### Cons 
+#### 短所
 
-* Takes more effort to train.
+* 学習にはより多くの労力を要します。
 
-#### Model Summary
+#### モデル概要
 
-Input: Image, Behavior vector
+入力: 画像、行動ベクター
 
-Network: 5 Convolution layers, followed by 2 dense layers, and driving controls.
+ネットワーク: 5つの畳み込み層、2つの全結合層を経て運転制御を行います。
 
-Output: Categorical steering, throttle output similar to Categorical keras model.
+出力: Categorical kerasモデルと同様のカテゴリカルなステアリングとスロットルを出力します。
 
 ## Keras Localizer
 
-This model type is not created without some code modification. 
+このモデルタイプはコードを修正しない限り作成されません。
 
-The KerasLocalizer pilot is very similar to the Keras Linear model, except that it learns to output it's location as a category.
-This category is arbitrary, but has only been tested as a 0-9 range segment of the track. This requires that the driving data is marked up with a category label for location. This could supply some higher level logic with track location, for driving stategy, lap counting, or other.
+KerasLocalizerパイロットはKeras Linearモデルによく似ていますが、位置をカテゴリーとして出力する点が異なります。
+このカテゴリーは任意ですが、0～9の範囲でトラックを区切った場合のみテストされています。走行データには位置を示すカテゴリラベルが付与されている必要があります。これにより走行戦略や周回数カウントなど、より高レベルのロジックにトラック位置を提供できます。
 
-#### Pros
+#### 長所
 
-* Steers smoothly.
-* Performs well in a limited compute environment like the Pi3.
-* No arbitrary limits to steering or throttle.
-* Location to supply some higher level logic.
+* スムーズに操舵します。
+* Pi3のような計算資源の限られた環境でも良好に動作します。
+* ステアリングやスロットルに任意の制限がありません。
+* 位置情報を用いた高レベルロジックを提供できます。
 
-#### Cons
+#### 短所
 
-* May sometimes fail to learn throttle well.
+* スロットルの学習がうまくいかない場合があります。
 
-#### Model Summary
+#### モデル概要
 
-Input: Image
+入力: 画像
 
-Network: 5 Convolution layers followed by two dense layers before output
+ネットワーク: 5つの畳み込み層と2つの全結合層を経て出力されます
 
-Output: Two dense layers with one scalar output each with linear activation for steering and throttle. One categorical output for location.
+出力: ステアリングとスロットルそれぞれに線形活性化されたスカラーを1つずつ出力する2つの全結合層。さらに位置を示すカテゴリカル出力を持ちます。
 

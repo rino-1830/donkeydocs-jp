@@ -1,28 +1,28 @@
 ## Tub
 
-This is the standard donkey data store. The "data" folder is what we call a "tub"
+これは標準的な Donkey のデータストアです。`data` フォルダーは「tub」と呼ばれます。
 
-### Accepted Types
+### 受け入れられる型
 
-The following datatypes are supported. 
+以下のデータ型をサポートしています。
 
 * `str`
 * `int`
 * `float` / `np.float`
-* `image_array`s and `array`s (`np.ndarray`)
+* `image_array` や `array` (`np.ndarray`)
 * `image` (jpeg / png)
 
-The `Tub` is an append only format, that is optimized for reads (to speed up training models). 
-It maintains indexes for records, and uses memory mapped files.
+`Tub` は追加のみ可能な形式で、学習モデルの高速化のために読み出しに最適化されています。
+レコードのインデックスを保持し、メモリマップドファイルを使用します。
 
-The `Tub` exposes an `Iterator` that can be used to read records. These iterators can be further used by `Pipeline`s to do arbitrary transformations of data prior to training (for data augumentation).
+`Tub` はレコードを読み出すための `Iterator` を提供します。これらのイテレータは `Pipeline` と組み合わせて、学習前にデータ拡張など任意の変換を行うことができます。
 
-### Example
+### 例
 
 ```python
 from donkeycar.parts.tub_v2 import Tub
 
-# Here we define records that have a single `input` of type `int`.
+# ここでは単一の `input` 型 `int` を持つレコードを定義します。
 inputs = ['input']
 types = ['int']
 tub = Tub(path, inputs, types)

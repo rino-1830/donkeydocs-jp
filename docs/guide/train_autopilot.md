@@ -1,44 +1,44 @@
-# Create an Autopilot
+# 自動運転を作成する
 
-Donkey supports three kinds of autopilots; a deep-learning autopilot, a path follow autopilot and a computer vision autopilot.  
+Donkey では 3 種類の自動運転方式をサポートしています。ディープラーニング方式、パスフォロー方式、コンピュータビジョン方式です。
 
-If you followed along with the [Create Donkeycar App](/guide/create_application) section, then you know that you choose which template to use when you create your **mycar** application folder using the **createcar** command.
+[Donkeycar アプリの作成](/guide/create_application) セクションで学んだように、`createcar` コマンドで **mycar** フォルダーを作成する際、使用するテンプレートを選択します。
 
-This section will talk about what the templates are for, then we can get onto training an autopilot.
+この章ではテンプレートの目的を説明し、その後に自動運転の学習方法を解説します。
 
-## Deep Learning Autopilot
-The deep learning autopilot uses a single forward facing camera and a convolutional neural network to implement an autopilot using a technique known as Behavioral Cloning (also known as Imitation Learning).  The technique is called Behavioral Cloning because the goal is to create an autopilot that imitates that actions of a human.  This is the first kind of autopilot that Donkeycar supported and what it is best known for.  For driving a car the overall process looks like this;
+## ディープラーニング自動運転
+前方カメラ 1 台と畳み込みニューラルネットワークを用い、模倣学習（Behavioral Cloning）によって自動運転を実現します。人間の運転動作を模倣することからこの名が付いています。Donkeycar が最初に対応した方式で、以下のような流れで進めます。
 
-- A **human drives** the car to **gather data**. As the you manually drive around the track Donkeycar records data 20 times per second.  Each piece of data has 3 components; a camera image, the throttle value and the steering values that were in place at the time the image was taken. We want about 10,000 of these.
-- **Clean the data**.  We don't want driving mistakes in the data; things like driving off the track or crashing into an obstacle.  Alternatively, we can delete such data while we are driving so it never get's into the data set.
-- Use the collected data to calculate (**train**) **a Convolutional Neural Network**.
-- Use the trained CNN to **infer the throttle and steering values** given an image.  So when we are in autopilot mode, we take an image, give it to the CNN, get the throttle and steering and put those into the cars hardware.  We **do that 20 times per second** and now we are driving!
+- **人が運転してデータを収集**します。手動運転中は毎秒 20 回、画像・スロットル値・ステアリング値を記録し、およそ 1 万件集めます。
+- **データを整理**します。コースアウトや衝突などの誤った走行データは削除します。走行中に削除しても構いません。
+- 収集したデータで **畳み込みニューラルネットワークを学習**します。
+- 学習済みモデルを使い、画像から **スロットル値とステアリング値を推論**します。自動運転モードでは毎秒 20 回これを行い、車を動かします。
 
-Because the deep learning autopilot depends on a camera image, lighting conditions are important.  The deep learning template is great for an indoor track where lighting conditions and the details of the room can be controlled, but it can be more difficult to get working outside where lighting conditions are variable and things change in the environment.  
+カメラ映像を利用するため照明条件が重要です。屋内のように環境を制御しやすい場所では扱いやすいですが、屋外では光の変化が大きく、調整が難しくなります。
 
-**Aside:** The Donkeycar approach to deep learning driving was inspired by an Nvidia research paper entitled [End to End Learning for Self-Driving Cars](https://arxiv.org/pdf/1604.07316v1.pdf).
-
-
-[Train a deep learning autopilot](./deep_learning/train_autopilot.md)
+**補足:** Donkeycar のディープラーニング走行は、Nvidia の論文 [End to End Learning for Self-Driving Cars](https://arxiv.org/pdf/1604.07316v1.pdf) を参考にしています。
 
 
-## Path Follow Autopilot (using GPS, wheel encoders, etc)
-The path follow template is an alternative to the deep learning template.  Outside we have access to GPS; the path follow template allows you to record a path using a GPS receiver and then configure an autopilot that can follow that path.  The overall process looks like this;
+[ディープラーニング自動運転の学習手順](./deep_learning/train_autopilot.md)
 
-- A **human drives** the car to **gather data**. The data is aquired from a GPS receiver and represents and (x,y) position in meters.  Each (x,y) position is called a waypoint.  The user will drive the course once to collect waypoints.  The complete set of waypoints is called a path.
-- The autopilot gets the car's current (x,y) position from the GPS receiver, then finds the two closest points in the path and adjusts the car's steering to drive towards the path.  It does this 20 times per second and now we are driving!  
 
-There is a lot more detail on this in the next section.
+## パスフォロー自動運転（GPS やエンコーダを利用）
+パスフォローテンプレートはディープラーニング方式の代替です。屋外では GPS が利用できるため、GPS 受信機で経路を記録し、それに沿って走行する自動運転を構成できます。流れは次の通りです。
 
-[Train a path follow autopilot](./path_follow/path_follow.md)
+- **人が運転してデータを収集**します。GPS から得られる (x,y) 座標をウェイポイントとして記録し、コースを一周してパスを作成します。
+- 自動運転では GPS で得た現在位置から最も近い 2 点のウェイポイントを探し、パスに沿うようステアリングを調整します。これを毎秒 20 回実行します。
 
-## Computer Vision Autopilot
-The computer vision autopilot uses traditional computer vision techniques, such as color space conversion and edge detection algorithms, to identify features in the camera image and turn those into steering and throttle values.  This autopilot has an advantage over the other autopilots in that it does not require manual driving to gather data.  Instead you will choose or write a computer vision algorithm and modify the algorithm parameters to suit the track.  This autopilot is specifically designed to make it easy to write your own algorithm using the OpenCV library and the many Donkeycar-provided primitives.
+この内容の詳細は次のセクションで説明します。
 
-- A **human** chooses the cv algorithm and modifies parameters until it delivers accurate and reliable steering and throttle values. 
-- A **human** places the car on the track and changes from user to autopilot mode.
-- When in autopilot mode, an image from the camera is passed to the cv algorithm which interprets it and outputs steering and throttle values.  It does this 20 times per second and now we are driving!
+[パスフォロー自動運転の学習手順](./path_follow/path_follow.md)
 
-There is a lot more detail in the next section about the build-in algorithm and how to write your own algorithm.
+## コンピュータビジョン自動運転
+色空間変換やエッジ検出などの従来手法を用いて画像から特徴を抽出し、ステアリングとスロットル値を算出します。事前のデータ収集が不要で、アルゴリズムやパラメータを変更してコースに合わせられる点が利点です。OpenCV ライブラリと Donkeycar が提供する部品を使い、独自アルゴリズムを容易に記述できるようになっています。
 
-[Computer Vision Autopilot](./computer_vision/computer_vision.md)
+- **人** が CV アルゴリズムを選択し、ステアリングとスロットルの値が安定するようパラメータを調整します。
+- **人** が車をコースに置き、ユーザーモードから自動運転モードに切り替えます。
+- 自動運転モードではカメラ画像をアルゴリズムに渡し、ステアリングとスロットル値を生成します。これを毎秒 20 回繰り返します。
+
+組み込みアルゴリズムの詳細や自作アルゴリズムの作成方法は次のセクションで説明します。
+
+[コンピュータビジョン自動運転の詳細](./computer_vision/computer_vision.md)

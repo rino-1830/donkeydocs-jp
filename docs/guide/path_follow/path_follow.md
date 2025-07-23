@@ -1,16 +1,16 @@
-# The Path Follow Template
+# パスフォローテンプレート
 
-The path follow template is an alternative to the deep learning template.  The deep learning template is great for an indoor track where lighting conditions and the details of the room can be controlled, but it can be more difficult to get working outside where lighting conditions are variable and things change in the environment.  Outside we have access to GPS; the path_follow template allows you to record a path using a GPS receiver and then configure an autopilot that can follow that path.
+パスフォローテンプレートはディープラーニングテンプレートの代替です。ディープラーニングテンプレートは屋内トラックのように照明条件や部屋の詳細を制御できる環境では優れていますが、照明条件が変化し環境が変わる屋外で動作させるのはより困難です。屋外ではGPSを利用できるため、`path_follow` テンプレートではGPSレシーバーで経路を記録し、その経路をたどる自動操縦を設定できます。
 
-GPS positions are read from the GPS receiver over a serial port.  We read these as NMEA sentences; a line oriented protocol that most GPS receivers use by default.  The NMEA sentences include positions as latitude and longitude; we then convert those to a local coordinate system in meters.  
+GPSの位置はGPSレシーバーからシリアルポート経由で読み取ります。これらはNMEAセンテンスとして読み込みます。NMEAは多くのGPSレシーバーがデフォルトで使用する行指向プロトコルです。NMEAセンテンスには緯度と経度の位置情報が含まれており、それらをメートル単位のローカル座標系に変換します。
 
-When we record a path, we save each (x, y) coordinate pair (each waypoint) we get from the GPS receiver into an array in memory.  We can then save that to a CSV file which has one (x, y) coordinate pair per line.  Later, we can read this csv file back into memory.  Once we have our waypoints in memory, we can enter autopilot mode and follow those points.  
+経路を記録する際には、GPSレシーバーから取得した各 (x, y) 座標ペア（各ウェイポイント）をメモリ上の配列に保存します。その後、1行に1組の (x, y) 座標ペアがあるCSVファイルに保存できます。後でこのCSVファイルをメモリに読み込めば、ウェイポイントを読み込んだ状態で自動操縦モードに入り、そのポイント群をたどることができます。
 
-Similar to the deep learning template, we have 3 modes of operation:
+ディープラーニングテンプレートと同様に、動作モードは3種類あります。
 
-- In **User** driving mode you manually control the car.   Again similar to the deep learning template, you can use the web controller and/or a game controller to steer, apply throttle and choose actions using buttons.  
-- In **Autosteering** mode the car will try to follow the set of recorded waypoints, but it will only control steering; you still control throttle manually.  This is a good mode to start in when following the path as you can safely stop the car by letting off the throttle.  It's also helpful in determining the maximum speed at which the car can reliably follow the waypoints.
-- In **Autopilot** mode the car will try to follow the set of recorded waypoints by controlling both steering and throttle.  This is fully autonomous.  To stop the car use your controller to end User mode.
+- **User** ドライブモードでは車を手動で操作します。ディープラーニングテンプレートと同様に、ウェブコントローラやゲームコントローラを使ってステアリングやスロットルを操作し、ボタンでアクションを選択できます。
+- **Autosteering** モードでは、記録されたウェイポイント群に沿って車がステアリングのみを制御して走行します。スロットルは手動操作のままです。経路追従を始めるときに安全に止められるので、このモードから始めると良いでしょう。また、車がウェイポイントを確実にたどれる最高速度を知るのにも役立ちます。
+- **Autopilot** モードでは、記録されたウェイポイント群に沿ってステアリングとスロットルの両方を制御しながら走行します。完全に自律走行です。停止するには、コントローラでUserモードを終了します。
 
 <div class="video-container" align="center">
     <iframe class="video" width="560" height="315" src="https://www.youtube.com/embed/tjWmrCIKgnE" allowfullscreen></iframe>
@@ -18,82 +18,81 @@ Similar to the deep learning template, we have 3 modes of operation:
   </div><br/>
 
 
-Before we can record or follow a path, we need to create an application and do a little configuration.
+経路を記録したり追従したりする前に、アプリケーションを作成して少し設定を行う必要があります。
 
-## Create a path follow Application
+## Path Follow アプリケーションの作成
 
-You can create a path follow application similarly to the how we create a deep learning application; we just tell it to use the **path_follow** template instead of the default template.  First, make sure your donkeycar python environment is activated, then use the **createcar** command to create your application folder.
+深層学習アプリケーションを作成するときと同様に、`createcar` コマンドで **path_follow** テンプレートを指定してアプリケーションを作成できます。まず、donkeycar のPython環境が有効になっていることを確認し、**createcar** コマンドでアプリケーションフォルダを作成します。
 
 ```bash
 donkey createcar --template=path_follow --path=~/mycar
 ```
 
-When updating to a new version of donkeycar, you will want to refresh your application folder.  You can do this with the same command, but add `--overwrite` so that it does not erase your **myconfig.py** file.
+Donkeycarを新しいバージョンに更新する際は、同じコマンドに `--overwrite` を追加してアプリケーションフォルダを更新します。これにより **myconfig.py** ファイルは削除されません。
 
 ```bash
 donkey createcar --template=path_follow --path=~/mycar --overwrite
 ```
 
-## Configuration
+## 設定
 
-Again, like the deep learning template, we can change default configuration values by editing the **myconfig.py** file in the **mycar** folder you created with the `createcar` command.
+ディープラーニングテンプレートと同様に、`createcar` コマンドで作成した **mycar** フォルダ内の **myconfig.py** を編集することでデフォルト設定値を変更できます。
 
-You will need to calibrate and configure the drivetrain as described in [**Calibrate your Car**](/guide/calibrate/).  If you have a game controller paired to your car, then you will want to configure it as described in [Controllers](/parts/controllers).
+[**Calibrate your Car**](/guide/calibrate/) の説明に従ってドライブトレインをキャリブレーションおよび設定する必要があります。ゲームコントローラを車にペアリングしている場合は、[Controllers](/parts/controllers) の説明に従って設定してください。
 
-### Configuring GPS
-In **myconfig.py**, search for the 'gps' section.  Make sure `HAVE_GPS = True` is set.  You will need to determine the serial port that the GPS receiver is connected to and the baud rate to use.  If possible, set your serial port to `115200` baud to get good throughput.
+### GPSの設定
+`myconfig.py` 内で 'gps' セクションを探します。`HAVE_GPS = True` が設定されていることを確認してください。GPSレシーバーが接続されているシリアルポートと使用するボーレートを決定する必要があります。可能であればシリアルポートのボーレートを `115200` に設定して、良好なスループットを得てください。
 
 - `GPS_SERIAL = <serialport>`
-    - The `<serialport>` value differs depending on how you have your gps receiver connected (by usb or gpio serial) and by SBC (RPi vs Nano)
-    - You can list all potential serial ports; `ls /dev/tty*`.  Note that most of these are actually not usable.
-    - If connecting to the Nano USB port, use `/dev/ttyUSB0`.
-    - If connecting to the RPi USB port, use `/dev/ttyACM01`.
-    - If connecting to the default RPi gpio serial port (board pins 8&10) use `/dev/ttyAMA0`.
-    - If connecting to the default Jetson Nano gpio serial port (board pins 8&10) use `/dev/ttyTHS1`.
+    - `<serialport>` の値は、GPSレシーバーをUSB経由で接続しているかGPIOシリアルで接続しているか、またSBC（RPiかNano）によって異なります。
+    - 利用可能なシリアルポートの一覧は `ls /dev/tty*` で確認できます。ただし、多くは実際には使用できません。
+    - NanoのUSBポートに接続する場合は `/dev/ttyUSB0` を使用します。
+    - RPiのUSBポートに接続する場合は `/dev/ttyACM01` を使用します。
+    - RPiの標準GPIOシリアルポート（基板ピン8と10）に接続する場合は `/dev/ttyAMA0` を使用します。
+    - Jetson Nanoの標準GPIOシリアルポート（基板ピン8と10）に接続する場合は `/dev/ttyTHS1` を使用します。
 - `GPS_SERIAL_BAUDRATE = <baudrate>`
-    - The `<baudrate>` value differs depending on your gps and if you have changed it using U-Center.  
-    - when connecting between the SBC's USB port and the usb port on the gps receiver the baud rate is detected by USB, so choose 115200 so you have a fast connection.
-    - The ZED-F9P's other serial ports default to 38400 baud.
-    - Cheap gps receivers generally default to 9600 baud.  
-    - See this [video](https://youtu.be/GLtEtxPWoIk) on how to use UBlox' U-Center to change the baudrate of the uarts on a UBlox GPS receiver.
+    - `<baudrate>` の値はGPSの種類やU-Centerで変更したかどうかによって異なります。
+    - SBCのUSBポートとGPSレシーバーのUSBポートを接続する場合、ボーレートはUSBが自動検出するので115200を選んで高速接続にします。
+    - ZED-F9Pの他のシリアルポートはデフォルトで38400ボーです。
+    - 安価なGPSレシーバーは一般的に9600ボーがデフォルトです。
+    - UBloxのU-CenterでGPSレシーバーのUARTボーレートを変更する方法は[この動画](https://youtu.be/GLtEtxPWoIk)を参照してください。
 
-Note that both the RPi and Jetson Nano may be using the default gpio serial port as a login console (you can connect up a serial 'terminal' and login).  If using the gpio serial ports you need to disable the login console.  See [Writing to a serial port](https://ezward.github.io/gps/#writing-to-the-serial-port) for details.
+RPiとJetson Nanoのどちらも、デフォルトのGPIOシリアルポートがログインコンソールとして使用されている場合があります（シリアル“ターミナル”を接続してログインできます）。GPIOシリアルポートを使用する場合はログインコンソールを無効にする必要があります。詳細は[Writing to a serial port](https://ezward.github.io/gps/#writing-to-the-serial-port) を参照してください。
 
-Those two settings are the only ones related to the GPS receiver that need to be set in **myconfig.py**.  Most GPS Receivers can also be directly configured to change things like the baudrate of the serial ports or how fast position estimates are sent to the computer.  Ideally the rate of position estimates should be as fast as possible, but different receivers have different upper limits and there is some tradeoff between the rate of updates and how accurate they are.  U-Blox based GPS receivers can be configured with [U-Blox U-Center](https://www.u-blox.com/en/product/u-center) software; see the U-Center section of  [Donkeycar Meets RTK GPS](https://ezward.github.io/gps/#u-center) for some details.  Other chipset manufacturers have their own software; you will have to check your GPS receiver to determine the manufacturer.  If you are using RTK high resolution GPS then you need to do a lot more configuration and wiring outside of Donkeycar.  See [Donkeycar meets RTK GPS](https://ezward.github.io/gps/#donkeycar-meets-rtk-gps) for a detailed discussion of one way to setup an RTK GPS receiver for use with Donkeycar.  Here is a related [video](https://youtu.be/q4T7kTaExTs?t=970) that goes over the same information.
+これら2つの設定だけが **myconfig.py** でGPSレシーバーに関連して設定する必要のある項目です。多くのGPSレシーバーはシリアルポートのボーレートや位置情報の送信頻度などを直接設定することもできます。理想的には位置情報の更新頻度はできるだけ速い方が良いですが、受信機によって上限が異なり、更新頻度と精度の間にはトレードオフがあります。U-Blox製のGPSレシーバーは [U-Blox U-Center](https://www.u-blox.com/en/product/u-center) ソフトウェアで設定できます。詳細は [Donkeycar Meets RTK GPS](https://ezward.github.io/gps/#u-center) のU-Centerセクションを参照してください。他のチップセットメーカーにもそれぞれのソフトウェアがありますので、使用しているGPSレシーバーのメーカーを確認してください。RTK高精度GPSを使用する場合は、Donkeycarの外でさらに多くの設定や配線が必要です。設定方法の一例については [Donkeycar meets RTK GPS](https://ezward.github.io/gps/#donkeycar-meets-rtk-gps) を参照してください。関連する[動画](https://youtu.be/q4T7kTaExTs?t=970)もあります。
 
-### Configuring Encoders and Kinematics
-An encoder setup can be used to estimate not only the vehicles' speed, but its position; that then allows encoders to be used with the [Path Follow](/guide/path_follow/path_follow) template in place of GPS, so it can be used indoors. This requires a few configurations to be set in the `myconfig.py`; basically measurements of the wheel diameter, the length of the wheel base and the length of the axle.  See [Odometer Software Setup](/parts/odometry#software-setup) for details.
+### エンコーダーと運動学の設定
+エンコーダーを使うと車両の速度だけでなく位置も推定できるため、屋内でもGPSの代わりに[Path Follow](/guide/path_follow/path_follow) テンプレートを使うことができます。これには `myconfig.py` でいくつかの設定が必要です。具体的にはホイール径、ホイールベース長、車軸長などの計測値を設定します。詳しくは [Odometer Software Setup](/parts/odometry#software-setup) を参照してください。
 
-### Configure button actions
+### ボタン操作の設定
 
-You can use either the [web controller](/guide/get_driving/#driving-with-web-controller) or a [game controller](/guide/get_driving/#driving-with-physical-joystick-controller).  You can assign a game pad button OR web ui button to an action by editing the button assignments in **myconfig.py**.  The name of the game pad buttons depend on the game controller you have configured (NOTE: one button is reserved for the emergency stop; you can see which one is assigned by looking at the console output when you start that car using the `python manage.py drive` command).  The 5 available web ui buttons are named `web/w1` to `web/w5`. If you assign `None` action to a button then it is ignored.
+[web controller](/guide/get_driving/#driving-with-web-controller) または [game controller](/guide/get_driving/#driving-with-physical-joystick-controller) のどちらかを使用できます。**myconfig.py** のボタン割り当てを編集することで、ゲームパッドのボタンまたはWeb UIのボタンにアクションを割り当てられます。ゲームパッドボタンの名称は設定したコントローラによって異なります（注: 1つのボタンは緊急停止用に予約されています。`python manage.py drive` コマンドで車を起動した際のコンソール出力を確認すると、どのボタンが割り当てられているか分かります）。Web UIで利用できる5つのボタンは `web/w1` から `web/w5` という名前です。`None` を割り当てたボタンは無視されます。
 
-- `SAVE_PATH_BTN` is the button to save the in-memory path to a file.
-- `LOAD_PATH_BTN` is the button to (re)load path from the csv file into memory.
-- `RESET_ORIGIN_BTN` is the button to set the current position as the origin.
-- `ERASE_PATH_BTN` is the button to erase path from memory and reset the origin.
-- `TOGGLE_RECORDING_BTN` is the button to toggle recording mode on or off.  Note that there is a pre-assigned button in the web ui, so there is not need to assign this button to one of the `web/w*` buttons if you are using the web ui.
-- `INC_PID_D_BTN` is the button to change PID 'D' constant by PID_D_DELTA.  
-- `DEC_PID_D_BTN` is the button to change PID 'D' constant by -PID_D_DELTA
-- `INC_PID_P_BTN` is the button to change PID 'P' constant by PID_P_DELTA
-- `DEC_PID_P_BTN` is the button to change PID 'P' constant by -PID_P_DELTA
+- `SAVE_PATH_BTN` はメモリ上の経路をファイルに保存するボタンです。
+- `LOAD_PATH_BTN` はCSVファイルから経路を読み込んでメモリに再ロードするボタンです。
+- `RESET_ORIGIN_BTN` は現在位置を原点として設定するボタンです。
+- `ERASE_PATH_BTN` はメモリ上の経路を消去して原点をリセットするボタンです。
+- `TOGGLE_RECORDING_BTN` は記録モードのオン／オフを切り替えるボタンです。Web UIにはあらかじめ割り当てられたボタンがあるため、Web UIを使う場合は `web/w*` のいずれかに割り当てる必要はありません。
+- `INC_PID_D_BTN` はPIDのD定数を PID_D_DELTA だけ増やすボタンです。
+- `DEC_PID_D_BTN` はPIDのD定数を -PID_D_DELTA だけ減らすボタンです。
+- `INC_PID_P_BTN` はPIDのP定数を PID_P_DELTA だけ増やすボタンです。
+- `DEC_PID_P_BTN` はPIDのP定数を -PID_P_DELTA だけ減らすボタンです。
 
+## 経路の記録
 
-## Recording a path
+アルゴリズムは、開始地点と終了地点が一致する連続した経路を走行することを前提としています。記録するウェイポイント間の間隔は **myconfig.py** の `PATH_MIN_DIST` で調整できます。保存するファイル名や保存場所は `PATH_FILENAME` を編集して変更できます。
 
-The algorithm assumes we will be driving in a continuous connected path such that the start and end are the same.  You can adjust the space between recorded waypoints by editing the `PATH_MIN_DIST` value in **myconfig.py** You can change the name and location of the saved file by editing the `PATH_FILENAME` value.
+経路を記録する手順は以下の通りです。
 
-The workflow for recording a path is as follows:
+- [web controller](/guide/get_driving/#driving-with-web-controller) または [game controller](/guide/get_driving/#driving-with-physical-joystick-controller) を使って **User** ドライブモードに入ります。
+- 車を開始したい位置に移動します。
+- メモリ上の経路を消去します（これにより原点もリセットされます）。
+- 記録をオンにします。
+- 車を手動で走らせ、再び開始地点に戻ってきます。
+- 記録をオフにします。
+- 必要であれば経路を保存します。
 
-- Enter **User** driving mode using either the [web controller](/guide/get_driving/#driving-with-web-controller) or a [game controller](/guide/get_driving/#driving-with-physical-joystick-controller).
-- Move the car to the desired starting point
-- Erase the path in memory (which will also reset the origin).
-- Toggle recording on.
-- Drive the car manually around the track until you reach the desired starting point again.
-- Toggle recording off.
-- If desired, save the path.
-
-The path is saved as a comma-separated-values (.csv) file.  Each line in the file contains 3 numbers separated by commas; x-position, y-position, throttle.  The x and y positions are where the car was when the position was read and the throttle is the throttle value that was in effect at that time.  Here is a section from a path file for illustration;
+経路はカンマ区切り値 (.csv) ファイルとして保存されます。各行にはコンマで区切られた3つの数値、x座標・y座標・スロットルが含まれます。x座標とy座標は位置を読み取った時点の車の位置で、スロットルはその時点で有効だったスロットル値です。参考までに経路ファイルの一部を示します。
 ```
 0.0033510593930259347, 7.996719985734671, 0.14
 0.11206169077195227, 9.325505392625928, 0.16
@@ -114,85 +113,84 @@ The path is saved as a comma-separated-values (.csv) file.  Each line in the fil
 -5.5869644057238474, 14.674541235901415, 0.25
 ```
 
-Since the path is saved in a simple .csv file it can be visualized in many tools.  A simple one to visualize your path is [CSV Plot](https://csvplot.com).  Use the button in the upper-right (just to the left of the home button) to make the axis scale square.  Here is an example path (rotated to fit a little better);
+経路は単純なCSVファイルとして保存されるため、多くのツールで可視化できます。経路を可視化する簡単な方法として [CSV Plot](https://csvplot.com) があります。右上（ホームボタンのすぐ左）のボタンを押して軸のスケールを正方形にすると良いでしょう。次に示すのは例として少し回転させた経路です。
 
 ![A CSV Path plotted in https://csvplot.com](../../assets/path_8_rotate.png)
 
-## Following a path
+## 経路の追従
 
-The current autopilot uses a constant throttle value.  You can set this by editing the `PID_THROTTLE` value in **myconfig.py**.
+現在の自動操縦は一定のスロットル値を使用します。これは **myconfig.py** の `PID_THROTTLE` を編集することで設定できます。
 
-The workflow for following a path is as follows:
+経路を追従する手順は以下の通りです。
 
-- Enter **User** driving mode using either the [web controller](/guide/get_driving/#driving-with-web-controller) or a [game controller](/guide/get_driving/#driving-with-physical-joystick-controller).
-- Move the car to the desired starting point.
-- If you are following a saved path, then load the path into memory.
-- Reset the origin (be careful; don't erase the path, just reset the origin).
-- Enter **Autosteering** or **Autopilot** driving mode.  If you are in **Autosteering** mode you will need to manually provide throttle for the car to move.  If you are in **Autopilot** mode the car should drive itself completely.
-- Re-enter **User** mode to stop the car.
+- [web controller](/guide/get_driving/#driving-with-web-controller) または [game controller](/guide/get_driving/#driving-with-physical-joystick-controller) を使って **User** ドライブモードに入ります。
+- 車を開始したい位置に移動します。
+- 保存した経路を使用する場合は、その経路をメモリに読み込みます。
+- 原点をリセットします（注意: 経路を消去せず、原点だけをリセットします）。
+- **Autosteering** もしくは **Autopilot** ドライブモードに入ります。**Autosteering** モードでは車を動かすために手動でスロットルを入れる必要があります。**Autopilot** モードでは完全に自律走行するはずです。
+- 車を止めるには再び **User** モードに入ります。
 
-## The Path Follow Algorithm
+## Path Follow アルゴリズム
 
-The algorithm we use for following the path is extremely simple; it's the Hello World of path following.
+経路追従に使用するアルゴリズムは非常に単純で、いわばパスフォローのHello Worldです。
 
-- Get the vehicle's current GPS position
-- Find the nearest point in the list of waypoints; starting at the last nearest waypoint, search up to `PATH_SEARCH_LENGTH` points and choose the waypoint that is closest to the current position.
-- Choose the waypoint `PATH_LOOK_AHEAD` points ahead of the closest point on the path.
-- Choose the waypoint `PATH_LOOK_BEHIND` points behind the closes point on the path.
-- Use behind and ahead waypoints to create a line that represents the desired track.
-- Calculate the cross-track error between the vehicle's current position and the desired track.  The cross-track error is a signed value that represents the distance from the line and which side of the line we are on.
-- Use the cross-track error as the error input into the PID controller that controls steering.  
-- The PID controller outputs a new steering value.
+- 車両の現在のGPS位置を取得します。
+- ウェイポイントリストの中から最も近いポイントを探します。最後に最も近かったウェイポイントから開始し、`PATH_SEARCH_LENGTH` 個先まで検索して現在位置に最も近いウェイポイントを選びます。
+- 経路上でその最も近いポイントから `PATH_LOOK_AHEAD` 個先のウェイポイントを選びます。
+- 同様に `PATH_LOOK_BEHIND` 個前のウェイポイントを選びます。
+- 前後のウェイポイントを使って、目標とする走行ラインを表す直線を作成します。
+- 車両の現在位置とその直線との間のクロストラック誤差を計算します。クロストラック誤差は直線からの距離と、どちら側にいるかを示す符号付きの値です。
+- このクロストラック誤差をステアリングを制御するPIDコントローラの誤差入力として使用します。
+- PIDコントローラが新しいステアリング値を出力します。
 
-In addition to steering, the path follow controller will set the throttle to the throttle saved with the closest point on the path scaled by the `PID_THROTTLE` value in the `myconfig.py` file.  That can be overridden if `USE_CONSTANT_THROTTLE = True` in the `myconfig.py`, in which case it will use `PID_THROTTLE` as the constant throttle.
+ステアリングに加えて、パスフォローコントローラは経路上で最も近いポイントに保存されているスロットル値に `myconfig.py` の `PID_THROTTLE` を掛けた値をスロットルとして設定します。`myconfig.py` で `USE_CONSTANT_THROTTLE = True` にしている場合はこの設定を上書きし、`PID_THROTTLE` を一定スロットルとして使用します。
 
-### Configuring Path Follow Parameters
+### Path Follow パラメータの設定
 
-So the algorithm uses the cross-track error between a desired line and the vehicle's measured position to decide how much and which way to steer.  But the path we recorded is not a simple line; it is a lot of points that is typically some kind of circuit.  As described above, we use the vehicle's current position to choose a short segment of the path that we use as our desired track.  That short segment is recalculated every time we get a new measured car position.  There are a few configuration parameters that determine exactly which two points on the path that we use to calculate the desired track line.
-
+このアルゴリズムは、目標となる直線と車両の測定位置とのクロストラック誤差を使ってどれくらい、どちらに舵を切るかを決定します。しかし記録した経路は単純な直線ではなく、多くの場合は何らかの周回コースです。前述のとおり、車両の現在位置を用いて経路の短い区間を選び、それを目標ラインとして使います。この短い区間は新しい位置が測定されるたびに再計算されます。どの2点を使って目標ラインを計算するかは、いくつかの設定パラメータで決まります。
 ```python
-PATH_SEARCH_LENGTH = None   # number of points to search for closest point, None to search entire path
-PATH_LOOK_AHEAD = 1         # number of points ahead of the closest point to include in cte track
-PATH_LOOK_BEHIND = 1        # number of points behind the closest point to include in cte track   
+PATH_SEARCH_LENGTH = None   # 最も近いポイントを探す際に検索するポイント数。Noneなら全経路を検索
+PATH_LOOK_AHEAD = 1         # 最も近いポイントから先に含めるポイント数
+PATH_LOOK_BEHIND = 1        # 最も近いポイントから後ろに含めるポイント数
 ```
 
-Generally, if you are driving very fast you might want the look ahead to be larger than if driving slowly so that your steering can anticipate upcoming curves.  Increasing the length of the resulting track line, by increasing the look behind and/or look ahead, also acts as a noise filter; it smooths out the track.  This reduces the amount of jitter in the controller.  However, this must be balanced with the true curves in the path; longer track segments effectively 'flatten' curves and so can result in understeer; not steering enough when on a curve.
-   
-### What is a PID Controller?
+非常に高速で走行する場合は、低速走行時よりも先を見るポイント数を多くした方が、ステアリングが先のカーブを予測しやすくなります。look behind や look ahead を増やしてトラックラインを長くすると、ノイズフィルタの役割も果たし、ラインが滑らかになります。これによりコントローラのジッターが減ります。ただし、実際のカーブ形状とのバランスを取る必要があります。トラックセグメントが長すぎるとカーブを“平坦化”してしまい、カーブで十分に曲がれないアンダーステアの原因になります。
 
-A PID controller is function that takes two parameters; 1) a target value to be achieved and 2) the current measured value. The PID function uses the difference between the target value and the measured value (the error) to calculate a control value that can be used to achieve the target value (so to drive the error between the desired value and the measured value to zero).  
+### PIDコントローラとは？
 
-In our case, we want to stay on the desired track; we want the cross-track error (the distance between the desired line and the vehicle's measured position) to be zero; the control value that is output is a steering value that should move the vehicle closer to the desired line.  So our PID controller is controlling steering based on which side of the line and how far from the desired line the car is.
- 
-The algorithm uses the sign of the cross track error to determine which way to steer.  Naturally, if the cross-track error indicates the vehicle is to the left of the desired track, then the vehicle should turn right to move towards the desired track.  If the cross-track error indicates the vehicle is to the right of the desired track, then the vehicle should turn left to move towards the desired track.  If the vehicle is on the desired track, then the steering should be neutral.
+PIDコントローラは目標値と現在測定値の2つを受け取り、その誤差から目標値を達成するための制御値を計算する関数です（誤差をゼロに近づけるための値を出力します）。
 
-But how much should we steer; should we turn only slightly or should be turn very hard?  The PID controller will output a steering value that is proportional to the magnitude of the cross-track error.  So if we are near the desired track, then it will steer slightly.  If we are far off the desired track then it will turn harder.  
+ここでは目標ライン上を走ることが目的なので、クロストラック誤差（目標ラインと車両の測定位置との距離）がゼロになるようにします。PIDコントローラの出力は車両を目標ラインに近づけるためのステアリング値となります。つまり、車が目標ラインのどちら側にどれだけ離れているかに基づいてステアリングを制御するわけです。
 
-### Determining PID Coefficients
+アルゴリズムではクロストラック誤差の符号を用いてステアリングの向きを決めます。クロストラック誤差が車両が目標ラインの左側にいることを示す場合、車は目標ラインに向かって右に曲がるべきです。逆に右側にいる場合は左に曲がるべきです。車が目標ライン上にいる場合、ステアリングはニュートラルになります。
 
-The PID coefficients are the most important (and time consuming) parameters to configure.  If they are not correct for your car then it will not follow the path.  The coefficients can be changed by editing their values in the **myconfig.py** file.  
+ではどれくらい舵を切るべきでしょうか。PIDコントローラはクロストラック誤差の大きさに比例したステアリング値を出力します。目標ラインに近い場合はわずかに舵を切り、ラインから大きく外れている場合は大きく曲がります。
 
-- `PID_P` is the proportional coefficient; it is multiplied with the cross-track error.  This is the most important parameter; it contributes the most to the output steering value and in some cases may be all that is needed to follow the line.  If this is too small then car will not turn enough when it reaches a curve.  If this to too large then it will over-react to small changes in the path and may start turning in circles; especially when it gets to a curve.
-- `PID_D` is the differential coefficient; it is multiplied with the change in the cross-track error.  This parameter can be useful in reducing oscillations and overshoot.
-- `PID_I` is the integral coefficient; it is multiplied with the total accumulated cross-track error.  This may be useful in reducing offsets caused by accumulated error; such as if one wheel is slightly smaller in diameter than another.
+### PID係数の決定
 
-As descibed in the [Configuring Button Actions](#configure-button-actions) section above, you can also assign functions like `INC_PID_P_BTN` or `DEC_PID_P_BTN` to the game controller or web ui buttons to modify the PID parameters 'on the fly'.  This helps when you are figuring out the best coefficients.  The button functions allow you to change values without having to stop the car, edit myconfig.py and restart the car.
+PID係数は最も重要で（そして時間のかかる）設定項目です。これらが車に合っていないと経路をうまくたどれません。係数は **myconfig.py** の値を編集して変更できます。
 
-Determining PID Coefficients can be difficult.  One approach is:
+- `PID_P` は比例係数で、クロストラック誤差に掛けられます。最も重要なパラメータで、出力ステアリング値に最も寄与し、場合によってはこれだけでラインを追従できることもあります。値が小さすぎるとカーブで十分に曲がれず、大きすぎると経路の小さな変化に過剰反応してしまい、特にカーブでは車が円を描くように回り始めることがあります。
+- `PID_D` は微分係数で、クロストラック誤差の変化量に掛けられます。振動やオーバーシュートを抑えるのに有用です。
+- `PID_I` は積分係数で、クロストラック誤差の累積値に掛けられます。例えば片方のタイヤ径がわずかに違う場合など、累積誤差によるオフセットを減らすのに役立つかもしれません。
 
-- First determine the P coefficient.
-    - zero out the D and the I coefficients.
-    - Use a kind of 'binary' search to find a value where the vehicle will roughly follow a recorded straight line; probably oscillating around it.  It will be weaving like it is under the influence.
-    - To do this, record a short straight line, maybe 6 meters.  You can do this by putting the car into recording mode and walking with the car (so you can keep the throttle at zero).  Once the short line is recorded put the car in autopilot mode and stand in the middle of the line holding the car parallel to the line; the car's front wheels should stay stable and straight.  Now slowly move the car off the line, keeping the car parallel to the line; the car should start to turn back towards the line.  The more off the line you move the more that car should turn.  Try both sides of the line.
-        - If the car turns away from the line rather than towards the line then change the sign of the P value.  
-        - If the car turns very little then increase the P value.
-        - If the car turns very abruptly when off the line then reduce the P value.
-        - Play with the P value until you get the car to turn back to the line smoothly and proportional to how far from the line it is held.
-        - Now try actually driving the line in autopilot mode. The car may oscillate around the line; it if oscillates a lot then reduce the P value. Adjust the P value so it can actually drive that line from one end to the other.  It will likely go out of control at the end of the line; that is normal because the path is not closed.
-        - Once you can drive a short straight line then drive the car in autopilot on a full closed path with only the P value set.  Make sure there is a fairly tight turn in the path.  Adjust the P value until you get acceptable performance.  Once you get that working then you can refine things with the D value.
-- Next find a D coefficient that reduces the weaving (oscillations) on a straight line.  Then record a path with a tight turn.  Find a D coefficient that reduces the overshoot when turning.
-- You may not even need the I value.  If the car becomes unstable after driving for a while then you may want to start to set this value.  It will likely be much smaller than the other values.
+上の[ボタン操作の設定](#configure-button-actions)で述べたように、`INC_PID_P_BTN` や `DEC_PID_P_BTN` のような関数をゲームコントローラやWeb UIのボタンに割り当てて、走行中にPIDパラメータを変更することもできます。これにより、myconfig.py を編集して車を再起動することなく値を調整できるため、最適な係数を探す際に役立ちます。
 
-Be patient.  Start with a reasonably slow speed.  Change one thing at a time and test the change; don't make many changes at once.  Write down what is working.
+PID係数を決定するのは難しい作業です。ひとつの手順を示します。
 
-Once you have a stable PID controller, then you can figure our just how fast you can go with it before autopilot becomes unstable.  If you want to go faster then set the desired speed and start tweaking the values again using the method suggested above.
+- まずP係数を決めます。
+    - D係数とI係数をゼロにします。
+    - 録音した直線を概ねたどれる値を、二分探索のようにして見つけます。おそらくその直線を中心に蛇行します。酔っ払ったようにふらつくかもしれません。
+    - これを行うには、長さ6メートル程度の短い直線を記録します。車を記録モードにして歩きながら（スロットルはゼロのまま）記録できます。短い直線を記録したら車をオートパイロットモードにし、ラインの中央に立って車をラインと平行に保持します。車の前輪は安定してまっすぐのままになるはずです。今度は車をゆっくりラインから外し、車体をラインと平行に保ったままにします。ラインから離れるほど車はラインに戻ろうと曲がり始めるはずです。両側で試してみてください。
+        - ラインに戻るのではなく離れる方向に曲がる場合は、P値の符号を反転させます。
+        - ほとんど曲がらない場合はP値を増やします。
+        - ラインから外したときに急激に曲がる場合はP値を減らします。
+        - P値を調整し、ラインから離れた量に比例して滑らかにラインへ戻るようにします。
+        - その後、実際にオートパイロットモードでその直線を走らせてみます。車がラインの周りで振動するかもしれません。振動が激しい場合はP値を下げます。P値を調整して、直線を端から端まで走れるようにします。直線の終端ではおそらく制御不能になりますが、これは経路が閉じていないためで正常です。
+        - 短い直線を走れるようになったら、P値だけ設定した状態で閉じた経路をオートパイロットで走らせます。経路にはかなりきついカーブを含めてください。P値を調整して満足できる走行を得られるようにします。これができたらD値でさらに調整します。
+- 次に、直線走行時の蛇行（振動）を減らすD係数を見つけます。その後、きついカーブを含む経路を記録し、曲がる際のオーバーシュートを減らすD値を探します。
+- I値は必要ないかもしれません。長時間走行すると車が不安定になる場合は、この値を設定し始めるとよいでしょう。他の値よりもかなり小さくなるはずです。
+
+焦らずに進めましょう。まずは比較的遅い速度から始めます。1回に1つだけ変更してテストし、同時に多数の変更を行わないでください。うまくいったことはメモしておきます。
+
+安定したPIDコントローラが得られたら、オートパイロットが不安定になる前にどれくらいの速度まで出せるかを把握できます。さらに速く走りたい場合は、希望の速度に設定して、上記の方法で再び値を調整してみてください。

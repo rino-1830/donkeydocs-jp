@@ -1,23 +1,23 @@
-# Dataset and pre-trained models
+# データセットと学習済みモデル
 
-The purpose of providing a sample dataset and pre-trained models here is to help beginners to get started easier. You can download the dataset and use it to train together with your own dataset. 
-
-
-## Dataset
-
-### Dataset in real world
-
-1. Sample dataset #1 by Tawn - 2.0GB , [Link](https://github.com/autorope/donkey_datasets)
-
-### Dataset in simulator
-
-- Not available yet
+ここでは、初心者が簡単に始められるようにサンプルのデータセットと学習済みモデルを提供しています。データセットをダウンロードして、自分のデータセットと組み合わせて学習に利用できます。
 
 
-## Contributing dataset
+## データセット
 
-If you have a dataset you want to contribute, please contact us on Discord #dataset channel, or raise a PR on [donkey_datasets](https://github.com/autorope/donkey_datasets). Thank you.
+### 実車でのデータセット
+
+1. Tawn 氏によるサンプルデータセット #1（2.0GB） [リンク](https://github.com/autorope/donkey_datasets)
+
+### シミュレータでのデータセット
+
+- まだ公開されていません
 
 
-## Pre-trained models
-Now available on [donkey_datasets](https://github.com/autorope/donkey_datasets). We plan to grow the repository of pre-trained models.
+## データセットの提供
+
+もし提供していただけるデータセットがある場合は、Discord の #dataset チャンネルでご連絡いただくか、[donkey_datasets](https://github.com/autorope/donkey_datasets) に PR を送ってください。ご協力をお願いします。
+
+
+## 学習済みモデル
+[donkey_datasets](https://github.com/autorope/donkey_datasets) で公開されています。今後も学習済みモデルのリポジトリを充実させる予定です。

@@ -1,18 +1,19 @@
-# Computer Vision Autopilot
 
-The computer vision autopilot, like the deep learning autopilot, interprets camera images in order to determine steering and throttle values.  However, rather than deep learning models, the computer vision autopilot utilizes traditional computer vision algorithms, such as Canny edge detection, to interpret images of the track.  The computer vision autopilot is specifically designed to make it easy to write your own algorithm and use it in place of the built-in algorithm.
+# コンピュータビジョンオートパイロット
+
+コンピュータビジョンオートパイロットはディープラーニングオートパイロットと同様にカメラ画像を解釈してステアリングとスロットルを決定します。ただし、ディープラーニングモデルではなく、Canny エッジ検出などの従来型コンピュータビジョンアルゴリズムを用いてトラックの画像を解析します。このオートパイロットは自分のアルゴリズムを簡単に作成し、組み込みのアルゴリズムの代わりに使用できるよう特別に設計されています。
 
 ![The Computer Vision Autopilot](/assets/cv_track.png)
 
-The built-in algorithm is a line following algorithm; it expects the track to have a center line, preferably solid, that it can detect.  The expected color of the line can be tuned with configuration; by default it expects a yellow line.  The algorithm calculates the distance of the line from the center of the image, then a PID controller uses that value to calculate a steering value.  If the car is to the left of the line then it will turn right.  If the car is to the right of the line then it will turn left.  The chosen steering angle is proportional to the distance from the line.  The chosen throttle is inversely proportional to the steering angle so that the car will go faster on a straight path and slow down for turns.  More details on the algorithm and the configuration parameters are discussed below.
+組み込みのアルゴリズムはライン追従型で、検出可能なセンターライン（できれば実線）がトラック上にあることを想定しています。ラインの色は設定で調整でき、デフォルトでは黄色を使用します。アルゴリズムは画像中央からラインまでの距離を計算し、その値をPIDコントローラーでステアリング角に変換します。車がラインの左側にあれば右に、右側にあれば左に曲がります。選択されるステアリング角はラインからの距離に比例し、スロットルはステアリング角に反比例するため、直線では速く走り、カーブでは減速します。アルゴリズムと設定パラメータの詳細は後述します。
 
-But what if your track does not have a center line; what if it just has a left and right lane boundary lines?  What if it is a sidewalk?  What if you simply want to implement your own algorithm?  The computer vision template is designed to make that pretty easy.  You can write your own part in Python to use as the autopilot and simply change the configuration in your myconfig.py to point to it.  Your part can utilize computer vision parts in [cv.py](https://github.com/autorope/donkeycar/blob/main/donkeycar/parts/cv.py) or you can call OpenCV's python api directly.  We present a simplified example below.
+しかし、走行路にセンターラインが無い場合や左右のレーン境界線だけの場合、あるいは歩道などの場合、自分でアルゴリズムを作りたいこともあるでしょう。このコンピュータビジョン用テンプレートはそのようなときに簡単に利用できるよう作られています。Python で独自のパートを作成し、`myconfig.py` の設定を変更するだけでそのパートをオートパイロットとして使用できます。パートでは [cv.py](https://github.com/autorope/donkeycar/blob/main/donkeycar/parts/cv.py) のCV部品を利用することも、OpenCV の Python API を直接呼び出すことも可能です。以下に簡単な例を示します。
 
->> IMPORTANT: The computer vision template requires that opencv is installed.  Opencv is pre-installed on the Jetson Nano, but it must be explicitly installed on the Raspberry Pi. See Raspberry Pi installation [Step 9](/guide/robot_sbc/setup_raspberry_pi/#step-9-optional-install-opencv-dependencies) and [Step 11](/guide/robot_sbc/setup_raspberry_pi/#step-11-install-donkeycar-python-code).  
+>> **重要**: コンピュータビジョンテンプレートを使用するには OpenCV がインストールされている必要があります。Jetson Nano にはあらかじめ OpenCV が入っていますが、Raspberry Pi では明示的にインストールしなければなりません。Raspberry Pi のインストール手順は[ステップ9](/guide/robot_sbc/setup_raspberry_pi/#step-9-optional-install-opencv-dependencies)と[ステップ11](/guide/robot_sbc/setup_raspberry_pi/#step-11-install-donkeycar-python-code)を参照してください。
 
-## Create a computer vision Application
+## コンピュータビジョンアプリケーションを作成する
 
-You can create a computer vision application similarly to the how we create a deep learning application; we just tell it to use the **cv_control** template instead of the default template.  First, make sure your donkeycar python environment is activated, then use the **createcar** command to create your application folder.
+ディープラーニングアプリケーションを作成するときと同様に、**cv_control** テンプレートを指定することでコンピュータビジョンアプリケーションを作成できます。まず donkeycar の Python 環境を有効化し、続いて **createcar** コマンドでアプリケーションフォルダーを作成します。
 
 ```bash
 donkey createcar --template=cv_control --path=~/mycar
@@ -24,47 +25,47 @@ When updating to a new version of donkeycar, you will want to refresh your appli
 donkey createcar --template=cv_control --path=~/mycar --overwrite
 ```
 
-## The Line Follower
+## ラインフォロワー
 
-The built-in algorithm can follow a line using the camera.  By default it is tuned for a yellow line, but the color that it tracks can be configured.  Many other aspects of the algorithm can be tuned.  Below is as description of the algorithm and how it uses the configuraton values.  The values themselves are listed and described afterwards.
-
-
-0. If `TARGET_PIXEL` is None, then use steps 1 to 5 to estimate the target (the expected) position of the line.
-1. Copy the image rows at `SCAN_Y` and `SCAN_HEIGHT` pixels height.  So the result is a block of pixels as wide as the image and `SCAN_HEIGHT` high.
-2. Convert the pixels from `RBG` red-gree-blue color space to `HSV` hue-saturation-value color space.  
-3. The algorithm then identifies all the pixels in the block that have an HSV color between `COLOR_THRESHOLD_LOW` and `COLOR_THRESHOLD_HIGH`.
-4. Once the pixels with the color target are isolated then a histogram is created that creates counts of yellow pixels from left to right for each 1 pixel wide by `SCAN_HEIGHT` pixel high slice.
-5. The x value (horizontal offset) of the slice with the most yellow pixels is chosen.  This is where the algorithm thinks the yellow line is.
-6. The difference between this x-value and the `TARGET_PIXEL` value is used as the value the PID algorithm uses to calculate a new steering.  If the value is to the left of the `TARGET_PIXEL` more than `TARGET_THRESHOLD` pixels then the car steers right; if hte value is to the right of `TARGET_PIXEL` more than `TARGET_THRESHOLD` pixels the the car steers left.  If the value is withing `TARGET_THRESHOLD` pixels of `TARGET_PIXEL` then steering is not changed.
-7. The steering value is used to decide if the car should speed up or slow down.  If steering is not changed then the throttle is increased by `THROTTLE_STEP`, but not over `THROTTLE_MAX`.  If steering is changed then throttle is decreased by `THROTTLE_STEP`, but not below `THROTTLE_MIN`.
-
->> This [pyimagesearch article](https://pyimagesearch.com/2021/04/28/opencv-color-spaces-cv2-cvtcolor/) and accompanying video describe the various color spaces available and OpenCV and their characteristics.  
+この組み込みアルゴリズムはカメラ映像からラインを追従します。デフォルトでは黄色のラインに合わせて調整されていますが、追跡する色は設定で変更できます。その他の多くの要素も調整可能です。以下にアルゴリズムの概要と設定値の利用方法を説明し、続いて各値を列挙します。
 
 
-The complete source code is provided and discussed in the [LineFollower class](#linefollower-class) section near the end of this page.
+0. `TARGET_PIXEL` が `None` の場合は、1～5 の手順でラインの想定位置を推定します。
+1. 画像の `SCAN_Y` 行から `SCAN_HEIGHT` 行分を取り出し、画像幅と同じ幅で `SCAN_HEIGHT` 高のブロックを作成します。
+2. そのブロックを `RGB` から `HSV`（色相・彩度・明度）空間に変換します。
+3. `COLOR_THRESHOLD_LOW` と `COLOR_THRESHOLD_HIGH` の範囲内にある HSV 値を持つ画素を抽出します。
+4. 抽出した画素からヒストグラムを作成し、`SCAN_HEIGHT` ピクセル高、幅1ピクセルごとに左から右へ黄色画素の数を数えます。
+5. 黄色画素が最も多いスライスの x 座標（水平位置）を求めます。ここが黄線の位置だと判断します。
+6. この x 値と `TARGET_PIXEL` の差を PID アルゴリズムに入力して新しいステアリング値を計算します。差が `TARGET_PIXEL` より左に `TARGET_THRESHOLD` ピクセル以上あれば右に、右に `TARGET_THRESHOLD` ピクセル以上あれば左に曲がります。差が `TARGET_THRESHOLD` 以内ならステアリングは変更しません。
+7. 求めたステアリング値を元に加速・減速を判断します。ステアリングが変化しない場合は `THROTTLE_STEP` ずつスロットルを上げますが `THROTTLE_MAX` を超えません。ステアリングを変更した場合は `THROTTLE_STEP` ずつ下げますが `THROTTLE_MIN` を下回りません。
+
+>> この[pyimagesearch の記事](https://pyimagesearch.com/2021/04/28/opencv-color-spaces-cv2-cvtcolor/)と動画では、利用可能なさまざまな色空間と OpenCV の特徴が解説されています。
 
 
-### Camera Setup
+完全なソースコードはこのページ末尾近くの [LineFollower クラス](#linefollower-class) セクションで紹介しています。
+
+
+### カメラのセットアップ
 The image at the top of the page shows the camera setup approximately how it would be using the standard Donkeycar cage.  It is angled to see to the horizon so that it can see turns from far away.  This is good when going very fast because you can see far ahead.  However if the detected line is very thin then it could have artifacting (noise) that could lead to false positives that cause the vehicle to move off the line. If you are not going fast and you want to be as accurate as possible then pointing the camera down at the line is a good idea.  So if your camera can be adjusted then you can make trade-offs between accuracy (point it down) and speed (point to to the horizon).
 
 ### Choosing Parameters for the LineFollower
 The computer vision template is a little different than the deep learning and path follow templates; there is no data recording.  After setting your configuration parameters you just put your car on the track that has the line that you want to follow and then change from user mode to one of the auto-pilot modes; full-auto or auto-steering.  The complete set of configuration parameters can be found in the [LineFollower Configuration](#linefollower-configuration) section below; we will discuss the most important configuration in more detail in this section.
 
 #### SCAN_Y and SCAN_HEIGHT
-The rectangular area that will be scanned for the line, called the detection area, is determined with the `SCAN_Y` and `SCAN_HEIGHT`.
+ラインをスキャンする矩形領域（検出エリア）は `SCAN_Y` と `SCAN_HEIGHT` で決まります。
 
-When in autopilot mode, the `LineFollower` shows the detection area as a horizontal black bar.  Pixels that fall within the color threshold range (see next sectino) are drawn as white pixels. Ideally, only the pixels in the line that are in the detection bar will show as white; any white pixels that are NOT part of the line that you want to follow are considered false positives.  If the false positives are relatively disperse then they should not interfere with detecting the line.  However, if there are big areas of white false positives then they might trick the algorithm.  See the next section of how to adjust the color threshold range to minimize false positives.
+オートパイロットモードでは検出エリアが水平の黒い帯として表示されます。色閾値範囲内（次節参照）の画素は白で描かれます。理想的にはライン上の画素だけが白く表示されますが、ライン以外の白い画素は誤検出です。誤検出が点在する程度なら問題ありませんが、大きな白い領域があるとアルゴリズムが惑わされる可能性があります。誤検出を減らすには次節の色閾値設定を調整してください。
 
-The image below shows the detection area and the detected line.
+下の画像は検出エリアと検出されたラインを示しています。
 
 ![The Detection Area](/assets/cv_track_telemetry.png)
 
-#### COLOR_THRESHOLD_LOW, COLOR_THRESHOLD_HIGH
-The color threshold values represent the range of colors used to detect the line; they should be chosen to include the colors in the line in the area that it passes through the detection bar and ideally they should not include any other colors.  The color threshold values are in HSV color space (Hue, Saturation, Color) format, not RGB format.  RGB color space is how a computer shows colors.  HSV color space is closer to how humans perceive color.  For our purposes the 'hue' part is the 'pure' color without regard for shadows or lighting.  This makes it easier to find a color because it is one number, rather than combination of 3 numbers.  
+#### COLOR_THRESHOLD_LOW と COLOR_THRESHOLD_HIGH
+これらの値はライン検出に用いる色の範囲を表します。検出バーを通過するラインの色を含み、かつ他の色を含まないように設定します。値は RGB ではなく HSV（色相・彩度・明度）形式で指定します。HSV は人間の色の感じ方に近く、影や照明の影響を受けにくい色相値のみで色を見つけられるため便利です。
 
->> There are many online converters between RGB and HSV.  This one was used when creating this documentation; [peko-step](https://www.peko-step.com/en/tool/hsvrgb_en.html)  I like that tool because it will allow the Saturation and Value to be output in the range of 0.255, which is what we need.  IMPORTANT: The online tools use the standard way of representing HSV, which is a Hue value of 0 to 359 degrees, Saturation of 0 to 100%, Value of 0 to 100%.  OpenCV, which our code is based on, uses a Hue value of 0 to 179, Saturation of 0 to 255 and value of 0 to 255; so be aware that you may need to convert from the tool's values to the OpenCV values when changing these configurations.
+>> RGB と HSV を変換するオンラインツールは多数あります。ここでは [peko-step](https://www.peko-step.com/en/tool/hsvrgb_en.html) を利用しました。彩度と明度を 0～255 の範囲で取得できるため便利です。注意点として、一般的な HSV は色相 0～359 度、彩度・明度 0～100% ですが、OpenCV では色相 0～179、彩度・明度 0～255 で表現するため、設定を変更する際は変換が必要です。
 
-When choosing the threshold colors it is important to take into account what the camera will see including the lighting conditions.  Donkeycar includes a script to make this easy to do.  the `hsv_picker.sh` script allows you to view the live camera image or alternatively to choose a static image to view.  So if you are running a desktop image on your car (so not a server image or headless image) then you can run the script and view the camera image.  If you do not have a desktop on the car, then you can run the car and open the web view in a browser on your host laptop at take a screen shot to save it, then use that static image with the `hsv_picker.sh` script on your laptop computer.  In either case, arrange the car on the course so it can see the line as it would see it when you drive in autopilot so you are getting a realistic view.  
+閾値の色を選ぶ際は、カメラが実際に見る環境や照明を考慮することが重要です。Donkeycar にはそれを簡単に行うための `hsv_picker.sh` スクリプトが用意されています。デスクトップ環境であれば、カメラ映像を直接表示させて調整できます。ヘッドレス環境の場合は、車を走らせて Web ビューを開きスクリーンショットを取得し、その画像をスクリプトに読み込ませます。いずれの場合も、実際にオートパイロットで走行する状況を再現した配置でラインを撮影してください。
 
 You can run the `hsv_picker.sh` script to view a screen shot image; with the donkey python environment activated run the script from the root of your donkeycar repo folder;
 ```
@@ -85,34 +86,34 @@ python scripts/hsv_picker.sh --camera=2  --width=320 --height=240
 
 ![A screenshot in hsv_script.sh](/assets/hsv_picker_no_mask.png)
 
-The image above shows the `hsv_script.sh` with a web ui screenshot loaded.  The blue line in the center of the image is the line that we want to follow.  The horizontal black bar in the camera image is the detection bar; this is defined by `SCAN_Y` and `SCAN_HEIGHT` and is the area where the mask is applied to try to isolate the pixels in the line.  When pixels are detected they will be draw in white in the detection area.
+上の画像は `hsv_script.sh` に Web UI のスクリーンショットを読み込んだ例です。中央の青い線が追従したいラインで、カメラ画像に映る水平の黒い帯が検出バーです。`SCAN_Y` と `SCAN_HEIGHT` で指定されたこの領域にマスクを適用し、ラインの画素を抽出します。検出された画素は白で表示されます。
 
 
-The bottom of the screen has 6 trackbars to select the 3 parts of the low HSV value and the 3 parts of the high HSV value that are used to create a mask to pull out the pixels in the line.  You can move those scrollbars manually to try to find the best values for the detection range.  As you change the scrollbars the resulting mask will be applied to the image and you will see pixels start to turn back.  The Hue value is typically the most important value.  You can reset the trackbars and clear the mask anytime by selecting the Escape key on the keyboard.
+画面下部には6つのトラックバーがあり、マスクに使用するHSVの下限3値と上限3値を調整できます。バーを動かすと即座にマスクに反映され、画像上でどの画素が抽出されているか確認できます。通常はHueが最も重要です。Escapeキーを押せばバーをリセットしてマスクをクリアできます。
 
-Using the scrollbars works, but there is an easier way.  You can also just select a rectangular area by clicking-dragging-releasing; the pixels in that area will be searched for a low and high value and the trackbars will by updated with those low and high values.  So the easiest way to find the mask for the line is to select a rectangular area _on the line_ itself.  You can fine-tune the selected mask using the trackbars.
+トラックバーでも調整できますが、矩形選択による自動設定も可能です。画像上で範囲をドラッグするとその領域の最小値・最大値が計算され、トラックバーに反映されます。ライン上を選択すると簡単にマスクを求められるので、微調整だけバーで行うと便利です。
 
-The image below shows the mask that was created by selecting a rectangular area within the blue line.
+下の画像は青いライン上を矩形選択して得られたマスクの例です。
 
 ![A masked screenshot in the hsv_picker.sh script](/assets/hsv_picker_mask.png)
 
-Features of `hsv_picker.sh`:
+`hsv_picker.sh` の主な機能:
 
-- change the low and high mask values using the taskbars at the bottom of the screen.
-- set the low and high mask values by selecting a rectangular area on the image using click-drag-release.
-- select the Escape key on the keyboard to clear the mast.
-- select the 'p' key to print the current mask values to the console.
-- select the 'q' key to print the final mask values and quit.
+- 画面下部のトラックバーでマスクの上下限を変更
+- 画像上で範囲をドラッグして上下限を自動設定
+- Escape キーでマスクをクリア
+- `p` キーで現在の値をコンソールに表示
+- `q` キーで値を表示して終了
 
 
 #### TARGET_PIXEL
-The `TARGET_PIXEL` value is the expected horizontal position of the line to follow in the image.  The line follow algorithm will adjust steering to try to keep the line at that position in the image.  More specifically, the difference between the `TARGET_PIXEL` value and where the line follow algorithm detects that actual line is in the image is used by a PID controller to adjust steering (see [The PID Controller](#the-pid-controller)) below.
+`TARGET_PIXEL` は画像内でラインが存在すると想定する水平位置を表します。ラインフォローアルゴリズムはこの位置にラインが来るようステアリングを調整します。具体的には、実際に検出されたライン位置と `TARGET_PIXEL` の差を PID コントローラに渡してステアリングを計算します（詳しくは[PID コントローラ](#the-pid-controller)参照）。
 
-If you are the only car on the course, then you probably want the car to drive directly on the line to follow.  In this case setting `TARGET_PIXEL` to  the horizontal center of the image at `(IMAGE_W / 2)` means the auto-pilot assumes the line to follow should be directly in the middle of the image and so the car will try to stay in the middle.  So if your car actually starts to the left or right of that line, it will quickly move the the line and stay on it.
+単独で走行する場合はライン上をそのまま走りたいでしょう。そのときは `TARGET_PIXEL` を画像の中央 `(IMAGE_W / 2)` に設定すると、ラインが中央にあると仮定して車が中心へ寄るよう制御します。スタート時にラインから外れていても素早く中央へ戻ります。
 
-However, if you are on a course where two cars drive at the same time (there are two lanes separated by a line), then you probably want your car to stay in it's lane.  In that case you would set `TARGET_PIXEL` to None, which will cause the car to detect the location of the line at startup.  The auto-pilot will then assume the line should stay at that position in the image, and so it will the try to keep the car it it's lane to make that true.
+一方、2台同時に走るコースなどでは自車のレーンを維持したいはずです。その場合 `TARGET_PIXEL` を `None` に設定すると、起動時にラインの位置を自動で検出し、その位置を基準として走行します。
 
->> If you are really motivated then you might try implementing a lane-changing algorithm that would dynamically change the target pixel value in order to move from one lane to another.
+>> さらに凝る場合は、レーン変更を行うために `TARGET_PIXEL` を動的に切り替えるアルゴリズムを実装してみてもよいでしょう。
 
 ### LineFollower Configuration
 The complete set of configuration values and their defaults can be found in [donkeycar/templates/cfg_cv_control.py](https://github.com/autorope/donkeycar/blob/main/donkeycar/templates/cfg_cv_control.py#L556) and is copied here for convenience.

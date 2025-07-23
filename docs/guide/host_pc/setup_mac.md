@@ -1,55 +1,53 @@
-## Install Donkeycar on Mac
+## MacでDonkeycarをインストールする
 
 ![donkey](/assets/logos/apple_logo.jpg)
 
-* Install [miniconda Python 3.11 64 bit](https://conda.io/miniconda.html)
+* [miniconda Python 3.11 64 bit](https://conda.io/miniconda.html) をインストールする
 
-* Start Terminal
+* Terminal を起動する
 
-Setup your `donkey` conda env with:
+`donkey` conda 環境を以下のように設定する:
 
 ```bash
 conda create -n donkey python=3.11
 conda activate donkey
 ```
 
-Now there are two different installations possible. Very likely you will 
-want to do the user install. Then you will perform Step 
-[_User install_](#user-install). In case 
-you want to debug or edit the source code, you will need to do the more advanced 
-[_Developer install_](#developer-install). But you can do only one.
+ここからは2種類のインストール方法が選択できます。多くの場合
+ユーザーインストールを行うことになるでしょう。その場合は手順
+[_ユーザーインストール_](#user-install) を実行します。もし
+ソースコードをデバッグしたり編集したい場合は、より高度な
+[_開発者インストール_](#developer-install) を行う必要があります。ただし、どちらか一方しか実行できません。
 
-> _**Note**_: Only do User install or Developer install but not both!
+> _**注意**_: ユーザーインストールか開発者インストールのどちらか一方のみ実行してください!
 
-### User install
+### ユーザーインストール
 
-As you have activated the new `donkey` env already you simply type:
+すでに新しい `donkey` 環境を有効化しているので次を入力します:
 
 ```bash
 pip install donkeycar[pc]
 ```
-If you are using ZSH (which is default on MacOS) you need to escape
-`[` and `]` and hence you would rather type:
+MacOS のデフォルトである ZSH を使用している場合は `[` と `]` をエスケープする必要があります
+そのため次のように入力してください:
 
 ```bash
 pip install donkeycar\[pc\]
 ```
-If you are using an Intel Mac or you type (read above how to change
-this if you are using ZSH):
+Intel Mac を使用している場合、あるいは
+ZSH を使用している場合の変更点は上記を参照して次を入力します:
 
 ```bash
 pip install donkeycar[macos]
 ```
-if you are on Apple Silicon. This will install the latest release.
+Apple Silicon を使用している場合はこちらを入力します。これにより最新リリースがインストールされます。
 
-### Developer install
+### 開発者インストール
 
-Here you can choose which branch or tag you want to install, and you can 
-edit and/or debug the code, by downloading the source code from GitHub.
-
-Install [git 64 bit](https://www.atlassian.com/git/tutorials/install-git) 
-and change to a dir you would like to use as the head of your projects. 
-
+ここではインストールしたいブランチやタグを選択できます。
+GitHub からソースコードをダウンロードしてコードを編集・デバッグできます。
+[git 64 bit](https://www.atlassian.com/git/tutorials/install-git) をインストールし、
+プロジェクトのルートとしたいディレクトリへ移動します。
 ```bash
 mkdir projects
 cd projects
@@ -59,13 +57,13 @@ git checkout main
 pip install -e .[pc]
 ```
 
-Note: if you are using ZSH (you'll know if you are), you won't be able to 
-run `pip install -e .[pc]`. You'll need to escape the brackets and run 
-`pip install -e .\[pc\]`.
+注意: ZSH を使用している場合、そのままでは `pip install -e .[pc]` を実行できません。
+ブラケットをエスケープする必要があるため、次のように入力してください。
+`pip install -e .\[pc\]`
 
-### Further steps
+### 追加の手順
 
-* If this is not your first install, update Conda and remove old donkey
+* 初めてのインストールでない場合は Conda を更新し、古い donkey 環境を削除します
 
 ```bash
 conda update -n base -c defaults conda
@@ -74,21 +72,20 @@ conda env remove -n donkey
 
 * Tensorflow GPU
 
-Currently, there is no NVidia gpu support for 
-[tensorflow on mac](https://www.tensorflow.org/install#install-tensorflow).
+現在のところ、[mac 用の tensorflow](https://www.tensorflow.org/install#install-tensorflow) には NVidia GPU のサポートがありません。
 
-* Create your local working dir:
+* 作業用のローカルディレクトリを作成します:
 
 ```bash
 donkey createcar --path ~/mycar
 ```
 
-> Note: After closing the Terminal, when you open it again, you will need to 
-> type
->`conda activate donkey`
-> to re-enable the mappings to donkey specific 
-> Python libraries
+> 注意: Terminal を閉じた後に再度開いた場合は、
+> 次のコマンドを入力してください
+> `conda activate donkey`
+> donkey 用の Python ライブラリへのパスを
+> 再設定する必要があります
 
 ----
 
-### Next let's [install software on Donkeycar](/guide/install_software/#step-2-install-software-on-donkeycar)
+### 次は [Donkeycar にソフトウェアをインストールする](/guide/install_software/#step-2-install-software-on-donkeycar)

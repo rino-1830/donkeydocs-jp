@@ -1,31 +1,31 @@
 # IMU
 
-IMUs or inertial measurement units are parts that sense the inertial forces on a robot. They vary depending on sensor, but may commonly include linear and rotational accelleration. They may sometimes include magnetometer to give global compasss facing dir. Frequently temperature is available from these as it affects their sensitivity.
+IMU（慣性計測装置）はロボットにかかる慣性力を検知するパーツである。センサーにより異なるが、一般的には直線加速度と回転加速度を含み、時には磁力計により方位も取得できる。多くの場合温度も取得でき、これはセンサーの感度に影響する。
 
 ## MPU6050/MPU9250
 
-This is a cheap, small, and moderately precise imu. Commonly available at [Amazon](https://www.amazon.com/s/ref=nb_sb_noss_2?url=search-alias%3Dindustrial&field-keywords=MPU6050).
+これは安価で小型かつそこそこ精度の高いIMUであり、[Amazon](https://www.amazon.com/s/ref=nb_sb_noss_2?url=search-alias%3Dindustrial&field-keywords=MPU6050)などで入手できる。
 
-MPU9250 offers additional integrated magnetometer.
+MPU9250には追加で磁力計が内蔵されている。
 
-* Typically uses the I2C interface and can be chained off the default PWM PCA9685 board. This configuration will also provide power.
-* MPU6050: Outputs acceleration X, Y, Z, Gyroscope X, Y, Z, and temperature.
-* MPU6250: Outputs acceleration X, Y, Z, Gyroscope X, Y, Z, Magnetometer X, Y, Z and temperature.
-* Chip built-in 16bit AD converter, 16bit data output
-* Gyroscopes range: +/- 250 500 1000 2000 degree/sec
-* Acceleration range: ±2 ±4 ±8 ±16g
+* 通常はI2Cインタフェースを使用し、既定のPWM PCA9685ボードから連結して利用できる。この構成では電源供給も行われる。
+* MPU6050: X、Y、Z方向の加速度、ジャイロスコープX、Y、Z、および温度を出力する。
+* MPU6250: X、Y、Z方向の加速度、ジャイロスコープX、Y、Z、磁力計X、Y、Z、そして温度を出力する。
+* チップに16ビットADコンバーターが内蔵されており、16ビットのデータ出力を行う。
+* ジャイロスコープの範囲: ±250、500、1000、2000 度/秒
+* 加速度範囲: ±2、±4、±8、±16g
 
-### Software Setup
+### ソフトウェア設定
 
-Install smbus
+smbusをインストールする
 
-* either from package:
+* パッケージからインストールする場合:
 
 ``` bash
  sudo apt install python3-smbus
 ```
 
-* or from source:
+* もしくはソースからインストールする場合:
 
 ```bash
 sudo apt-get install i2c-tools libi2c-dev python-dev python3-dev
@@ -34,24 +34,24 @@ cd py-smbus/library
 python setup.py build
 sudo python setup.py install
 ```
-For MPU6050: 
+MPU6050の場合:
 
-Install pip lib for `mpu6050`:
+`mpu6050`用のpipライブラリをインストール:
 
 ```bash
 pip install mpu6050-raspberrypi
 ```
 
-For MPU9250: 
+MPU9250の場合:
 
-Install pip lib for `mpu9250-jmdev`:
+`mpu9250-jmdev`用のpipライブラリをインストール:
 
 ```bash
 pip install mpu9250-jmdev
 ```
 
-### Configuration
-Enable the following configurations to your `myconfig.py`:
+### 設定
+`myconfig.py`に次の設定を追加する:
 
 ``` python
 #IMU
@@ -59,19 +59,19 @@ HAVE_IMU = True
 IMU_SENSOR = 'mpu9250'          # (mpu6050|mpu9250)
 IMU_DLP_CONFIG = 3
 ```
-`IMU_SENSOR` can be either `mpu6050` or `mpu9250` based on the sensor you are using.
+`IMU_SENSOR` は使用するセンサーに応じて `mpu6050` または `mpu9250` を指定できる。
 
-`IMU_DLP_CONFIG` allows to change the digital lowpass filter settings for your IMU. Lower frequency settings (see below) can filter high frequency noise at the expense of increased latency in IMU sensor data.
-Valid settings are from 0 to 6:
+`IMU_DLP_CONFIG` によりIMUのデジタルローパスフィルター設定を変更できる。周波数を下げると（下記参照）高周波ノイズを除去できるが、IMUデータの遅延が増加する。
+有効な設定値は0から6まで:
 
 - `0` 250Hz
 - `1` 184Hz
 - `2` 92Hz
 - `3` 41Hz
-- `4` 20Hz 
+- `4` 20Hz
 - `5` 10Hz
 - `6` 5Hz
 
-### Notes on MPU9250
-At startup the MPU9250 driver performs calibration to zero accel and gyro bias. Usually the process takes less than 10 seconds, and in that time avoid moving or touching the car.
-Please place the car on the ground before starting Donkey.
+### MPU9250に関する注意
+起動時にMPU9250ドライバーは加速度とジャイロのバイアスをゼロに校正する。通常この処理は10秒未満で終了するので、その間は車体に触れたり動かしたりしないこと。
+Donkeyを起動する前に、車体を地面に置いておくこと。

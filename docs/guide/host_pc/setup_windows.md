@@ -1,38 +1,37 @@
 # Windows
 
-Donkey Car used to support a native Windows installation but this has been 
-deprecated in favor of the WSL install. 
-## Install Donkeycar on Windows (WSL)
+Donkey Car はかつて Windows への直接インストールをサポートしていましたが、現在は WSL を利用する方法を推奨しています。
+## Windows(WSL) に Donkeycar をインストールする
 
-The Windows Subsystem for Linux (WSL) lets developers run a GNU/Linux environment -- including most command-line tools, utilities, and applications -- directly on Windows, unmodified, without the overhead of a traditional virtual machine or dualboot setup.
+Windows Subsystem for Linux (WSL) を利用すると、従来の仮想マシンやデュアルブートのような負荷なしに、ほぼそのままの GNU/Linux 環境を Windows 上で利用できます。
 
-* Install [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
-  1.  If using Windows 10 (this is not necessary for Windows 11), turn on Windows 10 "Windows Subsystem for Linux" Feature (Settings > Apps > Programs and Features > Turn Windows features on or off)
-  2.  Download a Linux Distribution from the Microsoft Store (recommend [Ubuntu](https://www.microsoft.com/en-us/p/ubuntu/9nblggh4msv6?activetab=pivot:overviewtab) Latest)
-  3.  Open the Ubuntu App and configure.
+* [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) をインストールします。
+  1. Windows 10 を利用している場合（Windows 11 では不要）、設定 > アプリ > プログラムと機能 > Windows の機能の有効化または無効化 から "Windows Subsystem for Linux" を有効にします。
+  2. Microsoft Store から Linux ディストリビューション（最新版の [Ubuntu](https://www.microsoft.com/en-us/p/ubuntu/9nblggh4msv6?activetab=pivot:overviewtab) を推奨）をダウンロードします。
+  3. Ubuntu アプリを起動して初期設定を行います。
 
-* Open the Ubuntu App to get a prompt window via Start Menu | Ubuntu
+* スタートメニューの Ubuntu からターミナルを起動します
 
-* Refresh list of packages and install pip and xclip:
+* パッケージを更新し、pip と xclip をインストールします:
 
 ```bash
 sudo apt-get update
 sudo apt install python3-pip
 sudo apt-get install libmtdev1 libgl1 xclip
 ```
-* Add export `LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6` to your `.bashrc` and re-source it.
+* `.bashrc` に `LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6` を追加し、読み込み直します。
   ```bash
   source ~/.bashrc
   ```
 
-At this point switch to the [Ubuntu instructions](http://docs.donkeycar.com/guide/host_pc/setup_ubuntu/) and continue the setup there.
+ここまで終わったら、[Ubuntu 用手順](http://docs.donkeycar.com/guide/host_pc/setup_ubuntu/) に切り替えて続行してください。
 
-* Possible problems when running the UI
+* UI 実行時のトラブルシューティング
 
-If you use the Donkey UI with an NVIDIA graphics card and you see a blurred window it might be due to some settings on 
-your PC. In the settings, switch the NVIDIA graphics card 3D rendering mode from 
-`let the running program decide the 3D rendering mode`
-to `let me decide on the 3D rendering mode: Quality`.
+NVIDIA グラフィックカードで Donkey UI を使った際に画面がぼやけて表示される場合は、設定を変更してください。
+設定画面で GPU の 3D レンダリングモードを
+`実行中のプログラムに任せる`
+から `自分で設定する: 品質` に変更します。
 
 ---
-## Next let's [install software on Donkeycar](/guide/install_software/#step-2-install-software-on-donkeycar)
+## 次に [Donkeycar にソフトウェアをインストール](/guide/install_software/#step-2-install-software-on-donkeycar) しましょう

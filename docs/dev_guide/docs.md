@@ -1,27 +1,28 @@
-# Contributing to the documentation
+# ドキュメントへの貢献
 
-Thank you for contributing to the Donkeycar project.  The documentation is critical for the success of our users so we appreciate your contributions.  Accuracy and completeness is critical. Many users are beginners so please write your contributions with this in mind; don't assume that 'they should already know that'.  
+Donkeycar プロジェクトへの貢献ありがとうございます。ドキュメントはユーザーの成功にとって非常に重要ですので、皆さんの貢献に感謝します。正確さと完全さが重要です。多くのユーザーは初心者ですので、「当然知っているはず」と思い込まずに記述してください。
 
-We use the [mkdocs package](https://www.mkdocs.org/user-guide/) to create the html for the https://docs.donkeycar.com site.  The files in the repo are in markdown format; mkdocs `compiles` those to html so they can be displayed in a browser.  You make your changes in your own fork of the donkeydocs repo and open a pull request so it can be merged into the main donkeydocs repo by one of the maintainers.  Once the PR is merged then the changes will automatically be compiled and pushed to the https://docs.donkeycar.com site.   
 
- 1. Fork the [donkeydocs](https://github.com/autorope/donkeydocs) repo in your own github account.
- 2. Clone your fork to your computer so you have a local copy that can be changed.
- 3. Create a new branch in the clone of your fork; the branch will be used to make the changes/additions.  If this is related to an issue in the main repo then start the name of the branch with the issue number.
- 4. Make the changes/additions and check them in your fork.  We use a package called mkdocs to compile the markdown files that you edit/create into html. See the [mkdocs documentation](https://www.mkdocs.org/user-guide/writing-your-docs/#writing-with-markdown) for the particulars of the markdown format that it uses.  If you install mkdocs you can use it to generate a live preview so you can see the changes as you save them.
-    - open a console (git bash console on windows) and cd into the root of your cloned donkeydocs project folder.
-    - create a python virtual environment and activate it.
-    - install the mkdocs package into the activated virtual environment.
-    - run the mkdocs server.  This will provide you with a url that you can open in your browser to see the rendered docs.  
+私たちは [mkdocs パッケージ](https://www.mkdocs.org/user-guide/) を使用して https://docs.donkeycar.com サイト用の HTML を生成しています。リポジトリ内のファイルは Markdown 形式で、mkdocs がそれらを HTML に「コンパイル」することでブラウザで表示できるようにします。変更は自身の fork で行い、プルリクエストを作成してメンテナーによりメインの donkeydocs リポジトリへマージしてもらいます。PR がマージされると変更は自動的にコンパイルされ、https://docs.donkeycar.com サイトへ反映されます。
+
+ 1. 自分の GitHub アカウントで [donkeydocs](https://github.com/autorope/donkeydocs) リポジトリを fork します。
+ 2. fork したリポジトリを自分のコンピューターにクローンし、変更可能なローカルコピーを取得します。
+ 3. fork のクローンで新しいブランチを作成します。このブランチで変更や追加を行います。メインリポジトリの issue に関連する場合は、ブランチ名を issue 番号から始めます。
+ 4. 変更や追加を行い、fork にコミットします。編集・作成した Markdown ファイルを HTML にコンパイルするために mkdocs というパッケージを使用しています。Markdown の書式の詳細は [mkdocs ドキュメント](https://www.mkdocs.org/user-guide/writing-your-docs/#writing-with-markdown) を参照してください。mkdocs をインストールすれば、保存するたびに変更を確認できるライブプレビューを生成できます。
+    - Windows では git bash コンソールを開き、クローンした donkeydocs プロジェクトフォルダーのルートに移動します。
+    - Python の仮想環境を作成してアクティブ化します。
+    - アクティブ化した仮想環境に mkdocs パッケージをインストールします。
+    - mkdocs サーバーを起動します。これにより、ブラウザでレンダリングされたドキュメントを表示できる URL が得られます。
     ```
     python3 -m venv env
     source env/bin/activate
     pip3 install mkdocs
-    mkdocs serve    
+    mkdocs serve
     ```
-    - On subsequent edit sessions, just reactivate the virtual environment and start the mkdocs server (you don't need to recreate the environment, just reactivate it).
+    - 次回以降の編集セッションでは、仮想環境を再度アクティブ化して mkdocs サーバーを起動するだけです（環境を作り直す必要はなく、再アクティブ化するだけで構いません）。
 
- 5. Once you are done making changes/addtions in your branch, commit the changes and push them to your forked repo.  If you find that you need to make more changes then just rinse and repeat; make changes, commit them, push them.
- 6. Once you are sure your updates are correct and they are pushed to your forked repo, open a pull request.  Because you created a fork of the main donkeydocs repo, you can reflect this pull request in the main repo.  Github has a nice feature; after you push to your forked repo; if you go to the repo in github.com then you will see a green `Compare & Pull Request` button; you can push that to create your pull request.
- 7. That will open a pull request in the main donkeydocs repo.  I would alert the discord maintainers channel that you have opened a PR so someone will review it.  You can expect a couple of rounds of comments during the PR process.  If you get a change request then you can make changes related to those comments and push them; the new changes will be reflected in the pull request.
+ 5. ブランチでの変更や追加が完了したら、変更をコミットして fork したリポジトリに push します。さらに変更が必要になった場合は、変更してコミットし push する、を繰り返してください。
+ 6. 更新内容が正しいことを確認し、fork したリポジトリに push したら、プルリクエストを作成します。メインの donkeydocs リポジトリを fork しているので、そのプルリクエストはメインリポジトリに反映されます。便利な機能として、fork したリポジトリに push したあと GitHub のページに行くと緑色の `Compare & Pull Request` ボタンが表示されます。これを押すとプルリクエストを作成できます。
+ 7. これでメインの donkeydocs リポジトリにプルリクエストが作成されます。Discord のメンテナーチャンネルに PR を作成したことを知らせて、誰かにレビューしてもらうとよいでしょう。プルリクエストの過程で数回コメントのやりとりがあるはずです。変更依頼を受けた場合は、そのコメントに沿って修正を行い push してください。新しい変更はプルリクエストに反映されます。
 
-This process is documented in more detail here https://docs.github.com/en/get-started/quickstart/contributing-to-projects
+このプロセスの詳細は https://docs.github.com/en/get-started/quickstart/contributing-to-projects に記載されています。

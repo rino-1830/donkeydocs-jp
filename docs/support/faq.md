@@ -1,60 +1,55 @@
-# FAQ
+# よくある質問
 
-### What types of RC cars work with the donkey platform?
+### Donkeyプラットフォームに対応するRCカーの種類は？
 
-Most hobby grade RC cars will work fine with the electronics, but you'll need to make your own base-plate and camera
-holder. To make sure the car will work with Donkey check these things.
+ほとんどのホビー用RCカーは電子部品と問題なく動作しますが、ベースプレートとカメラホルダーは自作する必要があります。Donkeyで動作させるためには以下を確認してください。
 
-* it has a separate ESC and receiver. Some cheaper cars have these combined so it would require soldering to connect the Donkey motor controller to the ESC.
-* The ESC uses three-wire connectors. This will make it easy to just plug into the Donkey hardware.
-* Brushed motors are easier because they can go slower but sensored brushless motors(w/sensored ESC) can work as well.
+* ESCと受信機が別々であること。一体型の場合は、DonkeyのモーターコントローラとESCを接続するために半田付けが必要になります。
+* ESCが3線式コネクタを使用していること。Donkeyハードウェアへそのまま接続できます。
+* ブラシ付きモーターの方が低速で扱いやすいですが、センサー付きブラシレスモーター（センサー対応ESC）でも動作可能です。
 
-For more information, see [Roll Your Own](../cars/roll_your_own.md).
+詳細は[Roll Your Own](../cars/roll_your_own.md)を参照してください。
 
-### What car can I use if I'm not in the USA?
+### アメリカ国外ではどの車を使えばよいですか？
 
-The easiest thing to do would be to take your parts down to your local RC / hobby shop and check that the car you want
-works with the parts. Here are some parts people have said work in other countries.
+一番簡単なのは、購入したパーツを持って近所のRCショップやホビーショップに行き、希望する車がこれらのパーツで動作するか確認することです。他国で使えると報告されている車を以下に示します。
 
-* Australia: [KAOS](https://www.hobbywarehouse.com.au/hsp-94186-18694k-kaos-blue-rc-truck.html) (functionally equivalent to the Exceed Magnet)
-* China: [HSP 94186](https://item.taobao.com/item.htm?spm=a1z02.1.2016030118.d2016038.314a2de7XhDszO&id=27037536775&scm=1007.10157.81291.100200300000000&pvid=dd956496-2837-41c8-be44-ecbcf48f1eac) (functionally equivalent to the Exceed Magnet)
-* Add your country to this list (click edit this in top left corner)
+* オーストラリア: [KAOS](https://www.hobbywarehouse.com.au/hsp-94186-18694k-kaos-blue-rc-truck.html)（機能的にはExceed Magnetと同等）
+* 中国: [HSP 94186](https://item.taobao.com/item.htm?spm=a1z02.1.2016030118.d2016038.314a2de7XhDszO&id=27037536775&scm=1007.10157.81291.100200300000000&pvid=dd956496-2837-41c8-be44-ecbcf48f1eac)（機能的にはExceed Magnetと同等）
+* このリストにあなたの国を追加してください（左上の「edit this」をクリック）
 
-### How can I make my own track?
+### 自分でコースを作るには？
 
-You can use tape, ribbon or even rope. The most popular tracks are 4ft wide and have 2in white borders with a dashed yellow center line. The Oakland track is about 70 feet around the center line. Key race characteristics include:
+テープやリボン、ロープなどを使うことができます。一般的なコースは幅4フィートで、2インチの白い外枠と破線の黄色いセンターラインがあります。オークランドのコースはセンターライン周囲が約70フィートです。主なレースの特徴は次の通りです。
 
-* straightaways.
-* left and right turns
-* hairpin turn
-* start/finish line.
+* ストレート区間
+* 左右のコーナー
+* ヘアピンカーブ
+* スタート／ゴールライン
 
-### Will Donkey Work on different hardware?
+### Donkeyは他のハードウェアでも動作しますか？
 
-Yes. It's all python so you can run it on any system. Usually the hard part of porting Donkey will be getting the hardware working.
-Here are a couple systems that people have tried or talked about.
+はい。すべてPythonで書かれているので、どんなシステムでも動作させることができます。移植で難しいのはハードウェアを動かす部分です。試された、または話題に上がったシステムをいくつか紹介します。
 
-* NVIDA TX2 - This was implemented with a webcam and used a teensy to control the motor/servos. I2c control of PCA9685 works as well.
+* NVIDIA TX2 - ウェブカメラを使用し、Teensyでモーターとサーボを制御しました。PCA9685をI2Cで制御することも可能です。
+* Pi-Zero - PiB/B+向けの手順をそのまま試してみてください。PiZeroでも動作するはずです。
 
-* Pi-Zero - Yes, try following the steps for the PiB/B+. They should work for the PiZero.
+### 再起動後にプロンプトの前に(donkey)が表示されず、実行するとPythonのエラーが出ます
 
-### After a reboot, I don't see the (donkey) in front of the prompt, and I get python errors when I run
-
-1. If you used this disc setup guide above, you used conda to manage your virtual environment. You need to activate the donkey conda environment with:
+1. 上記のディスクセットアップガイドに従った場合、condaで仮想環境を管理しています。以下のコマンドでdonkey環境を有効化してください。
 
 ```bash
 conda activate donkey
 ```
 
-2. optionally you can add that line to the last line of your `~/.bashrc` to have it active each time you login.
+2. 必要であれば、このコマンドを`~/.bashrc`の最終行に追加すると、ログイン時に自動的に有効化されます。
 
-### How to get latest Donkey source
+### 最新のDonkeyソースを取得するには
 
-1. When donkey has changed you can get the latest source. You've installed it directly from the github repo, so getting latest is easy:
+1. Donkeyが更新された場合、最新のソースを取得できます。GitHubリポジトリから直接インストールしているので、更新は簡単です。
 
 ```bash
 cd donkeycar
 git pull origin main
 donkey createcar --path ~/mycar --overwrite
 ```
-

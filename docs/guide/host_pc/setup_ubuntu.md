@@ -1,55 +1,55 @@
-# Install Donkeycar on Linux
+# LinuxでDonkeycarをインストールする
 
 
-> Note : tested on Ubuntu 20.04 LTS, 22.04 LTS
+> 注: Ubuntu 20.04 LTS、22.04 LTSでテスト済み
 
-* Open the Terminal application.
+* ターミナルアプリケーションを開きます。
 
-* Install miniconda Python 3.11 64 bit. 
+* 64ビット版のPython 3.11向けminicondaをインストールします。
 
 ```bash
 wget https://repo.anaconda.com/miniconda/Miniconda3-py311_24.4.0-0-Linux-x86_64.sh
 bash ./Miniconda3-py311_24.4.0-0-Linux-x86_64.sh
 ```
 
-Setup your `donkey` conda env with:
+`donkey` というconda環境を次のように設定します:
 
 ```bash
 conda create -n donkey python=3.11
 conda activate donkey
 ```
 
-Now there are two different installations possible. Very likely you will 
-want to do the user install. Then you will perform Step 
-[_User install_](#user-install). In case 
-you want to debug or edit the source code, you will need to do the more advanced 
-[_Developer install_](#developer-install). But you can do only one.
+現在、2通りのインストール方法があります。ほとんどの場合、
+ユーザーインストールを行うことになるでしょう。次に
+[_User install_](#user-install) を実行します。もし
+ソースコードのデバッグや編集をしたい場合は、より高度な
+[_Developer install_](#developer-install) を行う必要があります。ただしどちらか一方だけです。
 
-> _**Note**_: Only do User install or Developer install but not both!
+> **注意**: User install か Developer install のどちらか一方だけを実行してください。
 
-### User install
+### ユーザーインストール
 
-As you have activated the new `donkey` env already you simply type:
+`donkey` 環境をすでに有効化しているので、次のコマンドを入力します:
 
 ```bash
 pip install donkeycar[pc]
 ```
-This will install the latest release. Note, if you are using ZSH then
-you have to escape the `[` and `]`, i.e. 
+これで最新リリースがインストールされます。ZSH を使用している場合は、
+`[` と `]` をエスケープする必要があります。つまり、
 
 ```bash
 pip install donkeycar\[pc\]
 ```
 
 
-### Developer install
+### 開発者インストール
 
-Here you can choose which branch or tag you want to install, and you can 
-edit and/or debug the code, by downloading the source code from GitHub.
+こちらでは、インストールしたいブランチやタグを選択でき、
+GitHubからソースコードをダウンロードすることで、コードの編集やデバッグができます。
 
-Create a project directory you would like to use as the 
-head of your projects, change into it and download and install `donkeycar` 
-from GitHub.
+プロジェクトのルートとして使いたいディレクトリを作成し、
+そこに移動して `donkeycar` をダウンロード・インストールします。
+ソースはGitHubから取得します。
 
 ```bash
 mkdir projects
@@ -60,56 +60,56 @@ git checkout main
 pip install -e .[pc]
 ```
 
-Note: if you are using ZSH (you'll know if you are), you won't be able to 
-run `pip install -e .[pc]`. You'll need to escape the brackets and run 
-`pip install -e .\[pc\]`.
+注: ZSH を使っている場合、このままでは実行できないので、
+`pip install -e .[pc]` を実行する際にはブラケットをエスケープして
+`pip install -e .\[pc\]` と入力してください。
 
 
-* If this is not your first install, update Conda and remove old donkey
+* すでにインストール済みの場合は、Condaを更新して古いdonkey環境を削除します。
 
 ```bash
 conda update -n base -c defaults conda
 conda env remove -n donkey
 ```
 
-The newer version of Tensorflow is already built with GPU support. If you 
-have an Nvidia GPU, install Cuda 12 following instructions on Nivida's page 
-[here](https://developer.nvidia.com/cuda-toolkit-archive)
+新しいTensorflowはすでにGPUサポート付きでビルドされています。もし
+Nvidia GPUをお持ちなら、Nvidiaのページに従ってCuda 12をインストールしてください
+[こちら](https://developer.nvidia.com/cuda-toolkit-archive)
 
-* Optional Install Coral edge tpu compiler
+* 省略可能: Coral Edge TPUコンパイラのインストール
 
-If you have a Google Coral edge tpu, you may wish to compile models. You 
-will need to install the edgetpu_compiler exectutable. Follow [their 
-instructions](https://coral.withgoogle.com/docs/edgetpu/compiler/).
+Google Coral Edge TPU をお持ちなら、モデルをコンパイルするために
+`edgetpu_compiler` 実行ファイルをインストールする必要があります。[こちらの
+手順](https://coral.withgoogle.com/docs/edgetpu/compiler/) に従ってください。
 
-* Optionally configure PyTorch to use GPU - only for NVidia Graphics cards
+* 省略可能: PyTorch をGPUで使えるよう設定する ― Nvidia製GPU専用
 
-If you have an NVidia card, you should update to the latest drivers and 
-[install Cuda SDK](https://www.tensorflow.org/install/gpu#windows_setup). 
-You will also need to change the code to use the GPU in a few places, so
-you need the developer install. 
+NVidiaカードを使用している場合は、最新のドライバに更新し、
+[Cuda SDKをインストール](https://www.tensorflow.org/install/gpu#windows_setup) してください。
+また、いくつかの箇所でGPUを使用するようコードを変更する必要があるため、
+開発者インストールが必要です。
 
 ```bash
 conda install cudatoolkit=11 -c pytorch
 ```
 
-You should replace `<CUDA Version>` with your CUDA version. Any version 
-above 10.0 should work. You can find out your CUDA version by running 
-`nvcc --version` or `nvidia-smi`. (if those commands don't work, it means you 
-don't already have them installed. Follow the directions given by that error 
-to install them.) If the version given by these two commands don't match, go 
-with the version given by `nvidia-smi`.
+`<CUDA Version>` はお使いのCUDAバージョンに置き換えてください。10.0以上であれば
+動作します。CUDAのバージョンは
+`nvcc --version` または `nvidia-smi` で確認できます。(これらのコマンドが使えない場合は、
+インストールされていないということなので、そのエラーの指示に従って
+インストールしてください)。この2つのコマンドで表示されるバージョンが一致しない場合は、
+`nvidia-smi` の表示を採用してください。
 
-* Create your local working dir:
+* 作業用のローカルディレクトリを作成します:
 
 ```bash
 donkey createcar --path ~/mycar
 ```
 
-> Note: After closing the Anaconda Prompt, when you open it again, you will need to 
-> type ```conda activate donkey``` to re-enable the mappings to donkey specific 
-> Python libraries
+> 注: Anaconda Prompt を閉じた後に再度開くときは、
+> ```conda activate donkey``` を入力して、donkey 用のライブラリを再度有効に
+> してください。
 
 ----
 
-### Next let's [install software on Donkeycar](/guide/install_software/#step-2-install-software-on-donkeycar)
+### 次に [Donkeycar へのソフトウェアのインストール](/guide/install_software/#step-2-install-software-on-donkeycar) を行います

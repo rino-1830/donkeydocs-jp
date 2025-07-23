@@ -1,78 +1,78 @@
-# Create your car application
+# 自分の車アプリケーションを作成する
 
-If you are not already, please [ssh into your vehicle](/guide/robot_sbc/setup_raspberry_pi/#step-5-connecting-to-the-pi).
+まだ行っていない場合は、[車両にSSH接続してください](/guide/robot_sbc/setup_raspberry_pi/#step-5-connecting-to-the-pi)。
 
-## Create Donkeycar from Template
+## テンプレートからDonkeycarを作成する
 
-Create a set of files to control your Donkey with the [createcar](/utility/donkey/#create-car) command:
+[createcar](/utility/donkey/#create-car) コマンドを使ってDonkeyを制御するための一式のファイルを作成します。
 
 ```bash
 donkey createcar --path ~/mycar
 ```
 
-That creates a car using the default [deep learning template](/guide/deep_learning/train_autopilot/).  You can also create a car that uses the [gps path follow template](/guide/path_follow/path_follow/);
+これにより、デフォルトの [deep learning template](/guide/deep_learning/train_autopilot/) を使った車が作成されます。別途、[gps path follow template](/guide/path_follow/path_follow/) を使った車を作成することもできます。
 
 ```bash
 donkey createcar --template=path_follow --path ~/mycar
 ```
 
-You can also create a car that uses the [computer vision template](/guide/computer_vision/computer_vision/);
+さらに、[computer vision template](/guide/computer_vision/computer_vision/) を使った車を作成することもできます。
 
 ```bash
 donkey createcar --template=cv_control --path ~/mycar
 ```
 
-> `mycar` is not a special name; you can name your car folder anything you want. See the [createcar](/utility/donkey/#create-car) documentation for more details.
+> `mycar` は特別な名前ではありません。車のフォルダー名は好きなものにして構いません。詳細は [createcar](/utility/donkey/#create-car) のドキュメントを参照してください。
 
-## Configure Options
+## オプションを設定する
 
-Look at __myconfig.py__ in your newly created directory, ~/mycar
+作成したディレクトリ ~/mycar 内の __myconfig.py__ を確認します。
 ```bash
 cd ~/mycar
 nano myconfig.py
 ```
 
-Each line has a comment mark. The commented text shows the default value. When you want to make an edit to over-write the default, uncomment the line by removing the # and any spaces before the first character of the option.
+各行にはコメント記号が付いています。コメント内の値はデフォルト値です。デフォルトを上書きしたい場合は、行頭の # とその前の空白を削除してコメントを解除します。
 
-example:
+例：
 
 ```python
 # STEERING_LEFT_PWM = 460
 ```
 
-becomes:
+こうなります：
 
 ```python
 STEERING_LEFT_PWM = 500
 ```
 
-when edited. You will adjust these later in the [calibrate](/guide/calibrate/) section.
+このように編集します。後ほど [calibrate](/guide/calibrate/) の章でこれらを調整します。
 
-### Configure I2C PCA9685
+### I2C PCA9685 を設定する
 
-If you are using a PCA9685 servo driver board, make sure you can see it on I2C.
+PCA9685 サーボドライバボードを使用する場合、I2C 上で認識できることを確認してください。
 
-**Jetson Nano**:
+**Jetson Nano**：
 
 ```bash
 sudo usermod -aG i2c $USER
 sudo reboot
 ```
 
-After a reboot, then try:
+再起動後、次を試します：
 
 ```bash
 sudo i2cdetect -r -y 1
 ```
 
-**Raspberry Pi**:
+**Raspberry Pi**：
 
 ```bash
 sudo apt-get install -y i2c-tools
 sudo i2cdetect -y 1
 ```
 
-This should show you a grid of addresses like:
+すると、次のようなアドレスの一覧が表示されます：
 
 ```text
      0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
@@ -86,19 +86,19 @@ This should show you a grid of addresses like:
 70: 70 -- -- -- -- -- -- --
 ```
 
-In this case, the 40 shows up as the address of our PCA9685 board. If this does not show up, then check your wiring to the board. On a pi, ensure I2C is enabled in menu of ```sudo raspi-config``` (notice, it suggest reboot).
+この例では、PCA9685 ボードのアドレスとして 40 が表示されています。表示されない場合は配線を確認してください。Raspberry Pi では ```sudo raspi-config``` のメニューから I2C を有効にしておきます（再起動を促されます）。
 
-If you have assigned a non-standard address to your board, then adjust the address in the `myconfig.py` under variable `PCA9685_I2C_ADDR`. If your board is on another bus, then you can specify that with the `PCA9685_I2C_BUSNUM`.
+ボードに標準とは異なるアドレスを割り当てた場合は、`myconfig.py` の `PCA9685_I2C_ADDR` 変数でそのアドレスを設定してください。別のバスに接続している場合は `PCA9685_I2C_BUSNUM` を指定できます。
 
-**Jetson Nano**: set ```PCA9685_I2C_BUSNUM = 1``` in your __myconfig.py__ . For the pi, this will be auto detected by the Adafruit library. But not on the Jetson Nano.
+**Jetson Nano**：__myconfig.py__ で ```PCA9685_I2C_BUSNUM = 1``` に設定します。Raspberry Pi では Adafruit のライブラリが自動検出しますが、Jetson Nano ではそうなりません。
 
-## Sombrero Setup
+## Sombrero の設定
 
-Set ```HAVE_SOMBRERO = True``` in your __myconfig.py__ if you have a sombrero board.
+Sombrero ボードを使用する場合は __myconfig.py__ で ```HAVE_SOMBRERO = True``` を設定します。
 
-## Robo HAT MM1 Setup
+## Robo HAT MM1 の設定
 
-Set ```HAVE_ROBOHAT = True``` in your __myconfig.py__ if you have a Robo HAT MM1 board. Also set the following variables according to your setup.  Most people will be using the below values, however, if you are using a Jetson Nano, please set `MM1_SERIAL_PORT = '/dev/ttyTHS1'`
+Robo HAT MM1 ボードを使用する場合は __myconfig.py__ で ```HAVE_ROBOHAT = True``` を設定します。また、以下の変数を環境に合わせて設定してください。ほとんどの方は下記の値を使用しますが、Jetson Nano では `MM1_SERIAL_PORT = '/dev/ttyTHS1'` にしてください。
 
 
 ```python3
@@ -124,29 +124,29 @@ CONTROLLER_TYPE='MM1'
 DRIVE_TRAIN_TYPE = 'MM1'
 ```
 
-The Robo HAT MM1 uses a RC Controller and CircuitPython script to drive the car during training. You must put the CircuitPython script onto the Robo HAT MM1 with your computer before you can continue.
+Robo HAT MM1 はトレーニング中の走行にRCコントローラーとCircuitPythonスクリプトを使用します。先へ進む前に、CircuitPython スクリプトをパソコンから Robo HAT MM1 へコピーしておく必要があります。
 
-1.  Download the CircuitPython Donkey Car Driver for Robo HAT MM1 to your computer from [here](https://github.com/autorope/donkeycar/blob/dev/donkeycar/contrib/robohat/code.py)
-2.  Connect the MicroUSB connector on the Robo HAT MM1 to your computer's USB port.
-3.  A __CIRCUITPY__ device should appear on the computer as a USB Storage Device
-4.  Copy the file downloaded in Step 1 to the __CIRCUITPY__ USB Storage Device.  The file should be named __code.py__. It should be at the top level of the drive, not in any folder.
-5.  Download the Adafruit logging library python file, *adafruit_logging.py*, [here](https://github.com/adafruit/Adafruit_CircuitPython_Logging/blob/master/adafruit_logging.py)
-6.  Copy the *adafruit_logging.py* file into the CIRCUITPY "lib" folder
-7.  Unplug USB Cable from the Robo HAT MM1 and place on top of the Raspberry Pi, as you would any HAT.
-
-
-You may need to enable the hardware serial port on your Raspberry Pi.  On your Raspberry Pi...
-
-1.  Run the command ```sudo raspi-config```
-2.  Navigate to the __5 - Interfaceing options__ section.
-3.  Navigate to the __P6 - Serial__ section.
-4.  When asked: __Would you like a login shell to be accessible over serial?__  NO
-5.  When asked: __Would you like the serial port hardware to be enabled?__ YES
-6.  Close raspi-config
-7.  Restart
+1.  [こちら](https://github.com/autorope/donkeycar/blob/dev/donkeycar/contrib/robohat/code.py) から Robo HAT MM1 用 CircuitPython Donkey Car Driver をパソコンにダウンロードします。
+2.  Robo HAT MM1 のMicroUSBコネクターをパソコンのUSBポートに接続します。
+3.  パソコンに USB ストレージデバイスとして __CIRCUITPY__ が表示されます。
+4.  手順1でダウンロードしたファイルを __CIRCUITPY__ の USB ストレージデバイスにコピーします。ファイル名は __code.py__ とし、ドライブの最上位に配置してください。
+5.  Adafruit のロギングライブラリ *adafruit_logging.py* を [ここ](https://github.com/adafruit/Adafruit_CircuitPython_Logging/blob/master/adafruit_logging.py) からダウンロードします。
+6.  *adafruit_logging.py* を CIRCUITPY "lib" フォルダーにコピーします。
+7.  Robo HAT MM1 のUSBケーブルを外し、他のHATと同様に Raspberry Pi の上に取り付けます。
 
 
-If you would like additional hardware or software support with Robo HAT MM1, there are a few guides published on Hackster.io.  They are listed below.
+Raspberry Pi のハードウェアシリアルポートを有効にする必要がある場合があります。Raspberry Pi 上で以下を実行します...
+
+1.  `sudo raspi-config` を実行します。
+2.  __5 - Interfaceing options__ セクションへ移動します。
+3.  __P6 - Serial__ セクションへ移動します。
+4.  `Would you like a login shell to be accessible over serial?` と聞かれたら `NO` を選択します。
+5.  `Would you like the serial port hardware to be enabled?` と聞かれたら `YES` を選択します。
+6.  raspi-config を終了します。
+7.  再起動します。
+
+
+Robo HAT MM1 に関するさらなるハードウェアやソフトウェアのサポートを知りたい場合、Hackster.io にいくつかのガイドが公開されています。以下に示します。
 
 [Raspberry Pi + Robo HAT MM1](https://www.hackster.io/wallarug/autonomous-cars-with-robo-hat-mm1-8d0e65)
 
@@ -155,21 +155,21 @@ If you would like additional hardware or software support with Robo HAT MM1, the
 [Simulator + Robo HAT MM1](https://www.hackster.io/wallarug/donkey-car-simulator-with-real-rc-controller-628e77)
 
 
-## Joystick setup
+## ジョイスティックの設定
 
-If you plan to use a joystick, take a side track over to [here](/parts/controllers/#joystick-controller).
+ジョイスティックを使用する場合は、[こちら](/parts/controllers/#joystick-controller) を参照してください。
 
-## Camera Setup
+## カメラの設定
 
-If you are using the default deep learning template or the computer vision template then you will need a camera.  By default __myconfig.py__ assumes a RaspberryPi camera.  You can change this by editing the `CAMERA_TYPE` value in the __myconfig.py__ file in your `~/mycar` folder.  
+デフォルトの deep learning テンプレートまたは computer vision テンプレートを使用する場合、カメラが必要です。__myconfig.py__ ではデフォルトで Raspberry Pi カメラを想定しています。`~/mycar` フォルダーの __myconfig.py__ にある `CAMERA_TYPE` の値を編集して変更できます。
 
-If you are using the gps path follow template then you do not need, and may not want, a camera.  In this case you can change the camera type to mock; `CAMERA_TYPE = "MOCK"`.
+gps path follow テンプレートを使用する場合、カメラは不要、むしろ無いほうがよいこともあります。この場合はカメラタイプを `CAMERA_TYPE = "MOCK"` に変更します。
 
-See [Cameras](/parts/cameras) for details on the various cameras and configuration.
+[Cameras](/parts/cameras) で各種カメラと設定の詳細を確認してください。
 
-## Upgrade Donkey Car Software
+## Donkey Car ソフトウェアのアップグレード
 
-Make all config changes to __myconfig.py__ and they will be preserved through an update. When changes occur that you would like to get, you can pull the latest code, then issue a:
+__myconfig.py__ に行った設定変更は、アップデートしても保持されます。変更を取得したい場合は、最新のコードを取得して次のコマンドを実行します。
 
 ```bash
 cd projects/donkeycar
@@ -177,16 +177,16 @@ git pull
 donkey createcar --path ~/mycar --overwrite
 ```
 
-If you created a car with the gps path follow template then remember to include the --template argument;
+gps path follow テンプレートで車を作成した場合は、--template 引数を付けるのを忘れないでください。
 
 ```bash
 donkey createcar --template=path_follow --path ~/mycar --overwrite
 ```
 
 
-Your ~/mycar/manage.py, ~/mycar/config.py and other files will change with this operation, but __myconfig.py__ will not be touched. Your __data__ and __models__ dirs will not be touched.
+この操作により ~/mycar/manage.py、~/mycar/config.py などのファイルは更新されますが、__myconfig.py__ は変更されません。__data__ フォルダーと __models__ フォルダーも変更されません。
 
 -------
 
-## Next 
-[Calibrate your car](/guide/calibrate)
+## 次へ
+[車をキャリブレーションする](/guide/calibrate)

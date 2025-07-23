@@ -1,55 +1,55 @@
 
-# Path Following with the Intel Realsense T265 sensor
+# Intel Realsense T265 センサーによる経路追従
 
-Rather than using a standard camera and training a network to drive, Donkeycar supports using the [Intel Realsense T265 "tracking camera"](https://www.intelrealsense.com/tracking-camera-t265/) to follow a path instead. In this application, you simply drive a path once manually, and Donkeycar will "remember" that path and repeat it autonomously.
+通常のカメラを使って運転用ネットワークを学習させる代わりに、Donkeycar では [Intel Realsense T265 "tracking camera"](https://www.intelrealsense.com/tracking-camera-t265/) を利用して経路を追従させることができます。この仕組みでは、一度手動で経路を走らせるだけで Donkeycar がその経路を「記憶」し、自律的に繰り返して走行します。
 
-The Intel T265 uses a combination of stereo cameras and an internal Inertial Measurement Unit (IMU) plus its own Myriad X processor to do Visual Inertial Odometry, which is a fancy way of saying that it knows where it is by looking at the scene around it as it moves and correlating that with the IMU's sensing to localize itself, outputting an X,Y,Z position to Donkey, much as a GPS sensor would (but ideally much more accurately, to a precision of centemeters)
+Intel T265 は、ステレオカメラと内蔵の慣性計測装置（IMU）、そして独自の Myriad X プロセッサを組み合わせて Visual Inertial Odometry を行います。これは周囲の風景を見ながら移動し、IMU の情報と照合することで自身の位置を特定し、GPS センサーのように X、Y、Z 座標を Donkeycar へ出力します（ただし理想的にはより高精度で、センチメートル単位まで測位します）。
 
 ---------------
-* **Note** Although the Realsense T265 can be used with a Nvidia Jetson Nano, it's a bit easier to set up with a Raspberry Pi (we recommend the RPi 4, with at least 4GB memory). Also, the Intel Realsense D4XX series can also be used with Donkeycar as a regular camera (with the use of its depth sensing data coming soon), and we'll add instructions for that when it's ready.
+* **注意** Realsense T265 は Nvidia Jetson Nano でも利用できますが、Raspberry Pi（最低でも 4GB メモリの RPi 4 を推奨）で設定する方が少し簡単です。また、Intel Realsense D4XX シリーズも通常のカメラとして Donkeycar で使えます（深度センサーのデータ利用は近日対応予定）。準備ができ次第、手順を追加します。
 
-Original T265 path follower code by [Tawn Kramer](https://github.com/tawnkramer/donkey)
+T265 の経路追従コードは [Tawn Kramer](https://github.com/tawnkramer/donkey) によるものです。
 ----
 
 
-## Step 1: Setup Librealsense on Ubuntu Machine
+## ステップ 1: Ubuntu マシンで Librealsense をセットアップする
 
-Using the latest version of Raspian (tested with Raspian Buster) on the RPi, follow [these instructions](https://github.com/acrobotic/Ai_Demos_RPi/wiki/Raspberry-Pi-4-and-Intel-RealSense-D435) to set up Intel's Realsense libraries (Librealsense) and dependencies. Although those instructions discuss another Realsense sensor, they work equally well for the T265. There are also [video instructions](https://www.youtube.com/watch?v=LBIBUntnxp8)
+Raspberry Pi 上で最新の Raspian（Raspian Buster で確認済み）を使用し、Intel の Realsense ライブラリ（Librealsense）とその依存関係をセットアップするには [こちらの手順](https://github.com/acrobotic/Ai_Demos_RPi/wiki/Raspberry-Pi-4-and-Intel-RealSense-D435) を参照してください。これらの手順は別の Realsense センサーを扱っていますが、T265 でも同様に利用できます。また [ビデオによる解説](https://www.youtube.com/watch?v=LBIBUntnxp8) もあります。
 
-## Step 2: Setup Donkeycar
+## ステップ 2: Donkeycar のセットアップ
 
-Follow the standard instructions [here](https://docs.donkeycar.com/guide/install_software/). With the Path Follower, there is no need to install Tensorflow for this particular Donkeycar configuration however do install numpy/upgrade before running "pip install -e .[pi]"
+標準的な手順は [こちら](https://docs.donkeycar.com/guide/install_software/) を参照してください。この Path Follower 構成では Tensorflow のインストールは不要ですが、"pip install -e .[pi]" を実行する前に numpy をインストール／アップグレードしておいてください。
 
-## Step 3: Create the Donkeycar path follower app
+## ステップ 3: Donkeycar の Path Follower アプリを作成する
 
 ```donkey createcar --path ~/follow --template path_follow
 
-## Step 4: Check/change your config settings
+## ステップ 4: 設定を確認・変更する
 
 ```cd ~follow```
 ```sudo nano myconfig.py```
 
-Make sure you agree with the default values or adjust them to your liking (ie. "throttle", "steering", PIDs, etc.). Uncomment (remove the #) for any line you've changed. In Nano press cntrl-o to save the file and cntrl-x to exit.
+デフォルト値を確認し、必要に応じて好みに合わせて調整してください（「throttle」「steering」や PID など）。変更した行はコメントアウト記号「#」を外して有効にします。Nano では Ctrl+O で保存、Ctrl+X で終了します。
 
-## Step 5: Run the Donkeycar path follower app
+## ステップ 5: Donkeycar Path Follower アプリを実行する
 
-Running
+実行
 ``ssh pi@<your pi’s IP address or "raspberrypi.local">``
-``` cd ~/follow``` 
+``` cd ~/follow```
 ```python3 manage.py drive```
 
-Keep the terminal open to see the printed output of the app while it is running.
+アプリが動作している間、端末は開いたままにして出力を確認してください。
 
-If you get an error saying that it can't find the T265, unplug the sensor, plug it back in and try again. Ensure that your gamepad is on and connected, too (blue light is on the controller)
+T265 が見つからないというエラーが出た場合は、一度センサーを抜いて差し直してから再度試してください。ゲームパッドが電源オンで接続されていること（コントローラーの青いランプが点灯していること）も確認してください。
 
-Once it’s running, open a browser on your laptop and enter this in the URL bar: http://<your pi’s IP address or "raspberrypi.local">:8890
+起動したら、ノート PC のブラウザで次の URL を入力します: http://<your pi’s IP address or "raspberrypi.local">:8890
 
-When you drive, the Web interface will draw a red line for the path, a green circle for the robot location. If you're seeing the green dot but not the red line, that means that a path file has already been written. Delete “donkey_path.pkl” (rm donkey_path.pkl), restart and the red line should show up
+走行中、Web インターフェースには経路を示す赤線とロボット位置を示す緑の円が描かれます。緑の点だけで赤線が表示されない場合は、すでにパスファイルが作成されているということです。「donkey_path.pkl」を削除（rm donkey_path.pkl）し、再起動すると赤線が表示されるはずです。
 
 
-PS4 Gamepad controls are as follows:
+PS4 ゲームパッドの操作は次の通りです：
 +------------------+--------------------------+
-|     control      |          action          |
+|     操作        |          動作          |
 +------------------+--------------------------+
 |      share       | toggle auto/manual mode  |
 |      circle      |        save_path         |
@@ -65,22 +65,22 @@ PS4 Gamepad controls are as follows:
 | right_stick_vert |       set_throttle       |
 +------------------+--------------------------+
 
-## Step 6: Driving instructions
+## ステップ 6: 走行の手順
 
-1) Mark a nice starting spot for your robot. Be sure to put it right back there each time you start.
-2) Drive the car in some kind of loop. You see the red line show the path.
-3) Hit circle on the PS3/4 controller to save the path.
-4) Put the bot back at the start spot.
-5) Then hit the “select” button (on a PS3 controller) or “share” (on a PS4 controller) twice to go to pilot mode. This will start driving on the path. If you want it go faster or slower, change this line in the myconfig.py file: ```THROTTLE_FORWARD_PWM = 400```
+1) ロボットのスタート地点を決め、毎回必ずそこに戻してから開始してください。
+2) 車を一周させるように走らせます。赤い線で経路が表示されます。
+3) PS3/4 コントローラの circle ボタンを押して経路を保存します。
+4) ロボットをスタート地点に戻します。
+5) その後、PS3 コントローラなら「select」、PS4 コントローラなら「share」を 2 回押してパイロットモードに切り替えます。これで経路を走り始めます。速度を調整したい場合は、myconfig.py の ```THROTTLE_FORWARD_PWM = 400``` を変更してください。
 
-Check the bottom of myconfig.py for some settings to tweak. PID values, map offsets and scale. things like that. You might want to start by downloading and using the myconfig.py file from my repo, which has some known-good settings and is otherwise a good place to start.
+myconfig.py の末尾には PID 値やマップオフセット、スケールなど調整できる設定があります。私のリポジトリにある myconfig.py をダウンロードして使うと、既に実績のある設定が入っているので出発点として便利です。
 
-Some tips:
+いくつかのヒント：
 
-When you start, the green dot will be in the top left corner of the box. You may prefer to have it in the center. If so, change PATH_OFFSET = (0, 0) in the myconfig.py file to PATH_OFFSET = (250, 250)
+起動すると、緑の点はボックスの左上に表示されます。中央にしたい場合は、myconfig.py の PATH_OFFSET = (0, 0) を PATH_OFFSET = (250, 250) に変更してください。
 
-For a small course, you may find that the path is too small to see well. In that case, change PATH_SCALE = 5.0 to PATH_SCALE = 10.0 (or more, if necessary)
+小さいコースでは経路が見づらい場合があります。そのときは PATH_SCALE = 5.0 を PATH_SCALE = 10.0（必要に応じてそれ以上）に変更します。
 
-When you're running in auto mode, the green dot will change to blue
+自動モードで走行中は、緑の点が青に変わります。
 
-It defaults to recording a path point every 0.3 meters. If you want it to be smoother, you can change to a smaller number in myconfig.py with this line: PATH_MIN_DIST = 0.3
+デフォルトでは 0.3 メートルごとに経路ポイントを記録します。より滑らかにしたい場合は、myconfig.py の PATH_MIN_DIST = 0.3 を小さい値に変更してください。

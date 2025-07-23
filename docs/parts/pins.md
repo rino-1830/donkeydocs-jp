@@ -1,86 +1,86 @@
-# Pin Specifiers
+# ピン指定子
 
-Control signals are send and received by pins on the Raspberry Pi, Jetson Nano and connected peripherals, like the PCA9685 Servo controller.  Starting wit version 5.x, Donkeycar uses 'pin specs' to specify pins including various configuration that is specific to the underlying hardware or library implementation.  This allows use to make the underlying logic, like how a motor controller takes throttle values and outputs them to the motor, more independent of the particular hardware or library used to generate the signals.
+制御信号はRaspberry Pi、Jetson NanoおよびPCA9685サーボコントローラのような周辺機器のピンを介して送受信されます。バージョン5.xからDonkeycarでは、基盤ハードウェアやライブラリ実装固有の設定を含めてピンを指定する「ピン指定子」を使用します。これにより、モーターコントローラがスロットル値を取得してモーターへ出力するなどの内部ロジックを、信号生成に利用するハードウェアやライブラリに依存せずに構築できます。
 
-## Types of Pins
+## ピンの種類
 
-PWM pins generate a square wave, sometimes called a PWM pulse.  This is used to control servo motors, electronic speed controllers, and LEDs.
+PWMピンはPWMパルスとも呼ばれる矩形波を生成し、サーボモーターや電子スピードコントローラー、LEDの制御に使用されます。
 
-TTL Output pins can generate either a high value (1) or a low value (0)
+TTL出力ピンは高(1)または低(0)の値を出力できます。
 
-TTL Input pins read values as either high (1) or low (0)
+TTL入力ピンは高(1)または低(0)の値を読み取ります。
 
-## Pin Providers
-Donkeycar supports several technologies for specifying pins.  Pins are specified as a string that identifies the provider, the pin number and any techology specific configuration.
+## ピンプロバイダー
+Donkeycarではピンを指定するために複数の技術を利用できます。ピンは、プロバイダー名、ピン番号、技術固有の設定を表す文字列として指定します。
 
 #### PCA9685
-The PCA9685 Servo controller supports 16 PWM and TTL output pins.  The PCA9685 can only output signals; it does not support input pins.  The pin specifier for a PCA9685 pin includes:
+PCA9685サーボコントローラは16個のPWMおよびTTL出力ピンを備えています。PCA9685は出力専用で入力ピンはサポートしていません。PCA9685のピン指定子には次の情報を含めます。
 
-- the I2C bus to which the PCA9685 is attached
-- the address in hex of the PCA9685 on the I2C bus
-- the channel number 0.15
+- PCA9685が接続されているI2Cバス
+- I2Cバス上でのPCA9685の16進アドレス
+- チャネル番号（0〜15）
 
-For example, `"PCA9685.1:40.13"` specifies channel 13 on the PCA9685 on I2C bus 1 at address 0x40.
+例えば `"PCA9685.1:40.13"` はI2Cバス1のアドレス0x40にあるPCA9685のチャネル13を指定します。
 
-For example, `"PCA9685.0:60.1"` specified channel 1 on the PCA9685 on I2C bus 0 at address 0x60
+また `"PCA9685.0:60.1"` はI2Cバス0のアドレス0x60にあるPCA9685のチャネル1を指定します。
 
 #### RPI_GPIO
-Donkeycar installs the RPi.GPIO library on the RaspberryPi in the default installation.  The Jetson.GPIO library is compatible library installed by default on the Jetson Nano.  Both of these libaries work is a similar fashion to support PWM, input and output pins on the 40 pin GPIO bus of the RaspberryPi or Jetson Nano respectively.  The pin specifier includes:
+DonkeycarではRaspberryPiに標準でRPi.GPIOライブラリがインストールされます。Jetson Nanoには互換ライブラリであるJetson.GPIOが既定でインストールされています。これらのライブラリはいずれも同様に動作し、RaspberryPiやJetson Nanoの40ピンGPIOバスでPWM、入力、出力ピンを扱えます。ピン指定子には次の情報を含めます。
 
-- The pin addressing scheme
-  - "BOARD" indicates the pin number is based on the pin numbers, 0 to 39, printed on the RaspberryPi/Jetson Nano circuit board.
-  - "BCM" indicates the pin number is based on the Broadcom GPIO number scheme implemented in the RaspberryPi.  This scheme is emulated in the Jetson library, so "BCM" pin numbers can be used on the Jetson. 
-- The pin number, which depends upon the pin addressing scheme.
+- ピンのアドレス指定方式
+  - "BOARD" はRaspberryPiやJetson Nanoの基板に印字されている0〜39の番号に基づく方式を示します。
+  - "BCM" はRaspberryPiで採用されているBroadcom GPIO番号方式を示します。Jetson側ではこの方式がエミュレーションされているため、Jetsonでも"BCM"番号を使用できます。
+- ピン番号（アドレス指定方式によって異なります）
 
-See details of the RaspberryPi 40 pin header here:  https://www.raspberrypi.com/documentation/computers/os.html#gpio-and-the-40-pin-header
+RaspberryPiの40ピンヘッダーの詳細はこちらを参照してください:  https://www.raspberrypi.com/documentation/computers/os.html#gpio-and-the-40-pin-header
 
-Jetson Nano 40 pin header uses the same board numbering scheme, although the header is physically flipped on the board, so pay attention to the numbers printed on the board.  The Jetson Nano only supports 2 PWM pins and these must be enabled.  See [Generating PWM from the Jetson Nano](#generating-pwm-from-the-jetson-nano)
+Jetson Nanoの40ピンヘッダーも同じ基板番号方式を採用していますが、物理的に裏返しに配置されているため、基板上に印字された番号を確認してください。Jetson NanoはPWMピンを2本しかサポートしておらず、これらは有効化が必要です。詳細は[Jetson NanoでのPWM生成](#generating-pwm-from-the-jetson-nano)を参照してください。
 
-For example, `"RPI_GPIO.BOARD.33"` specifies board pin 33 using the Rpi.GPIO library.
+例えば `"RPI_GPIO.BOARD.33"` はRPi.GPIOライブラリを利用して基板番号33のピンを指定します。
 
-For example, `"RPI_GPIO.BCM.13"` specifies Broadcom GPIO-13 using the Rpi.GPIO library.  If you look at the header diagram linked above you will notice that this is the same physical pin as "RPI_GPIO.BOARD.33"; it is a synonymn for physical pin 33.  
+また `"RPI_GPIO.BCM.13"` はRPi.GPIOライブラリでBroadcom GPIO-13を指定します。上記のヘッダ図を見ると分かるように、これは物理的には`"RPI_GPIO.BOARD.33"`と同じピンであり、基板番号33の別名です。
 
-When using the RPI_GPIO pin provider, you can choose to use the BOARD or BCM pin schemes, but all pins must use the same pin scheme.  You cannot mix pin schemes.
+RPI_GPIOプロバイダーを使用する場合、BOARD方式とBCM方式のどちらかを選択できますが、すべてのピンで同一の方式を使う必要があります。方式を混在させることはできません。
 
 #### PIGPIO
-RaspberryPi users can optionally install the PiGPIO library and daemon to manage the pins on the 40 pin GPIO header.  Note that this library does NOT work on the Jetson Nano.  The library support PWM, Input and Output pins.
+RaspberryPiユーザーは、40ピンGPIOヘッダーのピンを制御するためにPiGPIOライブラリとデーモンを任意でインストールできます。ただし、このライブラリはJetson Nanoでは動作しません。PiGPIOはPWM、入力、出力ピンをサポートします。
 
-##### Installing and Starting PiGPIO
-- Install the system daemon
+##### PiGPIOのインストールと起動
+- システムデーモンのインストール
 ```bash
 sudo apt-get update
 sudo apt-get install pigpio
 ```
-- Install python support (with donkey environment activated)
+- Pythonサポートのインストール（donkey環境を有効にした状態で）
 ```bash
 pip install pigpio
 ```
-- Start the daemon
+- デーモンの起動
 ```bash
 sudo systemctl start pigpiod
 ```
-- Enable the daemon on startup
+- 起動時にデーモンを有効化
 ```
 sudo systemctl enable pigpiod
 ```
 
-The PIGPIO pin specifier includes:
-- "BCM"  PiGPIO used Broadcom (BCM) pin numbering scheme exclusively, so that is baked into the pin specifier.
-- The BCM pin number
+PIGPIOのピン指定子には以下が含まれます。
+- "BCM" — PiGPIOはBroadcom(BCM)方式のピン番号のみを使用するため、この方式が指定子に組み込まれています。
+- BCMピン番号
 
-For example, `"PIGPIO.BCM.13"` specifies Broadcom GPIO-13.  As discussed above and shown in the linked header diagram, this is exposed on board pin 33.
-
-
-## Generating PWM from the Jetson Nano
-
-Both the Jetson Nano and RaspberryPi4 support two hardware PWM pins.  On the Jetson Nano, these must be configured.
+例えば `"PIGPIO.BCM.13"` はBroadcom GPIO-13を指定します。前述およびリンク先のヘッダ図のとおり、これは基板ピン33に対応しています。
 
 
-#### Configure Jetson Expansion Header for PWM
+## Jetson NanoでPWMを生成する
 
-- ssh into the donkeycar and run this command `sudo /opt/nvidia/jetson-io/jetson-io.py`.  It should show the Jetson Expansion Header Tool that allows you to change GPIO pin functions (see below).
+Jetson NanoとRaspberryPi4の双方ともハードウェアPWMピンを2本備えています。Jetson Nanoではこれらを設定する必要があります。
 
-- If your Jetson expansion header configuration does not show any PWM pins, then you will need to enable them.
+
+#### Jetson拡張ヘッダーでPWMを有効化
+
+- donkeycarへsshして次のコマンドを実行します: `sudo /opt/nvidia/jetson-io/jetson-io.py`。GPIOピンの機能を変更できるJetson Expansion Header Toolが表示されます（下図参照）。
+
+- Jetsonの拡張ヘッダー設定にPWMピンが表示されていない場合は、有効化する必要があります。
 
 
 ```
@@ -114,7 +114,7 @@ Both the Jetson Nano and RaspberryPi4 support two hardware PWM pins.  On the Jet
 ```
 
 
-Choose `Configure the 40 pin expansion header` to activate pwm0 and pwm2:
+`Configure the 40 pin expansion header` を選択して pwm0 と pwm2 を有効化します。
 
 
 ```
@@ -148,7 +148,7 @@ Choose `Configure the 40 pin expansion header` to activate pwm0 and pwm2:
 ```
 
 
-After enabling, pwm0 is board pin-32 and pwm2 is board pin-33.
+有効化後、pwm0 は基板ピン32、pwm2 は基板ピン33となります。
 
 
 

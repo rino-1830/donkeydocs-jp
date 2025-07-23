@@ -1,29 +1,26 @@
-# How to build your own model
+# 独自モデルの構築方法
 
 ---
- **Note:** _This requires version >= 4.1.X_
+ **注意:** _この手順にはバージョン >= 4.1.X が必要です_
 
 ---
 
-* [Overview](model.md#overview)
-* [Constructor](model.md#constructor)
-* [Training Interface](model.md#training-interface)
-* [Parts Interface](model.md#parts-interface)
-* [Example](model.md#example)
+* [概要](model.md#overview)
+* [コンストラクター](model.md#constructor)
+* [学習インターフェース](model.md#training-interface)
+* [パーツインターフェース](model.md#parts-interface)
+* [例](model.md#example)
 
-## Overview
+## 概要
 
-You might want to write your own model:
+以下のような理由で独自モデルを作成したい場合があります。
 
-* If you find the models that ship with donkey not sufficient, and you want to
-  experiment with your own model infrastructure
-* If you want to add more input data to the model because your car has more
-  sensors
+* Donkey に付属するモデルでは不足しており、自分のモデル基盤で実験したい場合
+* 車にセンサーが多く、より多くの入力データをモデルに追加したい場合
 
-## Constructor
+## コンストラクター
 
-Models are located in `donkeycar/parts/keras.py`. Your own model needs to
-inherit from `KerasPilot` and initialize your model:
+モデルは `donkeycar/parts/keras.py` にあります。独自モデルは `KerasPilot` を継承し、次のように初期化します。
 
 ```python
 class KerasSensors(KerasPilot):
@@ -32,14 +29,12 @@ class KerasSensors(KerasPilot):
         self.num_sensors = num_sensors
         self.model = self.create_model(input_shape)
 ```
-Here, you implement the [keras model](https://www.tensorflow.org/guide/keras/sequential_model)
-in the member function `create_model()`. The model needs to have labelled input
-and output tensors. These are required for the training to work.
+ここではメンバー関数 `create_model()` 内で[keras のモデル](https://www.tensorflow.org/guide/keras/sequential_model)を実装します。学習を正常に行うためには、入力テンソルと出力テンソルに名前を付けておく必要があります。
 
 
-## Training interface
+## 学習インターフェース
 
-What is required for your model to work, are the following functions:
+モデルを機能させるためには、次の関数が必要です。
 
 ```python
 def compile(self):
@@ -49,10 +44,7 @@ def compile(self):
                        loss_weights={'angle_out': 0.5, 'throttle_out': 0.5})
 ```
 
-The `compile` function tells keras how to define the loss function for training.
-We are using the `KerasCategorical` model as an example. The loss function here
-makes explicit usage of the output tensors of the
-model (`angle_out, throttle_out`).
+`compile` 関数は学習時の損失関数を定義する方法を keras に伝えます。ここでは `KerasCategorical` モデルを例にしています。この損失関数ではモデルの出力テンソル（`angle_out`, `throttle_out`）を明示的に利用しています。
 
 ```python
 def x_transform(self, record: TubRecord):
@@ -60,17 +52,12 @@ def x_transform(self, record: TubRecord):
     return img_arr
 ```
 
-In this function you define how to extract the input data from your
-recorded data. This data is usually called `X` in the ML frame work . We have
-shown the implementation in the base class which works for all models that have
-only the image as input. 
+この関数では、記録されたデータから入力データを抽出する方法を定義します。このデータは機械学習では一般に `X` と呼ばれます。画像のみを入力とするモデルであれば、基底クラスの実装が利用できます。
 
-The function returns a single data item if the model has only one input. You 
-need to return a tuple if your model uses more input data.
+モデルが入力を一つだけ持つ場合、この関数は単一のデータ項目を返します。複数の入力を利用するモデルではタプルを返す必要があります。
 
 
-**Note:** _If your model has more inputs, the tuple needs to have the image in 
-the first place._ 
+**注意:** _入力が複数ある場合、タプルの先頭には画像を置く必要があります_
 
 ```python
 def y_transform(self, record: TubRecord):
@@ -78,25 +65,17 @@ def y_transform(self, record: TubRecord):
     throttle: float = record.underlying['user/throttle']
     return angle, throttle
 ```
-In this function you specify how to extract the `y` values (i.e. target
-values) from your recorded data.
+この関数では、記録データから `y` 値（ターゲット値）を取り出す方法を定義します。
 
 
 ```python
 def x_translate(self, x: XY) -> Dict[str, Union[float, np.ndarray]]:
     return {'img_in': x}
 ```
-Here we require a translation of how the `X` value that you extracted above will
-be fed into `tf.data`. Note, `tf.data` expects a dictionary if the model has
-more than one input variable, so we have chosen to use dictionaries also in the
-one-argument case for consistency. Above we have shown the implementation in the
-base class which works for all models that have only the image as input. You
-don't have to overwrite neither `x_transform` nor `x_translate` if your 
-model only uses the image as input data.
+ここでは上で抽出した `X` の値を `tf.data` に渡す形に変換する必要があります。`tf.data` は入力が複数ある場合は辞書を期待するため、一貫性を保つために入力が1つだけの場合も辞書を使います。画像のみを入力にするモデルであれば基底クラスの実装がそのまま使用でき、`x_transform` と `x_translate` をオーバーライドする必要はありません。
 
 
-**Note:** _the keys of the dictionary must match the name of the **input** 
-layers in the model._
+**注意:** _辞書のキーはモデルの**入力**レイヤー名と一致していなければなりません_
 
 ```python
 def y_translate(self, y: XY) -> Dict[str, Union[float, np.ndarray]]:
@@ -106,13 +85,10 @@ def y_translate(self, y: XY) -> Dict[str, Union[float, np.ndarray]]:
     else:
         raise TypeError('Expected tuple')
 ```
-Similar to the above, this provides the translation of the `y` data into the
-dictionary required for `tf.data`. This example shows the implementation of
-`KerasLinear`.
+同様に、`y` データを `tf.data` 用の辞書に変換します。この例は `KerasLinear` の実装です。
 
 
-**Note:** _the keys of the dictionary must match the name of the **output**
-layers in the model._
+**注意:** _辞書のキーはモデルの**出力**レイヤー名と一致していなければなりません_
 
 ```python
 def output_shapes(self):
@@ -123,27 +99,18 @@ def output_shapes(self):
                'throttle_out': tf.TensorShape([20])})
     return shapes
 ```
-This function returns a tuple of _two_ dictionaries that tells tensorflow which
-shapes are used in the model. We have shown the example of the 
-`KerasCategorical` model here.
+この関数は、モデルで使用されるテンソル形状を TensorFlow に伝える 2 つの辞書からなるタプルを返します。ここでは `KerasCategorical` モデルの例を示しています。
 
 
-**Note 1:** _As above, the keys of the two dictionaries must match the name 
-of the **input** and **output** layers in the model._
+**注意 1:** _上記の通り、2 つの辞書のキーはモデルの**入力**および**出力**レイヤー名と一致していなければなりません_
 
 
-**Note 2:** _Where the model returns scalar numbers, the corresponding 
-type has to be `tf.TensorShape([])`._
+**注意 2:** _モデルがスカラー値を返す場合、その型は `tf.TensorShape([])` とする必要があります_
 
 
 ## Parts interface
 
-In the car application the model is called through the `run()` function. That
-function is already provided in the base class where the normalisation of the
-input image is happening centrally. Instead, the derived classes have to
-implement
-`inference()` which works on the normalised data. If you have additional data
-that needs to be normalised, too, you might want to override `run()` as well.
+車のアプリケーションでは、`run()` 関数を通じてモデルが呼び出されます。この関数は基底クラスで提供されており、入力画像の正規化処理も中央で行われます。派生クラスでは正規化済みデータを扱う `inference()` を実装します。追加のデータも正規化が必要な場合は、`run()` をオーバーライドすることも考慮してください。
 ```python
 def inference(self, img_arr, other_arr):
     img_arr = img_arr.reshape((1,) + img_arr.shape)
@@ -152,28 +119,21 @@ def inference(self, img_arr, other_arr):
     throttle = outputs[1]
     return steering[0][0], throttle[0][0]
 ```
-Here we are showing the implementation of the linear model. Please note that 
-the input tensor shape always contains the batch dimension in the first 
-place, hence the shape of the input image is adjusted from 
-`(120, 160, 3) -> (1, 120, 160, 3)`.
+ここでは線形モデルの実装例を示しています。入力テンソルの形状には常にバッチ次元が先頭に含まれるため、入力画像の形状は `(120, 160, 3)` から `(1, 120, 160, 3)` へと調整されています。
 
 
-**Note:** _If you are passing another array in the`other_arr` variable, you will
-have to do a similar re-shaping.
+**注意:** _`other_arr` 変数で別の配列を渡す場合も同様の形状変換が必要です_
 
 
-## Example
-Let's build a new donkey model which is based on the standard linear model 
-but has following changes w.r.t. input data and network design:
+## 例
+標準的な線形モデルを基に、入力データとネットワーク設計に以下の変更を加えた新しい Donkey モデルを作成してみましょう。
 
-1. The model takes an additional vector of input data that represents a set 
-   of values from distance sensors which are attached to the front of the car.
+1. 車の前部に取り付けた距離センサーから取得した値を表すベクトルを追加の入力として受け取る
    
-2. The model adds a couple of more feed-forward layers to combine the CNN 
-   layers of the vision system with the distance sensor data.
+2. ビジョンシステムの CNN 層と距離センサーのデータを組み合わせるために、いくつかのフィードフォワード層を追加する
 
-### Building the model using keras   
-So here is the example model:
+### keras を用いたモデルの構築
+以下に例となるモデルを示します。
 ```python
 class KerasSensors(KerasPilot):
     def __init__(self, input_shape=(120, 160, 3), num_sensors=2):
@@ -189,22 +149,21 @@ class KerasSensors(KerasPilot):
         x = Dropout(drop)(x)
         x = Dense(50, activation='relu', name='dense_2')(x)
         x = Dropout(drop)(x)
-        # up to here, this is the standard linear model, now we add the
-        # sensor data to it
+        # ここまでは標準的な線形モデル。ここからセンサーのデータを追加する
         sensor_in = Input(shape=(self.num_sensors, ), name='sensor_in')
         y = sensor_in
         z = concatenate([x, y])
-        # here we add two more dense layers
+        # ここでさらに 2 層の Dense を追加
         z = Dense(50, activation='relu', name='dense_3')(z)
         z = Dropout(drop)(z)
         z = Dense(50, activation='relu', name='dense_4')(z)
         z = Dropout(drop)(z)
-        # two outputs for angle and throttle
+        # 角度とスロットルの 2 つの出力
         outputs = [
             Dense(1, activation='linear', name='n_outputs' + str(i))(z)
             for i in range(2)]
 
-        # the model needs to specify the additional input here
+        # 追加の入力をモデルに指定する
         model = Model(inputs=[img_in, sensor_in], outputs=outputs)
         return model
 
@@ -221,14 +180,14 @@ class KerasSensors(KerasPilot):
 
     def x_transform(self, record: TubRecord) -> XY:
         img_arr = super().x_transform(record)
-        # for simplicity we assume the sensor data here is normalised
+        # 簡単のため、ここではセンサーのデータが正規化済みであると仮定する
         sensor_arr = np.array(record.underlying['sensor'])
-        # we need to return the image data first
+        # 画像データを先に返す必要がある
         return img_arr, sensor_arr
 
     def x_translate(self, x: XY) -> Dict[str, Union[float, np.ndarray]]:
         assert isinstance(x, tuple), 'Requires tuple as input'
-        # the keys are the names of the input layers of the model
+        # キーはモデルの入力レイヤー名
         return {'img_in': x[0], 'sensor_in': x[1]}
 
     def y_transform(self, record: TubRecord):
@@ -239,31 +198,28 @@ class KerasSensors(KerasPilot):
     def y_translate(self, y: XY) -> Dict[str, Union[float, np.ndarray]]:
         if isinstance(y, tuple):
             angle, throttle = y
-            # the keys are the names of the output layers of the model
+            # キーはモデルの出力レイヤー名
             return {'n_outputs0': angle, 'n_outputs1': throttle}
         else:
             raise TypeError('Expected tuple')
 
     def output_shapes(self):
-        # need to cut off None from [None, 120, 160, 3] tensor shape
+        # [None, 120, 160, 3] の None を取り除く必要がある
         img_shape = self.get_input_shape()[1:]
-        # the keys need to match the models input/output layers
+        # キーはモデルの入出力レイヤーに合わせる必要がある
         shapes = ({'img_in': tf.TensorShape(img_shape),
                    'sensor_in': tf.TensorShape([self.num_sensors])},
                   {'n_outputs0': tf.TensorShape([]),
                    'n_outputs1': tf.TensorShape([])})
         return shapes
 ```
-We could have inherited from `KerasLinear` which already provides the 
-implementation of `y_transform(), y_translate(), compile()`. However, to 
-make it explicit for the general case we have implemented all functions here. 
-The model requires the sensor data to be an array in the TubRecord with key 
-`"sensor"`. 
+`KerasLinear` を継承すれば `y_transform()`, `y_translate()`, `compile()` の実装は
+すでに提供されていますが、一般的なケースを明示するためここではすべての関数を実装しています。
+モデルでは、センサーデータが TubRecord の `"sensor"` というキーの配列として存在することが求められます。
 
-### Creating a tub
+### チューブの作成
 
-Because we don't have a tub with sensor data, let's create one with fake 
-sensor entries:
+センサーのデータを含むチューブがないため、ダミーのセンサーエントリーでチューブを作成してみましょう。
 ```python
 import os
 import tarfile
@@ -274,10 +230,10 @@ from donkeycar.config import load_config
 
 
 if __name__ == '__main__':
-    # put your path to your car app
+    # あなたの車アプリへのパスを指定
     my_car = os.path.expanduser('~/mycar')
     cfg = load_config(os.path.join(my_car, 'config.py'))
-    # put your path to donkey project
+    # donkey プロジェクトへのパスを指定
     tar = tarfile.open(os.path.expanduser(
         '~/Python/donkeycar/donkeycar/tests/tub/tub.tar.gz'))
     tub_parent = os.path.join(my_car, 'data2/')
@@ -299,9 +255,8 @@ if __name__ == '__main__':
         tub2.write_record(record)
 ```
 
-### Making the model available
-We don't have a dynamic factory yet, so we need to add the new model into the 
-function `get_model_by_type()` in the module `donkeycar/utils.py`:
+### モデルを利用可能にする
+まだ動的なファクトリーはないため、`donkeycar/utils.py` の `get_model_by_type()` 関数にこの新しいモデルを追加する必要があります。
 ```python
 ...
 elif model_type == 'sensor':
@@ -309,16 +264,14 @@ elif model_type == 'sensor':
 ...
 ```
 
-### Go train
-In your car app folder now the following should work:
+### 学習を実行
+車アプリのフォルダーで以下を実行すると、学習が始まります。
 `donkey train --tub data2/tub_sensor --model models/pilot.h5 --type sensor`
-Because of the random values in the data the model will not converge quickly,
-the goal here is to get it working in the framework.
+データがランダム値なのでモデルの収束は早くありませんが、ここではフレームワークで動作させることが目的です。
 
 
-## Support and discussions
-Please join the [Discord](https://discord.gg/dpvYHhpV2w) Donkey Car group for 
-support and discussions.
+## サポートとディスカッション
+サポートや議論には [Discord](https://discord.gg/dpvYHhpV2w) の Donkey Car グループにご参加ください。
 
 
 

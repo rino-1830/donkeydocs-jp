@@ -1,42 +1,36 @@
-# A Guide to using TensorRT on the Nvidia Jetson Nano
+# Nvidia Jetson NanoでTensorRTを使用するためのガイド
 
 ----
 
-* **Note** This guide assumes that you are using Ubuntu `18.04`. If you are
-  using Windows refer to 
-  [these](https://docs.nvidia.com/deeplearning/sdk/tensorrt-install-guide/index.html)
-  instructions on how to setup your computer to use TensorRT.
+* **注意** このガイドはUbuntu `18.04`を使用していることを前提としています。もしWindowsを使用している場合は[こちらの](https://docs.nvidia.com/deeplearning/sdk/tensorrt-install-guide/index.html)手順を参照してTensorRTを使用するための設定を行ってください。
 
 ----
 
-## Step 1: Setup TensorRT on Ubuntu Machine
+## ステップ1：UbuntuマシンでTensorRTを設定する
 
-Follow the instructions [here](https://docs.nvidia.com/deeplearning/sdk/tensorrt-install-guide/index.html#installing-tar).
-Make sure you use the `tar` file instructions unless you have previously
-installed CUDA using `.deb` files.
+[こちら](https://docs.nvidia.com/deeplearning/sdk/tensorrt-install-guide/index.html#installing-tar)の手順に従ってください。以前に`.deb`ファイルでCUDAをインストールしているのでなければ、`tar`ファイルの手順を必ず使用してください。
 
-## Step 2: Setup TensorRT on your Jetson Nano
+## ステップ2：Jetson NanoにTensorRTを設定する
 
-* Setup some environment variables so `nvcc` is on `$PATH`. Add the following
-  lines to your `~/.bashrc` file.
+* `nvcc`が`$PATH`上にあるよう環境変数を設定します。次の行を`~/.bashrc`ファイルに追加してください。
 
 ```bash
-# Add this to your .bashrc file
+# これを .bashrc に追加してください
 export CUDA_HOME=/usr/local/cuda
-# Adds the CUDA compiler to the PATH
+# CUDAコンパイラをPATHに追加
 export PATH=$CUDA_HOME/bin:$PATH
-# Adds the libraries
+# ライブラリを追加
 export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH
 ```
 
-* Test the changes to your `.bashrc`.
+* `.bashrc`の変更をテストします。
 
 ```bash
 source ~/.bashrc
 nvcc --version
 ```
 
-You should see something like:
+次のような表示が得られるはずです：
 
 ```text
 nvcc: NVIDIA (R) Cuda compiler driver
@@ -45,63 +39,58 @@ Built on ...
 Cuda compilation tools, release 10.0, Vxxxxx
 ```
 
-* Switch to your `virtualenv` and install PyCUDA.
+* `virtualenv`に切り替えてPyCUDAをインストールします。
 
 ```bash
-# This takes a a while.`
+# これは少し時間がかかります
 pip install pycuda
 ```
 
-* After this you will also need to setup `PYTHONPATH` such that
-  your `dist-packages` are included as part of your `virtualenv`. Add this to
-  your `.bashrc`. This needs to be done because the python bindings
-  to `tensorrt` are available in `dist-packages` and this folder is usually not
-  visible to your virtualenv. To make them visible we add it to `PYTHONPATH`.
+* その後、`dist-packages`が`virtualenv`の一部として読み込まれるよう、`PYTHONPATH`を設定する必要があります。以下を`.bashrc`に追加してください。これは`tensorrt`のPythonバインディングが`dist-packages`にあり、このフォルダは通常`virtualenv`からは見えないため、`PYTHONPATH`に追加して見えるようにします。
 
 ```bash
 export PYTHONPATH=/usr/lib/python3.6/dist-packages:$PYTHONPATH
 ```
 
-* Test this change by switching to your `virtualenv` and importing `tensorrt`.
+* `virtualenv`に切り替えて`tensorrt`をインポートすることでこの変更をテストします。
 
 ```python
 > import tensorrt as trt
->  # This import should succeed
+>  # このインポートが成功するはずです
 ```
 
-## Step 3: Train, Freeze and Export your model to TensorRT format (`uff`)
+## ステップ3：モデルを学習し、凍結してTensorRT形式（`uff`）にエクスポートする
 
-After you train the `linear` model you end up with a file with a `.h5`
-extension.
+`linear`モデルを学習すると、`.h5`拡張子のファイルが生成されます。
 
 ```bash
-# You end up with a Linear.h5 in the models folder
+# モデルフォルダにLinear.h5が生成されます
 python manage.py train --model=./models/Linear.h5 --tub=./data/tub_1_19-06-29,...
 
-# (optional) copy './models/Linear.h5' from your desktop computer to your Jetson Nano in your working dir (~mycar/models/)
+# （オプション）デスクトップPCからJetson Nanoの作業ディレクトリ(~mycar/models/)に'./models/Linear.h5'をコピーします
 
-# Freeze model using freeze_model.py in donkeycar/scripts ; the frozen model is stored as protocol buffers.
-# This command also exports some metadata about the model which is saved in ./models/Linear.metadata
+# donkeycar/scriptsにあるfreeze_model.pyを使用してモデルを凍結します；凍結されたモデルはプロトコルバッファとして保存されます。
+# このコマンドはモデルのメタデータもエクスポートし、./models/Linear.metadataに保存します
 python ~/projects/donkeycar/scripts/freeze_model.py --model=~/mycar/models/Linear.h5 --output=~/mycar/models/Linear.pb
 
-# Convert the frozen model to UFF. The command below creates a file ./models/Linear.uff
+# 凍結したモデルをUFFに変換します。以下のコマンドで./models/Linear.uffファイルが作成されます
 cd /usr/lib/python3.6/dist-packages/uff/bin/
 python convert_to_uff.py ~/mycar/models/Linear.pb
 ```
 
-Now copy the converted `uff` model and the `metadata` to your Jetson Nano.
+変換した`uff`モデルと`metadata`をJetson Nanoにコピーします。
 
-## Step 4
+## ステップ4
 
-* In `myconfig.py` pick the model type as `tensorrt_linear`.
+* `myconfig.py`でモデルタイプを`tensorrt_linear`に設定します。
 
 ```python
 DEFAULT_MODEL_TYPE = `tensorrt_linear`
 ```
 
-* Finally you can do
+* 最後に以下を実行します
 
 ```bash
-# After you scp your `uff` model to the Nano
+# `uff`モデルをNanoにscpした後
 python manage.py drive --model=./models/Linear.uff
 ```

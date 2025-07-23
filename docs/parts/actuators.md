@@ -1,153 +1,147 @@
-# Actuators
+# アクチュエータ
 
-A car needs a way to to move forward and backward and to turn left and right.  We commonly call devices that produce a physical movement in the robot 'actuators'.  Common actuators are DC motors, Servo motors, continuous servo motors and stepper motors.  There are many, many different ways that these actuators can be combined to propel and turn a robot.  Donkeycar supports two common configurations that can be implemented with various actuators: 
+車両が前後に動き、左右に曲がるためには仕組みが必要です。ロボットで物理的な動作を生み出す装置を一般に「アクチュエータ」と呼びます。代表的なアクチュエータにはDCモーター、サーボモーター、連続回転サーボモーター、ステッピングモーターがあります。これらのアクチュエータを組み合わせてロボットを走らせたり曲げたりする方法は無数に存在します。Donkeycar ではさまざまなアクチュエータで実装できる2つの一般的な構成をサポートしています。
 
-- **Car-like vehicles** steer by angling the front wheels left or right and move by turning the drive wheels forward or reverse. Common RC cars fall in this category.
-- **Differential drive vehicles**  have two independently controlled drive wheels to provide both movement and steering.  For instance a differential drive car can be driven straight forward by turning the two drive wheels forward at the same speed. In order to turn, one motor can be driven faster than the other and the car will turn an arc in the direction of the slower motor. [Differential Drive cars](#differential-drive-cars) are discussed in a section near the end of this page.
+- **車型の車両** は前輪を左右に角度を付けて操舵し、駆動輪を前後に回して走行します。一般的なRCカーはこの分類です。
+- **差動走行車両** は個別に制御できる2つの駆動輪を持ち、これによって前進とステアリングの両方を行います。たとえば両方の駆動輪を同じ速度で前進させれば直進し、一方を速く回せばその反対側へ弧を描いて曲がります。[差動走行車](#differential-drive-cars)についてはこのページの後半で解説します。
 
-Actuators take control signals from the Donkeycar to control their actions.  There are several options for generating these control signals.
+アクチュエータは Donkeycar から送られる制御信号によって動作します。これらの制御信号を生成する方法はいくつかあります。
 
-- A RC Hat, which is a board you mount on top of the RaspberryPi to use the regular RC that comes with ready-to-run cars
-- PCA9685 Servo controller board
-- RPi/Jetson 40 pin GPIO header
-    - see [Generating PWM from the Jetson Nano](./pins.md#generating-pwm-from-the-jetson-nano) for how to enable PWM output from the Jetson Nano 40 pin GPIO header.
+- RaspberryPi の上に載せて既存のRC受信機を利用する「RC Hat」
+- PCA9685 サーボコントローラボード
+- RPi/Jetson の40ピンGPIOヘッダー
+    - Jetson Nano 40ピンGPIOヘッダーからPWM出力を有効化する方法は[Jetson NanoからのPWM生成](./pins.md#generating-pwm-from-the-jetson-nano)を参照してください。
 - Arduino
 
-Below we will describe the supported actuator setups and software configuration of their control signals.
+以下では、サポートされているアクチュエータ構成とその制御信号のソフトウェア設定について説明します。
 
-## Standard RC with ESC and Steering Servo. 
+## ESC とステアリングサーボを用いた標準的なRC
 
-A standard RC car is equipped with a steering servo for steering the front wheels and an ESC (Electronic Speed Controller) to control the speed of the DC motor driving the wheels.  Both the steering servo and the ESC take a PWM (Pulse Width Modulation) control signal.  A PWM signal is simply a square wave pulse of a certain duration and frequency.  In the case of the steering servo the PWM signal determines the position of the servo's arm, which is generally between 0 degrees (full right) and 180 degrees (full left).  In the case of the ESC the PWM signal determines the direction and speed of the drive motor, from full reverse, through stopped, to full forward.
+一般的なRCカーには前輪を操舵するステアリングサーボと、駆動用DCモーターの速度を制御するESC(Electronic Speed Controller)が搭載されています。ステアリングサーボもESCもともにPWM(Pulse Width Modulation)信号で制御されます。PWM信号とは一定の周期である幅のパルスを送るもので、ステアリングサーボではパルス幅でサーボアームの角度(おおよそ0度=右一杯から180度=左一杯まで)を決めます。ESCではパルス幅で駆動モーターの回転方向と速度を決め、全開後退から停止、全開前進までを指示します。
 
-- Standard RC servo pulses range from 1 millisecond (full reverse for ESC, fully left for servo) to 2 milliseconds (full forward for ESC, full right for servo) with 1.5 milliseconds being neutral (stopped for ESC, straight for servo).
-- These pulses are typically sent at 50 hertz (one duty cycle every 20 milliseconds). One duty cycle includes a period where the signal is brought high followed by a period where the signal is brought low.  This means that, using the standard 50hz frequency, a 1 millisecond pulse (1 ms high followed by 19 ms low) represents a 5% duty cycle and a 2 millisecond pulse represents a 10% duty cycle.
-- The most important part is the length of the pulse; it must be in the range of 1 to 2 milliseconds.  
+- 標準的なRCサーボのパルス幅は1ミリ秒(ESCでは全開後退、サーボでは左一杯)から2ミリ秒(ESCでは全開前進、サーボでは右一杯)までで、1.5ミリ秒が中立(ESCでは停止、サーボでは直進)です。
+- このパルスは通常50ヘルツ(20ミリ秒周期)で送信されます。1周期とは信号をHIGHにした後LOWに戻すまでで、50ヘルツの場合1ミリ秒パルス(1ms HIGH/19ms LOW)はデューティ比5%、2ミリ秒パルスはデューティ比10%となります。
+- 重要なのはパルスの長さで、1〜2ミリ秒の範囲に収まっている必要があります。
 
-![A diagram showing typical PWM timing for a servomotor (Wikipedia)](../assets/parts/Servomotor_Timing_Diagram.svg "A diagram showing typical PWM timing for a servomotor (Wikipedia)")
+![サーボモーターの典型的なPWMタイミング図 (Wikipedia)](../assets/parts/Servomotor_Timing_Diagram.svg "A diagram showing typical PWM timing for a servomotor (Wikipedia)")
 
-- So this means that if a different frequency is used, then the duty cycle must be adjusted in order to get the 1ms to 2ms pulse.
-- For instance, if a 60hz frequency is used, then a 1 ms pulse requires a duty cycle of 0.05 * 60 / 50 = 0.06 (6%) duty cycle
-- We default the frequency of our PCA9685 to 60 hz, so pulses in config are generally based on 60hz frequency and 12 bit values. We use 12 bit values because the PCA9685 has 12 bit resolution. So a 1 ms pulse is 0.06 * 4096 ~= 246, a neutral pulse of 0.09 duty cycle is 0.09 * 4096 ~= 367 and full forward pulse of 0.12 duty cycles is 0.12 * 4096 ~= 492
-- These are generalizations that are useful for understanding the underlying api call arguments and the values that are generating when calibrating.  The final choice of duty-cycle/pulse length depends on your hardware and perhaps your strategy (you may not want to go too fast,  and so you may choose is low max throttle pwm)
+- つまり別の周波数を使用する場合は、1〜2ミリ秒のパルス幅を得るためにデューティ比を調整する必要があります。
+- 例えば60ヘルツであれば、1ミリ秒パルスは0.05 * 60 / 50 = 0.06(6%)のデューティ比となります。
+- PCA9685 の周波数はデフォルトで60ヘルツなので、設定値も60ヘルツかつ12ビット値を基準としています。PCA9685は12ビット解像度のため、1ミリ秒パルスは0.06 * 4096 ≒ 246、中立の0.09デューティ比は0.09 * 4096 ≒ 367、全開前進の0.12デューティ比は0.12 * 4096 ≒ 492 となります。
+- これらはAPI呼び出しの引数やキャリブレーション時に生成される値を理解する上で役立つ概念です。最終的なデューティ比やパルス幅の選択はハードウェアや方針によって決まります(あまり速くしたくないなら最大スロットルのPWMを低めにするなど)。
 
-### Using a RC Hat to generate the commands. 
-- You can buy a RC Hat from the Donkeycar Store [here](https://www.diyrobocars.com/shop/). This is the easiest way to go if your car came with a regular RC Transmitter and Receiver. Instructions for using it are on the product page.
+### RC Hat を使ってコマンドを生成する
+- [Donkeycar Store](https://www.diyrobocars.com/shop/)でRC Hatを購入できます。既存のRC送受信機を使う場合、これが最も簡単な方法です。使い方は商品ページに記載されています。
 
-### Generating PWM pulses with a PCA9685 Servo controller
-- The hardware connection of the PCA9685 I2C servo driver board is described fully in the overall setup instructions [here](../guide/build_hardware.md)
-- The PCA9685 Servo controller is connected the RaspberryPi or Jetson Nano via the I2C pins on the 40 Pin bus, then the 3 pin cables from the ESC and Steering Servo are connected to the PCA9685, generally to channel 0 and channel 1 respectively. See [Step 4: Connect Servo Shield](../guide/build_hardware.md#step-4-connect-servo-shield-to-raspberry-pi).   Connection of a PCA9685 to a Jetson Nano is the same.
+### PCA9685 サーボコントローラでPWMパルスを生成する
+- PCA9685 I2Cサーボドライバボードのハードウェア接続は[こちら](../guide/build_hardware.md)のセットアップ手順に詳しく説明されています。
+- PCA9685 サーボコントローラはRaspberryPiまたはJetson Nanoと40ピンバスのI2Cピンで接続し、ESCとステアリングサーボからの3ピンケーブルを一般的にはそれぞれチャンネル0とチャンネル1へ接続します。[ステップ4: サーボシールドを接続](../guide/build_hardware.md#step-4-connect-servo-shield-to-raspberry-pi) を参照してください。Jetson Nanoへの接続も同様です。
 
-**Configuration**
+**設定**
 
-- Use `DRIVE_TRAIN_TYPE = "PWM_STEERING_THROTTLE"` in myconfig.py
-  - Set use PCA9685 pin specifiers for `PWM_STEERING_PIN` and `PWM_THROTTLE_PIN` in the `PWM_STEERING_THROTTLE` section of myconfig.py. For example:
-
-```python
-    DRIVE_TRAIN_TYPE = "PWM_STEERING_THROTTLE"
-    
-    #
-    # PWM_STEERING_THROTTLE
-    #
-    # Drive train for RC car with a steering servo and ESC.
-    # Uses a PwmPin for steering (servo) and a second PwmPin for throttle (ESC)
-    # Base PWM Frequence is presumed to be 60hz; use PWM_xxxx_SCALE to adjust pulse with for non-standard PWM frequencies
-    #
-    PWM_STEERING_THROTTLE = {
-        "PWM_STEERING_PIN": "PCA9685.1:40.0",   # PCA9685, I2C bus 1, address 0x40, channel 0
-        "PWM_STEERING_SCALE": 1.0,              # used to compensate for PWM frequency differents from 60hz; NOT for adjusting steering range
-        "PWM_STEERING_INVERTED": False,         # True if hardware requires an inverted PWM pulse
-        "PWM_THROTTLE_PIN": "PCA9685.1:40.1",   # PCA9685, I2C bus 1, address 0x40, channel 1
-        "PWM_THROTTLE_SCALE": 1.0,              # used to compensate for PWM frequence differences from 60hz; NOT for increasing/limiting speed
-        "PWM_THROTTLE_INVERTED": False,         # True if hardware requires an inverted PWM pulse
-        "STEERING_LEFT_PWM": 460,               # pwm value for full left steering
-        "STEERING_RIGHT_PWM": 290,              # pwm value for full right steering
-        "THROTTLE_FORWARD_PWM": 500,            # pwm value for max forward throttle
-        "THROTTLE_STOPPED_PWM": 370,            # pwm value for no movement
-        "THROTTLE_REVERSE_PWM": 220,            # pwm value for max reverse throttle
-    }
-```
-
-> NOTE: the pwm values (`STEERING_LEFT_PWM`, etc.) differ from car to car and are derived by running the calibration procedure.  See [Calibrate your Car](http://docs.donkeycar.com/guide/calibrate/)
-
-> See [pins](pins.md) for a detailed discussion of pin providers and pin specifiers.
-
-### Generating PWM pulses from the 40 pin GPIO header
-- Here the PWM signal is generated from the 40 pin GPIO header.  The data pin on the 3-pin ESC and Servo connectors are connected to a PWM pin on the GPIO.  The ground pins on the 3-pin connectors are connected to a common ground.  The 5V pins on the 3-pin connectors are connected to the 5V pins on the GPIO: the 3-pin connector from the ESC will generally provide 5V that can then be used to power the Servo. 
-
-**Configuration**
-
-- Use `DRIVE_TRAIN_TYPE = "PWM_STEERING_THROTTLE"` in myconfig.py
-  - Set the pin specifiers for GPIO in the `# PWM_STEERING_THROTTLE` section. Note that each pin has both a BOARD mode and a BCM (Broadcom) mode identifier.  You can use either mode, but all pins must use the same mode.
-  - The RaspberryPi 4b has 4 pwm hardware outputs; 3 of which are mapped to pins on the 40 pin header (see https://linuxhint.com/gpio-pinout-raspberry-pi/); note that pins can be addressed either by their board number or by their internal gpio number (see http://docs.donkeycar.com/parts/pins/). In the case of the hardware PWM pins, board pin 12 ("RPI_GPIO.BOARD.12") is the same as GPIO18 ("RPI_GPIO.BCM.18"), board pin 33 ("RPI_GPIO.BOARD.33") is the same as GPIO13 ("RPI_GPIO.BCM.13") and board pin 32 ("RPI_GPIO.BOARD.32") is the same as GPIO12 ("RPI_GPIO.BCM.12"). So you should be setting up your myconfig.py so that `DRIVE_TRAIN_TYPE = "PWM_STEERING_THROTTLE"` and `PWM_STEERING_PIN` and `PWM_THROTTLE_PIN` are set to use one of the hardware pwm pins for output. For example:
+- myconfig.py で `DRIVE_TRAIN_TYPE = "PWM_STEERING_THROTTLE"` を使用します。
+  - myconfig.py の `PWM_STEERING_THROTTLE` セクションで、`PWM_STEERING_PIN` と `PWM_THROTTLE_PIN` に PCA9685 のピン指定子を設定します。例:
 
 ```python
     DRIVE_TRAIN_TYPE = "PWM_STEERING_THROTTLE"
-    
+
     #
     # PWM_STEERING_THROTTLE
     #
-    # Drive train for RC car with a steering servo and ESC.
-    # Uses a PwmPin for steering (servo) and a second PwmPin for throttle (ESC)
-    # Base PWM Frequence is presumed to be 60hz; use PWM_xxxx_SCALE to adjust pulse with for non-standard PWM frequencies
+    # ステアリングサーボとESCを備えたRCカー向けドライブトレイン
+    # ステアリング用に1つの PwmPin、スロットル用にもう1つの PwmPin を使用
+    # PWMの基本周波数は60Hzを想定。異なる周波数を使用する場合は PWM_xxxx_SCALE でパルス幅を調整
     #
     PWM_STEERING_THROTTLE = {
-        "PWM_STEERING_PIN": "RPI_GPIO.BOARD.33",# GPIO board mode pin-33 == BCM mode pin-13
-        "PWM_STEERING_SCALE": 1.0,              # used to compensate for PWM frequency differents from 60hz; NOT for adjusting steering range
-        "PWM_STEERING_INVERTED": False,         # True if hardware requires an inverted PWM pulse
-        "PWM_THROTTLE_PIN": "RPI_GPIO.BOARD.12",# GPIO board mode pin-12 == BCM mode pin-18
-        "PWM_THROTTLE_SCALE": 1.0,              # used to compensate for PWM frequence differences from 60hz; NOT for increasing/limiting speed
-        "PWM_THROTTLE_INVERTED": False,         # True if hardware requires an inverted PWM pulse
-        "STEERING_LEFT_PWM": 460,               # pwm value for full left steering
-        "STEERING_RIGHT_PWM": 290,              # pwm value for full right steering
-        "THROTTLE_FORWARD_PWM": 500,            # pwm value for max forward throttle
-        "THROTTLE_STOPPED_PWM": 370,            # pwm value for no movement
-        "THROTTLE_REVERSE_PWM": 220,            # pwm value for max reverse throttle
+        "PWM_STEERING_PIN": "PCA9685.1:40.0",   # PCA9685、I2Cバス1、アドレス0x40、チャンネル0
+        "PWM_STEERING_SCALE": 1.0,              # PWM周波数が60Hzと異なる場合の補正。ステアリング範囲調整用ではない
+        "PWM_STEERING_INVERTED": False,         # ハードウェアが反転PWMパルスを要求する場合はTrue
+        "PWM_THROTTLE_PIN": "PCA9685.1:40.1",   # PCA9685、I2Cバス1、アドレス0x40、チャンネル1
+        "PWM_THROTTLE_SCALE": 1.0,              # PWM周波数が60Hzと異なる場合の補正。速度制限/増加用ではない
+        "PWM_THROTTLE_INVERTED": False,         # ハードウェアが反転PWMパルスを要求する場合はTrue
+        "STEERING_LEFT_PWM": 460,               # 左一杯ステアのPWM値
+        "STEERING_RIGHT_PWM": 290,              # 右一杯ステアのPWM値
+        "THROTTLE_FORWARD_PWM": 500,            # 最大前進スロットルのPWM値
+        "THROTTLE_STOPPED_PWM": 370,            # 停止時のPWM値
+        "THROTTLE_REVERSE_PWM": 220,            # 最大後退スロットルのPWM値
     }
 ```
-> NOTE: the pwm values (`STEERING_LEFT_PWM`, etc.) differ from car to car and are derived by running the calibration procedure.  See [Calibrate your Car](http://docs.donkeycar.com/guide/calibrate/)
+> 注: PWM値(`STEERING_LEFT_PWM` など)は車ごとに異なり、キャリブレーション手順で求めます。詳しくは[車のキャリブレーション](http://docs.donkeycar.com/guide/calibrate/)を参照してください。
 
-> See [pins](pins.md) for a detailed discussion of pin providers and pin specifiers.
+> ピンプロバイダやピン指定子の詳細は [pins](pins.md) を参照してください。
 
-### Direct control with the RaspberryPi GPIO pins. 
+### 40ピンGPIOヘッダーからPWMパルスを生成する
+- PWM信号を40ピンGPIOヘッダーから直接出力する方法です。ESCとサーボの3ピンコネクタのデータピンをGPIOのPWMピンに接続し、3ピンコネクタのGNDピンは共通のGNDに接続します。5VピンはGPIOの5Vに接続しますが、ESCの3ピンコネクタが一般に5Vを供給するため、それをサーボの電源として利用できます。
 
-Please follow the instructions [here](../parts/rc.md)
+**設定**
 
-### Control with the Robo HAT MM1 board. 
+- myconfig.py で `DRIVE_TRAIN_TYPE = "PWM_STEERING_THROTTLE"` を使用します。
+  - `# PWM_STEERING_THROTTLE` セクションでGPIOのピン指定子を設定します。各ピンにはBOARDモード番号とBCM(Broadcom)モード番号があり、どちらでも利用できますが、すべて同じモードで指定してください。
+  - RaspberryPi 4b にはハードウェアPWM出力が4つあり、そのうち3つが40ピンヘッダーに割り当てられています(https://linuxhint.com/gpio-pinout-raspberry-pi/ を参照)。ピンは基板番号または内部gpio番号で指定できます(http://docs.donkeycar.com/parts/pins/ を参照)。ハードウェアPWMピンの場合、BOARDピン12("RPI_GPIO.BOARD.12") は GPIO18("RPI_GPIO.BCM.18")、BOARDピン33("RPI_GPIO.BOARD.33") は GPIO13("RPI_GPIO.BCM.13")、BOARDピン32("RPI_GPIO.BOARD.32") は GPIO12("RPI_GPIO.BCM.12") と同じです。したがって、`DRIVE_TRAIN_TYPE = "PWM_STEERING_THROTTLE"` とし、`PWM_STEERING_PIN` と `PWM_THROTTLE_PIN` にハードウェアPWMピンを指定してください。例:
 
-Please follow the instructions [here](https://robohatmm1-docs.readthedocs.io/en/latest/)
+```python
+    DRIVE_TRAIN_TYPE = "PWM_STEERING_THROTTLE"
+
+    #
+    # PWM_STEERING_THROTTLE
+    #
+    # ステアリングサーボとESCを備えたRCカー向けドライブトレイン
+    # ステアリング用に1つの PwmPin、スロットル用にもう1つの PwmPin を使用
+    # PWMの基本周波数は60Hzを想定。異なる周波数を使用する場合は PWM_xxxx_SCALE でパルス幅を調整
+    #
+    PWM_STEERING_THROTTLE = {
+        "PWM_STEERING_PIN": "RPI_GPIO.BOARD.33",# BOARDモード33番ピン == BCMモード13番ピン
+        "PWM_STEERING_SCALE": 1.0,              # PWM周波数が60Hzと異なる場合の補正。ステアリング範囲調整用ではない
+        "PWM_STEERING_INVERTED": False,         # ハードウェアが反転PWMパルスを要求する場合はTrue
+        "PWM_THROTTLE_PIN": "RPI_GPIO.BOARD.12",# BOARDモード12番ピン == BCMモード18番ピン
+        "PWM_THROTTLE_SCALE": 1.0,              # PWM周波数が60Hzと異なる場合の補正。速度制限/増加用ではない
+        "PWM_THROTTLE_INVERTED": False,         # ハードウェアが反転PWMパルスを要求する場合はTrue
+        "STEERING_LEFT_PWM": 460,               # 左一杯ステアのPWM値
+        "STEERING_RIGHT_PWM": 290,              # 右一杯ステアのPWM値
+        "THROTTLE_FORWARD_PWM": 500,            # 最大前進スロットルのPWM値
+        "THROTTLE_STOPPED_PWM": 370,            # 停止時のPWM値
+        "THROTTLE_REVERSE_PWM": 220,            # 最大後退スロットルのPWM値
+    }
+```
+> 注: PWM値(`STEERING_LEFT_PWM` など)は車ごとに異なり、キャリブレーション手順で求めます。詳しくは[車のキャリブレーション](http://docs.donkeycar.com/guide/calibrate/)を参照してください。
+
+> ピンプロバイダやピン指定子の詳細は [pins](pins.md) を参照してください。
+
+### RaspberryPi のGPIOピンで直接制御する
+
+詳しい手順は[こちら](../parts/rc.md)を参照してください。
+
+### Robo HAT MM1 ボードで制御する
+
+詳しい手順は[こちら](https://robohatmm1-docs.readthedocs.io/en/latest/)を参照してください。
 
 ### Arduino
-Arduino can be used in the following fashion to generate PWM signals to control the steering and throttle.
+Arduino を利用してステアリングとスロットルを制御するPWM信号を生成することもできます。
 
-For now the Arduino mode is only tested on the [Latte Panda Delta (LP-D)](https://www.lattepanda.com/products/lattepanda-delta-432.html) board.
-However it should be straightforward to use it with Raspberry Pi / Jetson Nano (instead of PCA 9685).
+現在 Arduino モードは [Latte Panda Delta (LP-D)](https://www.lattepanda.com/products/lattepanda-delta-432.html) ボードでのみテストされていますが、Raspberry Pi や Jetson Nano でも(PCA9685の代わりとして)簡単に利用できるはずです。
 
-Refer to the below block diagram to understand where things fits in.
+以下のブロック図で各部の接続位置を確認してください。
 
-![block diagram](../assets/Arduino_actuator_blk_dgm.jpg)
+![ブロック図](../assets/Arduino_actuator_blk_dgm.jpg)
 
-Arduino board should be running the standard firmata sketch (This sketch comes by default when you download the arduino tool). Load the standard firmata sketch (from _Examples > Firmata > StandardFirmata_) onto the Arduino.
-![wiring diagram](../assets/Arduino_firmata_sketch.jpg) 
-Further **pymata_aio_** python package needs to be installed on the car computer via _pip3 install pymata_aio_.
+Arduino ボードには標準のFirmataスケッチを実行させてください(Arduinoツールをダウンロードするとデフォルトで付属しています)。Arduinoへは _Examples > Firmata > StandardFirmata_ にあるスケッチを書き込みます。
+![配線図](../assets/Arduino_firmata_sketch.jpg)
+さらに車両側コンピュータに **pymata_aio** Pythonパッケージを _pip3 install pymata_aio_ でインストールしておく必要があります。
 
-As shown in the block-diagram above LattePanda combines both the x86 CPU and the Connected Arduino into a single board.
+上のブロック図の通り、LattePanda は x86 CPU と接続済みの Arduino を1枚のボードに統合したものです。
 
-The following diagram shows how to connect the Arduino pins to steering servo and ESC.
+次の図は Arduino のピンをステアリングサーボと ESC にどのように接続するかを示しています。
 
-![wiring diagram](../assets/ArduinoWiring.png)
-Note that the power for the servo is provided by the ESC battery elemininator circuit (BEC) which most ESC's provide.
-This is done to avoid supplying the entire servo power from Arduino's 5v.
-In large RC cars the servo can drag up to 2 amps, which lead to a destruction of the Arduino.
+![配線図](../assets/ArduinoWiring.png)
+サーボへの電源は、多くのESCが備えるBEC(Battery Eliminator Circuit)から供給します。これは Arduino の5Vからサーボに全ての電力を供給しないためです。大型RCカーではサーボが最大2Aを消費することがあり、それにより Arduino が破損する恐れがあります。
 
-### Calibration
-Note that the calibration procedure/values are slightly different for the Arduino (than PCA9685).
-Note that 90 is the usual midpoint (i.e. 1.5 ms pulse width at 50 Hz), so it is recommended to start
- with 90 and adjust +/- 5 until you figure the desired range for steering / throttle.
+### キャリブレーション
+Arduino では( PCA9685とは)若干異なるキャリブレーション手順/値を用います。通常の中央値は90(50Hzでパルス幅1.5ms)なので、まず90から開始し、左右/前後それぞれ±5ずつ調整して望む範囲を見つけてください。
 ```bash
 (env1) jithu@jithu-lp:~/master/pred_mt/lp/001/donkey$ donkey calibrate --arduino --channel 6
 using donkey v2.6.0t ...
 
-pymata_aio Version 2.33	Copyright (c) 2015-2018 Alan Yorinks All rights reserved.
+pymata_aio Version 2.33 Copyright (c) 2015-2018 Alan Yorinks All rights reserved.
 
 Using COM Port:/dev/ttyACM0
 
@@ -161,12 +155,11 @@ Enter a PWM setting to test(0-180)90
 Enter a PWM setting to test(0-180)85
 ...
 ```
-Note the **--arduino** switch passed to the calibrate command. Further note that the arduino pin being
- calibrated is passed via the **--channel** parameter.
+キャリブレーションコマンドには **--arduino** オプションを付け、さらにキャリブレーションする Arduino ピンを **--channel** パラメータで指定します。
 
-### Using the arduino actuator part
+### Arduino アクチュエータパートの使用
 
-The following snippet illustrates how to exercise the Arduino actuator in the drive() loop:
+drive() ループ内で Arduino アクチュエータを利用する例を以下に示します。
 
 ```python
     #Drive train setup
@@ -187,170 +180,166 @@ The following snippet illustrates how to exercise the Arduino actuator in the dr
     V.add(throttle, inputs=['user/throttle'])
 ```
 
-Refer to templates/arduino_drive.py for more details.
+templates/arduino_drive.py も参照してください。
 
+## HBridge モータードライバとステアリングサーボ
+この構成では、車輪を駆動するDCモーターを L298N HBridge モータードライバ(互換品含む)で制御します。前輪の操舵はPWMパルスを受けるステアリングサーボで行います。モータードライバの配線方法には3ピン方式と2ピン方式の2通りがあります。
 
-## HBridge Motor Controller and Steering Servo
-In this configuration the DC motor that drives the wheels is controlled by an L298N HBridge motor controller or compatible.  Steering the front wheels is accomplished with a Steering Servo that takes an PWM pulse.  The motor driver is wired in one of two ways; 3 pin wiring or 2 pin wiring.
-
-### 3-pin HBridge and Steering Servo
-A single DC gear motor is controlled with an L298N using two TTL output pins to select direction and a PWM pin to control the power to the motor.
+### 3ピン HBridge とステアリングサーボ
+単一のDCギアモーターをL298Nで制御する際、方向選択に2本のTTL出力ピン、モーターへの電力制御にPWMピン1本を使用します。
 
 ![L298N Motor Driver Module](../assets/L298N-Driver-Board-Module.png "L298N Motor Driver Module")
-**L298N Motor Driver Module**
+**L298N モータードライバモジュール**
 
-See https://www.electronicshub.org/raspberry-pi-l298n-interface-tutorial-control-dc-motor-l298n-raspberry-pi/ for a discussion of how the L298N HBridge module is wired in 3-pin mode to the RaspberryPi GPIO. This also applies to the some other driver chips that emulate the L298N, such as the TB6612FNG motor driver.
+3ピンモードでL298N HBridgeモジュールをRaspberryPiのGPIOに配線する方法については、https://www.electronicshub.org/raspberry-pi-l298n-interface-tutorial-control-dc-motor-l298n-raspberry-pi/ を参照してください。これはTB6612FNGなどL298N互換のドライバチップにも当てはまります。
 
-**Configuration**
+**設定**
 
-- use `DRIVETRAIN_TYPE = "SERVO_HBRIDGE_3PIN"` in myconfig.py
-  - Example pin specifiers using 40 pin GPIO header to generate signals: 
+- myconfig.py で `DRIVETRAIN_TYPE = "SERVO_HBRIDGE_3PIN"` を使用します。
+  - 40ピンGPIOヘッダーから信号を生成する場合のピン指定例:
 ```python
-HBRIDGE_3PIN_FWD = "RPI_GPIO.BOARD.18"   # ttl pin, high enables motor forward 
-HBRIDGE_3PIN_BWD = "RPI_GPIO.BOARD.16"   # ttl pin, highenables motor reverse
-HBRIDGE_3PIN_DUTY = "RPI_GPIO.BOARD.35"  # provides duty cycle to motor
-PWM_STEERING_PIN = "RPI_GPIO.BOARD.33"   # provides servo pulse to steering servo
-STEERING_LEFT_PWM = 460         # pwm value for full left steering (use `donkey calibrate` to measure value for your car)
-STEERING_RIGHT_PWM = 290        # pwm value for full right steering (use `donkey calibrate` to measure value for your car)
+HBRIDGE_3PIN_FWD = "RPI_GPIO.BOARD.18"   # TTLピン、高で前進
+HBRIDGE_3PIN_BWD = "RPI_GPIO.BOARD.16"   # TTLピン、高で後退
+HBRIDGE_3PIN_DUTY = "RPI_GPIO.BOARD.35"  # モーターへのデューティ比
+PWM_STEERING_PIN = "RPI_GPIO.BOARD.33"   # ステアリングサーボへのパルス
+STEERING_LEFT_PWM = 460         # 左一杯ステアのPWM値(`donkey calibrate`で測定)
+STEERING_RIGHT_PWM = 290        # 右一杯ステアのPWM値(`donkey calibrate`で測定)
 ```
 
-A PCA9685 could also be used to generate all control signals.  See [pins](pins.md) for a detailed discussion of pin providers and pin specifiers.
+PCA9685 を用いてすべての制御信号を生成することも可能です。詳細は [pins](pins.md) を参照してください。
 
-### 2-pin HBridge and Steering Servo
-A single DC gear motor is controlled with an 'mini' L298d HBridge (or an L9110S HBridge) using 2 PWM pins; one pwm pin to enable and control forward speed and one to enable and control reverse motor speed.
+### 2ピン HBridge とステアリングサーボ
+ミニL298d HBridge(またはL9110S HBridge)で単一のDCギアモーターを制御する場合、2本のPWMピンを用います。1本は前進速度用、もう1本は後退速度用です。
 
 ![L293D Motor Driver Module](../assets/MINI-L293D-Motor-driver-module.png "L293D Motor Driver Module")
-**L293D Motor Driver Module**
+**L293D モータードライバモジュール**
 
-See https://www.instructables.com/Tutorial-for-Dual-Channel-DC-Motor-Driver-Board-PW/ for how an L298d mini-hbridge module is wired in 2-pin mode.  
-See https://electropeak.com/learn/interfacing-l9110s-dual-channel-h-bridge-motor-driver-module-with-arduino/ for how an L9110S/HG7881 motor driver module is wired.
+L298d ミニHBridgeモジュールを2ピンモードで配線する方法については https://www.instructables.com/Tutorial-for-Dual-Channel-DC-Motor-Driver-Board-PW/ を参照してください。
+L9110S/HG7881 モータードライバモジュールの配線方法は https://electropeak.com/learn/interfacing-l9110s-dual-channel-h-bridge-motor-driver-module-with-arduino/ を参照してください。
 
-**Configuration**
+**設定**
 
-- use `DRIVETRAIN_TYPE = "SERVO_HBRIDGE_2PIN"` in myconfig.py
-  - Example pin specifiers using 40 pin GPIO header to generate signals: 
+- myconfig.py で `DRIVETRAIN_TYPE = "SERVO_HBRIDGE_2PIN"` を使用します。
+  - 40ピンGPIOヘッダーから信号を生成する場合のピン指定例:
 ```python
-  HBRIDGE_2PIN_DUTY_FWD = "RPI_GPIO.BOARD.18"  # provides forward duty cycle to motor
-  HBRIDGE_2PIN_DUTY_BWD = "RPI_GPIO.BOARD.16"  # provides reverse duty cycle to motor
-  PWM_STEERING_PIN = "RPI_GPIO.BOARD.33"       # provides servo pulse to steering servo
-  STEERING_LEFT_PWM = 460         # pwm value for full left steering (use `donkey calibrate` to measure value for your car)
-  STEERING_RIGHT_PWM = 290        # pwm value for full right steering (use `donkey calibrate` to measure value for your car)
+  HBRIDGE_2PIN_DUTY_FWD = "RPI_GPIO.BOARD.18"  # 前進用デューティ比
+  HBRIDGE_2PIN_DUTY_BWD = "RPI_GPIO.BOARD.16"  # 後退用デューティ比
+  PWM_STEERING_PIN = "RPI_GPIO.BOARD.33"       # ステアリングサーボへのパルス
+  STEERING_LEFT_PWM = 460         # 左一杯ステアのPWM値(`donkey calibrate`で測定)
+  STEERING_RIGHT_PWM = 290        # 右一杯ステアのPWM値(`donkey calibrate`で測定)
 ```
-A PCA9685 could also be used to generate all control signals.  See [pins](pins.md) for a detailed discussion of pin providers and pin specifiers.
+PCA9685 を用いてすべての制御信号を生成することも可能です。詳細は [pins](pins.md) を参照してください。
 
-## HBridge for both Steering and Throttle
-Some very inexpensive toy cars use a DC motor to drive the back wheels forward and reverse and another DC motor to steer the front wheels left or right.  A single L298N HBridge (or L9110S HBridge) can be used to control these two motors.  This driver assumes 2-pin wiring where each motor uses two PWM pins, one for each direction.
+## ステアリングとスロットルの両方をHBridgeで制御する
+ごく安価な玩具の車では、後輪駆動用のDCモーターと、前輪操舵用の別のDCモーターを使うことがあります。これら2つのモーターは1つのL298N HBridge(またはL9110S HBridge)で制御できます。このドライバでは2ピン配線を想定しており、各モーターにつき2本のPWMピン(方向ごとに1本)を使用します。
 
-**Configuration**
+**設定**
 
-- use `DRIVETRAIN_TYPE = "DC_STEER_THROTTLE"` in myconfig.py
-  - Example pin specifiers using 40 pin GPIO header to generate signals: 
+- myconfig.py で `DRIVETRAIN_TYPE = "DC_STEER_THROTTLE"` を使用します。
+  - 40ピンGPIOヘッダーから信号を生成する場合のピン指定例:
 ```python
-  HBRIDGE_PIN_LEFT = "RPI_GPIO.BOARD.18"   # pwm pin produces duty cycle for steering left
-  HBRIDGE_PIN_RIGHT = "RPI_GPIO.BOARD.16"  # pwm pin produces duty cycle for steering right
-  HBRIDGE_PIN_FWD = "RPI_GPIO.BOARD.15"    # pwm pin produces duty cycle for forward drive
-  HBRIDGE_PIN_BWD = "RPI_GPIO.BOARD.13"    # pwm pin produces duty cycle for reverse drive
+  HBRIDGE_PIN_LEFT = "RPI_GPIO.BOARD.18"   # 左旋回用デューティ比
+  HBRIDGE_PIN_RIGHT = "RPI_GPIO.BOARD.16"  # 右旋回用デューティ比
+  HBRIDGE_PIN_FWD = "RPI_GPIO.BOARD.15"    # 前進用デューティ比
+  HBRIDGE_PIN_BWD = "RPI_GPIO.BOARD.13"    # 後退用デューティ比
 ```
-A PCA9685 could also be used to generate all control signals.  See [pins](pins.md) for a detailed discussion of pin providers and pin specifiers.
+PCA9685 を用いてすべての制御信号を生成することも可能です。詳細は [pins](pins.md) を参照してください。
 
-## VESC for both Steering and Throttle
+## ステアリングとスロットルを両方VESCで制御する
 
-VESC is an advanced version of ESC that provides you a lot of customization options on how the ESC operates. It includes features such as regenerative braking, temperature control etc.
+VESC はESCの高度なバージョンで、再生ブレーキや温度管理など、多くのカスタマイズ機能を提供します。
 
-This was tested with a VESC 6 and Traxxas Brushless Motor
-Follow this F1Tenth tutorial to update your VESC firmware and calibrate it: [https://f1tenth.readthedocs.io/en/stable/getting_started/firmware/firmware_vesc.html](https://f1tenth.readthedocs.io/en/stable/getting_started/firmware/firmware_vesc.html)
-It's important to use the servo out bin so that we can control steering with the VESC as well
+これはVESC 6とTraxxas ブラシレスモーターでテストされています。VESCのファームウェア更新とキャリブレーションは F1Tenth のチュートリアル [https://f1tenth.readthedocs.io/en/stable/getting_started/firmware/firmware_vesc.html](https://f1tenth.readthedocs.io/en/stable/getting_started/firmware/firmware_vesc.html) に従ってください。ステアリングもVESCで制御できるよう、servo out bin を使用することが重要です。
 
-Requires installation of PyVESC from source for servo control (pip install git+https://github.com/LiamBindle/PyVESC.git@master)
-**Configuration**
+サーボ制御には PyVESC をソースからインストールする必要があります(`pip install git+https://github.com/LiamBindle/PyVESC.git@master`)。
+**設定**
 
-- use `DRIVETRAIN_TYPE = "VESC"` in myconfig.py
-  - Example parameters 
+- myconfig.py で `DRIVETRAIN_TYPE = "VESC"` を使用します。
+  - パラメータ例
 ```python
-  VESC_MAX_SPEED_PERCENT =.2  # Max speed as a percent of the actual speed
-  VESC_SERIAL_PORT= "/dev/ttyACM0" # Serial device to use for communication. Can check with ls /dev/tty*
-  VESC_HAS_SENSOR= True # Whether or not the bldc motor is using a hall effect sensor
-  VESC_START_HEARTBEAT= True # Whether or not to automatically start the heartbeat thread that will keep commands alive.
-  VESC_BAUDRATE= 115200 # baudrate for the serial communication. Shouldn't need to change this.
-  VESC_TIMEOUT= 0.05 # timeout for the serial communication
-  VESC_STEERING_SCALE= 0.5 # VESC accepts steering inputs from 0 to 1. Joystick is usually -1 to 1. This changes it to -0.5 to 0.5
-  VESC_STEERING_OFFSET = 0.5 # VESC accepts steering inputs from 0 to 1. Coupled with above change we move Joystick to 0 to 1
+  VESC_MAX_SPEED_PERCENT =.2  # 実際の速度に対する最大速度の割合
+  VESC_SERIAL_PORT= "/dev/ttyACM0" # 通信用シリアルデバイス。ls /dev/tty* で確認可能
+  VESC_HAS_SENSOR= True # BLDCモーターがホールセンサーを使用しているか
+  VESC_START_HEARTBEAT= True # コマンドを生かし続けるハートビートスレッドを自動開始するか
+  VESC_BAUDRATE= 115200 # シリアル通信のボーレート。変更の必要はほぼない
+  VESC_TIMEOUT= 0.05 # シリアル通信のタイムアウト
+  VESC_STEERING_SCALE= 0.5 # VESCは0〜1のステア入力を受け付ける。ジョイスティックは通常-1〜1なので-0.5〜0.5に変換
+  VESC_STEERING_OFFSET = 0.5 # 上記変換に伴いジョイスティックの範囲を0〜1にシフト
 ```
 
-## Differential Drive cars
-An inexpensive Donkeycar compatible robot can be constructed using a cheap smart car robot chassis that includes 2 DC gear motors and an L298N motor driver or compatible to run the motors.  Steering is accomplished by running one motor faster than the other, causing the car to drive in an arc.  The motor driver can be wired in one of two ways; 3 pin wiring or 2 pin wiring.  The name of the DonkeyCar drivetrains for differential drive all start with `DC_TWO_WHEEL`.
+## 差動駆動車
+安価なスマートカー用シャーシにはDCギアモーター2個と、駆動用モーターを制御するL298Nモータードライバ(互換品含む)が付属しており、これでDonkeycar互換のロボットを作ることができます。ステアリングは片方のモーターを他方より速く回すことで行い、車体は弧を描いて走行します。モータードライバの配線方法には3ピン方式と2ピン方式の2通りがあります。差動駆動用のDonkeycarドライブトレイン名はすべて `DC_TWO_WHEEL` で始まります。
 
-### 3-pin HBridge Differential Drive
-2 DC gear motors are controlled with an L298N, each motor using two TTL output pins to select direction and a PWM pin to control the power to the motor.  Since each motor uses 3 pins, so a total of 6 pins are used in a differential drive configuration. The advantage of this wiring scheme is that it only requires 2 PWM pins, which happens to be the maximum number of PWM pins on the Jetson Nano.
+### 3ピン HBridge 差動駆動
+2つのDCギアモーターを L298N で制御します。各モーターは方向選択用に2本のTTL出力ピン、速度制御用に1本のPWMピンを使用します。各モーターが3本使うため、差動駆動全体では合計6本のピンを使用します。この方式の利点は、必要なPWMピンが2本だけで済むことです。これはJetson Nano がサポートする最大PWM数と一致します。
 
-See https://www.electronicshub.org/raspberry-pi-l298n-interface-tutorial-control-dc-motor-l298n-raspberry-pi/ for a discussion of how the L298N HBridge module is wired in 3-pin mode to the RaspberryPi GPIO. This also applies to the some other driver chips that emulate the L298N, such as the TB6612FNG motor driver.
+L298N HBridge モジュールを3ピンモードでRaspberryPiのGPIOに配線する方法については https://www.electronicshub.org/raspberry-pi-l298n-interface-tutorial-control-dc-motor-l298n-raspberry-pi/ を参照してください。これはTB6612FNGなどL298N互換のドライバチップにも当てはまります。
 
-**Configuration**
+**設定**
 
-- use `DRIVETRAIN_TYPE = "DC_TWO_WHEEL_L298N"` in myconfig.py
-  - Example pin specifiers using 40 pin GPIO header to generate signals: 
+- myconfig.py で `DRIVETRAIN_TYPE = "DC_TWO_WHEEL_L298N"` を使用します。
+  - 40ピンGPIOヘッダーから信号を生成する場合のピン指定例:
 
 ```python
 DC_TWO_WHEEL_L298N = {
-    "LEFT_FWD_PIN": "RPI_GPIO.BOARD.16",        # TTL output pin enables left wheel forward
-    "LEFT_BWD_PIN": "RPI_GPIO.BOARD.18",        # TTL output pin enables left wheel reverse
-    "LEFT_EN_DUTY_PIN": "RPI_GPIO.BOARD.22",    # PWM pin generates duty cycle for left motor speed
+    "LEFT_FWD_PIN": "RPI_GPIO.BOARD.16",        # 左ホイール前進用TTL出力
+    "LEFT_BWD_PIN": "RPI_GPIO.BOARD.18",        # 左ホイール後退用TTL出力
+    "LEFT_EN_DUTY_PIN": "RPI_GPIO.BOARD.22",    # 左モーター速度用PWM出力
 
-    "RIGHT_FWD_PIN": "RPI_GPIO.BOARD.15",       # TTL output pin enables right wheel forward
-    "RIGHT_BWD_PIN": "RPI_GPIO.BOARD.13",       # TTL output pin enables right wheel reverse
-    "RIGHT_EN_DUTY_PIN": "RPI_GPIO.BOARD.11",   # PWM pin generates duty cycle for right wheel speed
+    "RIGHT_FWD_PIN": "RPI_GPIO.BOARD.15",       # 右ホイール前進用TTL出力
+    "RIGHT_BWD_PIN": "RPI_GPIO.BOARD.13",       # 右ホイール後退用TTL出力
+    "RIGHT_EN_DUTY_PIN": "RPI_GPIO.BOARD.11",   # 右モーター速度用PWM出力
 }
 ```
 
-  - Example pin specifiers using a PCA9685 to generate signals: 
+  - PCA9685 を用いて信号を生成する場合のピン指定例:
 
 ```python
 DC_TWO_WHEEL_L298N = {
-    "LEFT_FWD_PIN": "PCA9685.1:40.3",        # TTL output pin enables left wheel forward
-    "LEFT_BWD_PIN": "PCA9685.1:40.2",        # TTL output pin enables left wheel reverse
-    "LEFT_EN_DUTY_PIN": "PCA9685.1:40.1",    # PWM pin generates duty cycle for left motor speed
+    "LEFT_FWD_PIN": "PCA9685.1:40.3",        # 左ホイール前進用TTL出力
+    "LEFT_BWD_PIN": "PCA9685.1:40.2",        # 左ホイール後退用TTL出力
+    "LEFT_EN_DUTY_PIN": "PCA9685.1:40.1",    # 左モーター速度用PWM出力
 
-    "RIGHT_FWD_PIN": "PCA9685.1:40.6",       # TTL output pin enables right wheel forward
-    "RIGHT_BWD_PIN": "PCA9685.1:40.5",       # TTL output pin enables right wheel reverse
-    "RIGHT_EN_DUTY_PIN": "PCA9685.1:40.4",   # PWM pin generates duty cycle for right wheel speed
+    "RIGHT_FWD_PIN": "PCA9685.1:40.6",       # 右ホイール前進用TTL出力
+    "RIGHT_BWD_PIN": "PCA9685.1:40.5",       # 右ホイール後退用TTL出力
+    "RIGHT_EN_DUTY_PIN": "PCA9685.1:40.4",   # 右モーター速度用PWM出力
 }
 ```
 
-  - In the configuration, the HBRIDGE_L298N_PIN_xxxx_EN pins determine how fast the motors spin.  These pins must support PWM output.  Remember that the Jetson Nano only supports 2 PWM output pins and only if they are enabled using `/opt/nvidia/jetson-io/jetson-io.py`. See [Generating PWM from the Jetson Nano](pins.md#generating-pwm-from-the-jetson-nano).
-  - The HBRIDGE_L298N_PIN_xxxx_FWD and HBRIDGE_L298N_PIN_xxxx_BWD pins are TTL output pins that determine the direction the motors spin.
+  - 設定では HBRIDGE_L298N_PIN_xxxx_EN ピンでモーターの回転速度を決定します。これらのピンはPWM出力に対応している必要があります。Jetson Nano では `/opt/nvidia/jetson-io/jetson-io.py` を使って有効化した場合のみPWM出力が2ピン利用可能です。[Jetson Nano からのPWM生成](pins.md#generating-pwm-from-the-jetson-nano) を参照してください。
+  - HBRIDGE_L298N_PIN_xxxx_FWD および HBRIDGE_L298N_PIN_xxxx_BWD ピンはモーターの回転方向を指定するTTL出力ピンです。
 
-> See [pins](pins.md) for a detailed discussion of pin providers and pin specifiers.
+> ピンプロバイダやピン指定子の詳細は [pins](pins.md) を参照してください。
 
-### 2 Pin HBridge Differential Drive
-2 DC Motors controlled with an 'mini' L293D HBridge, each motor using 2 PWM pins; one pwm pin to enable and control forward speed and one to enable and control reverse motor speed.  This advantage of this wiring method is that it only requires a total of 4 pins; however all of those pins must be able to output PWM.  
+### 2ピン HBridge 差動駆動
+ミニ L293D HBridge を使用して2つのDCモーターを制御します。各モーターは2本のPWMピンを用い、1本が前進速度用、もう1本が後退速度用です。この配線方式の利点は合計4本のピンで済むことですが、使用するピンはすべてPWM出力に対応している必要があります。
 
-- See [L293 Tutorial](https://www.instructables.com/Tutorial-for-Dual-Channel-DC-Motor-Driver-Board-PW/) for how an L293D mini-HBridge module is wired in 2-pin mode. 
-- This driver can also be used with an L9110S/HG7881 motor driver.  See [Interfacing L9110S](https://electropeak.com/learn/interfacing-l9110s-dual-channel-h-bridge-motor-driver-module-with-arduino/) for how an L9110S motor driver module is wired.  
-- The driver can also be used with a DRV8833.  See [DRV8833 HBridge](https://electropeak.com/learn/interfacing-drv8833-dual-motor-driver-module-with-arduino/) for how to interface to an arduino.
+- L293D ミニHBridgeモジュールを2ピンモードで配線する方法は[こちら](https://www.instructables.com/Tutorial-for-Dual-Channel-DC-Motor-Driver-Board-PW/)を参照してください。
+- このドライバはL9110S/HG7881モータードライバでも利用できます。配線方法は[Interfacing L9110S](https://electropeak.com/learn/interfacing-l9110s-dual-channel-h-bridge-motor-driver-module-with-arduino/)を参照してください。
+- DRV8833でも使用可能です。[DRV8833 HBridge](https://electropeak.com/learn/interfacing-drv8833-dual-motor-driver-module-with-arduino/)を参照してArduinoとの接続方法を確認してください。
 
+**設定**
 
-**Configuration**
-
-- use `DRIVETRAIN_TYPE = "DC_TWO_WHEEL"` in myconfig.py
-  - example pin specifiers using the 40 pin GPIO to generate signals: 
-  
-```python
-DC_TWO_WHEEL = {
-    "LEFT_FWD_DUTY_PIN": "RPI_GPIO.BCM.16",  # BCM.16 == BOARD.36, pwm pin produces duty cycle for left wheel forward
-    "LEFT_BWD_DUTY_PIN": "RPI_GPIO.BCM.20",  # BCM.20 == BOARD.38, pwm pin produces duty cycle for left wheel reverse
-    "RIGHT_FWD_DUTY_PIN": "RPI_GPIO.BCM.5",  # BCM.5 == BOARD.29, pwm pin produces duty cycle for right wheel forward
-    "RIGHT_BWD_DUTY_PIN": "RPI_GPIO.BCM.6",  # BCM.6 == BOARD.31, pwm pin produces duty cycle for right wheel reverse
-}
-```
-  - example pin specifiers using a PCA9685 to generate signals: 
+- myconfig.py で `DRIVETRAIN_TYPE = "DC_TWO_WHEEL"` を使用します。
+  - 40ピンGPIOヘッダーから信号を生成する場合のピン指定例:
 
 ```python
 DC_TWO_WHEEL = {
-    "LEFT_FWD_DUTY_PIN": "PCA9685.1:40.0",  # pwm pin produces duty cycle for left wheel forward
-    "LEFT_BWD_DUTY_PIN": "PCA9685.1:40.1",  # pwm pin produces duty cycle for left wheel reverse
-    "RIGHT_FWD_DUTY_PIN": "PCA9685.1:40.5",  # pwm pin produces duty cycle for right wheel forward
-    "RIGHT_BWD_DUTY_PIN": "PCA9685.1:40.6",  # pwm pin produces duty cycle for right wheel reverse
+    "LEFT_FWD_DUTY_PIN": "RPI_GPIO.BCM.16",  # BCM.16 == BOARD.36 左前進用PWM
+    "LEFT_BWD_DUTY_PIN": "RPI_GPIO.BCM.20",  # BCM.20 == BOARD.38 左後退用PWM
+    "RIGHT_FWD_DUTY_PIN": "RPI_GPIO.BCM.5",  # BCM.5 == BOARD.29 右前進用PWM
+    "RIGHT_BWD_DUTY_PIN": "RPI_GPIO.BCM.6",  # BCM.6 == BOARD.31 右後退用PWM
+}
+```
+  - PCA9685 を用いて信号を生成する場合のピン指定例:
+
+```python
+DC_TWO_WHEEL = {
+    "LEFT_FWD_DUTY_PIN": "PCA9685.1:40.0",  # 左前進用PWM
+    "LEFT_BWD_DUTY_PIN": "PCA9685.1:40.1",  # 左後退用PWM
+    "RIGHT_FWD_DUTY_PIN": "PCA9685.1:40.5",  # 右前進用PWM
+    "RIGHT_BWD_DUTY_PIN": "PCA9685.1:40.6",  # 右後退用PWM
 }
 ```
 
-> See [pins](pins.md) for a detailed discussion of pin providers and pin specifiers.
+> ピンプロバイダやピン指定子の詳細は [pins](pins.md) を参照してください。

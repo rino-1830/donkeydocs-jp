@@ -1,146 +1,141 @@
-# Train an autopilot with Keras
+# Keras で自動運転を学習する
 
-Now that you're able to drive your car reliably you can use [Keras](https://keras.io/) to train a
-neural network to drive like you. Here are the steps.
+これで安定して車を走らせられるようになったら、[Keras](https://keras.io/) を使ってあなたの走り方を学習するニューラルネットワークを作成できます。以下が手順です。
 
-## Collect Data
+## データ収集
 
- Make sure you collect good, clean data.  The neural network will learn what is in the data that it is train upon, so bad data results in a bad model.  If your data has segments where you drive off the track, then there will be as aspect of the trained model that will reflect that.  Ideally you would drive perfectly and no bad data would be recorded.  However, that is not realistic, but there are ways to easily remove errors as they happen.
+良質なクリーンデータを収集することを忘れないでください。ニューラルネットワークは与えられたデータから学習するため、質の悪いデータからは質の悪いモデルしか得られません。走行中にコースアウトした区間があると、学習したモデルにもその要素が反映されてしまいます。理想としては完璧な走行で不要なデータを記録しないことですが、現実的ではありません。ただし発生したエラーを簡単に取り除く方法はあります。
 
- A technique that is useful to avoid collecting bad data is to use the erase-records button on the controller when you make a mistake.  So if you crash then immediately toggle recording to off and select the erase-records button to delete the last 100 records.  It get's even easier if you use set `AUTO_RECORD_ON_THROTTLE = True` in your `myconfig.py` file; in that case recording will turn on when you apply throttle and will turn off when you stop applying throttle.  So between that and the erase-records button you can record tens-of-thousands of records without having to go back and clean data with the `donkey tubclean` command.
+ミスをしたときにコントローラーの erase-records ボタンを使用すると、悪いデータの収集を避けるのに役立ちます。クラッシュしたらすぐに録画をオフに切り替え、erase-records ボタンを押して直近 100 件の記録を削除しましょう。`myconfig.py` で `AUTO_RECORD_ON_THROTTLE = True` に設定しておくとさらに簡単で、スロットルを入れると記録が開始され、スロットルを戻すと自動で停止します。この設定と erase-records ボタンを組み合わせれば、`donkey tubclean` コマンドでデータを後からクリーンアップする必要なく、数万件の記録を集められます。
 
- Beyond actual mistakes, the consistency in the data you record matters.  The more variation there is in the data, the more data you will need to get a good model.  The more consistent you are when you drive, then the more uniform the data will be and so the neural network will be able to correllate the inputs to the outputs more effectively.  Consistency is particularly hard to get for throttle; it is very hard to replicate throttle exactly at each place on the track.  One strategy (a strategy I use) is to find the maximum throttle you can maintain around the entire track or at least most of the track, then just use that; set `JOYSTICK_MAX_THROTTLE` in your `myconfig.py` file to that throttle, then you can put the pedal to the metal around most of the course when you are collecting data.   
+実際のミスだけでなく、記録するデータの一貫性も重要です。データのばらつきが大きいほど、良いモデルを得るにはより多くのデータが必要になります。走行が安定していればいるほどデータが均一となり、ニューラルネットワークは入力と出力の関係をより効果的に学習できます。特にスロットルは再現が難しく、コース上の同じ場所でまったく同じスロットルを入力するのは非常に困難です。私が実践している方法の一つは、コース全体あるいは大部分を維持できる最大スロットルを見つけ、それだけを使用することです。`myconfig.py` の `JOYSTICK_MAX_THROTTLE` をその値に設定すれば、データ収集時にほとんどの区間で全開にできます。
 
 
-1. Practice driving around the track a couple times.
-2. When you're confident you can drive 10 laps with few mistakes, restart the python mange.py process to create a new data recording session. Press `Start Recording` if using web controller or use `AUTO_RECORD_ON_THROTTLE = True` as described above so the joystick will auto record with any non-zero throttle.
-3. If you crash or run off the track press Stop Car immediately and stop recording. If you are using a joystick tap the button that erases the last 100 records (5 seconds at 20 hz drive loop).
-4. After you've collected 10-20 laps of good data (5-20k images) you can stop
-your car with `Ctrl-c` in the ssh session for your car.
-5. The data you've collected is in the mycar data folder.
-6. If you recorded mistakes then you can use the `donkey tubclean` to edit your data and remove the mistakes.
+1. まずはコースを数周走行して練習しましょう。
+2. ミスなく 10 周程度走れる自信が付いたら、`python manage.py` プロセスを再起動して新しいデータ記録セッションを作成します。Web コントローラーを使用している場合は「Start Recording」を押すか、前述の `AUTO_RECORD_ON_THROTTLE = True` を使ってジョイスティックのスロットル操作で自動記録するようにします。
+3. クラッシュしたりコースアウトしたら直ちに Stop Car を押して記録を停止します。ジョイスティックを使っている場合は、最後の 100 件（20Hz のドライブループで 5 秒分）の記録を消去するボタンを押します。
+4. 良いデータを 10～20 周（5～20k 画像）収集できたら、車の ssh セッションで `Ctrl-c` を押して終了します。
+5. 収集したデータは mycar の data フォルダーに保存されています。
+6. ミスを記録してしまった場合は `donkey tubclean` を使ってデータを編集し、不要な部分を削除します。
 
-## Transfer data from your car to your computer
+## 車から PC へデータ転送
 
-Since the Raspberry Pi is not very powerful, we need to transfer the data
-to a PC computer to train. The Jetson nano is more powerful, but still quite slow to train. If desired, skip this transfer step and train on the Nano.
+Raspberry Pi では処理能力が低いため、データを PC に転送して学習させる必要があります。Jetson Nano なら多少高速ですが、それでも学習はかなり遅いです。望むならこの転送手順を省き、Nano 上で学習しても構いません。
 
-## Training the easy, GUI way
+## GUI を使った簡単な学習方法
 
-The easiest way to do the training on your desktop is by using the [Donkey UI application](/utility/ui).
+デスクトップで最も簡単に学習する方法は、[Donkey UI アプリケーション](/utility/ui) を利用することです。
  ![Tub_manager UI](/assets/ui-tub-manager.png)
 
-If, however, you want to do the training with the command line, read on....
+それでもコマンドラインで学習したい場合は、この先を読んでください…。
 
-## Training with the command line
+## コマンドラインで学習する
 
-In a new terminal session on your host PC use rsync to copy your cars
-folder from the Raspberry Pi.
+ホスト PC の新しいターミナルセッションで rsync を使用し、Raspberry Pi から車のフォルダーをコピーします。
 
 ```bash
 rsync -rv --progress --partial pi@<your_pi_ip_address>:~/mycar/data/  ~/mycar/data/
 ```
 
-## Train a model
+## モデルを学習させる
 
-* In the same terminal you can now run the training script on the latest data by passing the path to that data as an argument. You can optionally pass path masks, such as `./data/*` to gather multiple manifests. For example, from your mycar folder on your host PC:
-
+* 同じターミナルで、取得した最新データに対して学習スクリプトを実行します。引数としてデータへのパスを指定します。`./data/*` のようにパスのマスクを指定すれば複数のマニフェストをまとめて扱えます。例として、ホスト PC の mycar フォルダーで以下を実行します。
 
 ```bash
 ~\mycar$ donkey train --tub ./data --model ./models/mypilot.h5
 ```
-You may specify more than one tub using a comma separated list `--tub=foo/data,bar/data` or just leaving spaces like `--tub foo/data bar/data`.  See [Train the Model](/utility/donkey#train-the-model)
+カンマ区切りリスト `--tub=foo/data,bar/data` あるいはスペース区切り `--tub foo/data bar/data` で複数の tub を指定できます。詳しくは[Train the Model](/utility/donkey#train-the-model) を参照してください。
 
-* You can create different model types with the `--type` argument during training. You may also choose to change the default model type in myconfig.py `DEFAULT_MODEL_TYPE`. When specifying a new model type, be sure to provide that type when running the model, or using the model in other tools like plotting or profiling. For more information on the different model types, look here for [Keras Parts](/parts/keras). The model will be placed into the folder `models/`. You can as well omit the `--model` flag and the model name will be auto created using the pattern `pilot_YY-MM-DD_N.h5`. 
+* `--type` 引数を使うことで異なるモデルタイプを作成できます。また `myconfig.py` の `DEFAULT_MODEL_TYPE` でデフォルトのモデルタイプを変更することも可能です。新しいモデルタイプを指定する場合、モデルを実行するときやプロット・プロファイルなど他のツールで使用する際にもそのタイプを指定してください。各モデルタイプの詳細は [Keras Parts](/parts/keras) を参照してください。学習したモデルは `models/` フォルダーに保存されます。`--model` フラグを省略すると、`pilot_YY-MM-DD_N.h5` というパターンで自動的に名前が付けられます。
 
-* If you run with version >= 4.3.0, the model will be automatically created in tflite format for fast inferencing, generating a `./models/mypilot.tflite` file, too. Tflite creation can be suppressed, by setting `CREATE_TF_LITE = False` in your `myconfig.py` file. In addition, a tensorrt model is produced if you set `CREATE_TENSOR_RT = True`, which is `False` by default. That setting produces a `./models/mypilot.trt` file that should work on all platforms. On RPi, the tflite model will be the fastest. 
+* バージョン 4.3.0 以降では、tflite 形式のモデルが自動生成され、高速推論用に `./models/mypilot.tflite` も作成されます。tflite の生成を抑止したい場合は `myconfig.py` で `CREATE_TF_LITE = False` に設定します。さらに `CREATE_TENSOR_RT = True` を設定すると（デフォルトは `False`）、TensorRT モデル `./models/mypilot.trt` も生成されます。このファイルはすべてのプラットフォームで動作するはずです。RPi では tflite モデルが最速です。
 
-> _**Note:**_ There was a regression in version 4.2 where you only had to provide the model name in the model argument, like `--model mypilot.h5`. This got resolved in version 4.2.1. Please update to that version.
+> **注記:** 4.2 では回帰があり、`--model mypilot.h5` のようにモデル名だけを指定できていましたが、これは 4.2.1 で修正されました。ぜひアップデートしてください。
 
-* **Image Augmentation** With version >= 4.3.0 you also have access to image augmentations for training. Image augmentation is a technique where data, in this case images, is changed (augmented) to create variation in the data.  The purpose is two-fold.  First it can help extend your data when you don't have a lot of data.  Second it can create a model that is more resilient to variations in the data at inference time.  In our case, we want to handle various lighting conditions.  Currently supported are `AUGMENTATIONS = ['MULTIPLY', 'BLUR']` in the settings which generate brightness modifications and apply a Gaussian blur. These can be used individually or together. Augmentations are only applied during training; they are not applied when driving on autopilot.
+* **画像拡張** バージョン 4.3.0 以降では、学習時に画像拡張を利用できます。画像拡張とは画像データを変化させ（拡張し）、データにバリエーションを持たせる手法です。目的は二つあり、一つはデータ量が少ない場合に補うこと、もう一つは推論時のデータ変動に強いモデルを作ることです。ここではさまざまな照明条件に対応できるようにすることが狙いです。設定の `AUGMENTATIONS = ['MULTIPLY', 'BLUR']` で明るさ調整とガウシアンブラーを適用できます。個別にも併用も可能です。拡張は学習時のみ適用され、オートパイロット走行時には適用されません。
 
-* **Image Transformation** With version >= 4.3.0 you also have access to image transformations like cropping or trapezoidal masking.  **Cropping and masking** are similar; both 'erase' pixels on the image.  This is done to **remove pixels that are not important** and that may add unwanted detail that can make the model perform poorly under conditions where that unwanted detail is different.  Cropping can erase pixels on the top, bottom, left and/or right of the image.  Trapezoidal masking is a little more flexible in that it can mask pixels using a trapezoidal mask that can account for perspective in the image.  To crop the image or apply a trapezoidal mask you can provide `TRANSFORMATIONS = ['CROP']` or `TRANSFORMATIONS = ['TRAPEZE']`. Generally you will use either cropping or trapezoidal masking but not both.  **Transformations must be applied in the same way in training and when driving on autopilot**; make sure the transformation configuration is the same on your training machine and on your Donkey Car. 
+* **画像変換** バージョン 4.3.0 以降では、クロッピングや台形マスクなどの画像変換も利用できます。**クロッピングとマスキング** は似ており、いずれも画像のピクセルを「消す」ことで、重要でないピクセルや条件によって変化しやすい詳細部分を除去し、モデルの性能低下を防ぎます。クロッピングでは画像の上・下・左・右を削ることができ、台形マスクでは遠近を考慮した台形状のマスクで柔軟にピクセルを無効化できます。画像をクロップまたは台形マスクするには `TRANSFORMATIONS = ['CROP']` か `TRANSFORMATIONS = ['TRAPEZE']` を設定します。通常どちらか一方のみを使用します。**変換は学習時とオートパイロット走行時で同じ方法を適用する必要があります**。学習用 PC と Donkey Car の双方で変換設定が一致していることを確認してください。
 
-## Copy model back to car
+## モデルを車にコピー
 
-* In previous step we managed to get a model trained on the data. Now is time to move the model back to Rasberry Pi, so we can use it for testing it if it will drive itself.
+* 前の手順でデータからモデルを学習しました。次はそのモデルを Raspberry Pi に戻し、実際に自走できるかテストします。
 
-* Use rsync again to move your trained model pilot back to your car.
+* 再び rsync を使って学習済みモデルを車へコピーします。
 
 ```bash
 rsync -rv --progress --partial ~/mycar/models/ pi@<your_ip_address>:~/mycar/models/
 ```
 
-* Ensure to place car on the track so that it is ready to drive.
+* 走行準備ができるよう、車をコース上に置きます。
 
-* Now you can start your car again and pass it your model to drive.
+* これで再び車を起動し、モデルを渡して走行させます。
 
 ```bash
 python manage.py drive --model ~/mycar/models/mypilot.h5
 ```
 
-* However, you will see better performance if you start with the tflite mode.
+* ただし tflite モデルから始めたほうがより良い性能が得られます。
 
 ```bash
 python manage.py drive --model ~/mycar/models/mypilot.tflite --type tflite_linear
 ```
 
-* The car should start to drive on its own, congratulations!
+* これで車が自動で走り始めるはずです。おめでとうございます！
 
-## [Optional] Use TensorRT on the Jetson Nano
+## 【オプション】Jetson Nano で TensorRT を使用する
 
-Read [this](/docs/guide/robot_sbc/tensorrt_jetson_nano.md) for more information.
+詳細は[こちら](/docs/guide/robot_sbc/tensorrt_jetson_nano.md)を参照してください。
 
-## Training Tips
+## 学習のヒント
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/4fXbDf_QWM4" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 ----
 
-1. **Mode & Pilot**: Congratulations on getting it this far. The first thing to note after running the command above, is to look at the options in the Mode & Pilot menu. It can be pretty confusing. So here's what the different options mean:
+1. **Mode & Pilot**: ここまで進めたことを祝福します。上記のコマンドを実行した後、Mode & Pilot メニューのオプションを確認してください。少しわかりにくいので各オプションの意味を説明します。
 
-  a. **User** : As you guessed, this is where you are in control of both the steering and throttle control.
+  a. **User** : その名の通り、ステアリングもスロットルもあなたが操作します。
 
-  b. **Local Angle** : Not too obvious, but this is where the trained model (mypilot from above) controls the steering. The _Local_ refers to the trained model which is locally hosted on the raspberry-pi.
+  b. **Local Angle** : 少し分かりにくいですが、ここでは学習済みモデル（上で作成した mypilot）がステアリングを制御します。_Local_ とは Raspberry Pi 上に置かれた学習モデルを指します。
 
-  c. **Local Pilot** : This is where the trained model (mypilot) assumes control of both the steering and the throttle. As of now, it's purportedly not very reliable.
+  c. **Local Pilot** : 学習済みモデル（mypilot）がステアリングとスロットルの両方を制御します。現時点ではあまり信頼性が高くないとされています。
 
-  Be sure to also check out the **Max Throttle** and **Throttle Mode** options, and play around with a few settings. Can help with training quite a lot.
+  **Max Throttle** と **Throttle Mode** の各オプションも確認し、いろいろ設定を試してください。学習に大きく役立つ場合があります。
 
-2. **Build a Simple Track** : This isn't very well-documented, but the car should (theoretically) be able to train against any kind of track. To start off with, it might not be necessary to build a two-lane track with a striped center-lane. Try with a single lane with no center-line, or just a single strip that makes a circuit! At the least, you'll be able to do an end-to-end testing and verify that the software pipeline is all properly functional. Of course, as the next-step, you'll want to create a more standard track, and compete at a [meetup](https://diyrobocars.com/local-meetup-groups/) nearest to you!
+2. **シンプルなコースを作る** : あまり文書化されていませんが、理論上この車はどんなコースでも学習できるはずです。まずは中央線のある二車線コースを作る必要はないかもしれません。中央線のない一車線や、周回する一本のラインだけでも試してみましょう。最低限、エンドツーエンドのテストを行ってソフトウェアのパイプラインが正常に動作しているか確認できます。もちろん次のステップとして、より一般的なコースを作って[近くの meetup](https://diyrobocars.com/local-meetup-groups/) に参加してみてください。
 
-3. **Get help** : Try to get some helping hands from a friend or two. Again, this helps immensely with building the track, because it is harder than it looks to build a two-line track on your own! Also, you can save on resources (and tapes) by using a [ribbon](https://www.amazon.com/gp/product/B00L2MLCNO) instead of tapes. They'll still need a bit of tapes to hold them, but you can reuse them and they can be laid down with a lot less effort (Although the wind, if you're working outside, might make it difficult to lay them down initially).
+3. **助けを得る** : 友人に手伝ってもらいましょう。コース作りは見た目より大変なので、数人いると非常に助かります。また、テープの代わりに[リボン](https://www.amazon.com/gp/product/B00L2MLCNO)を使うと資材（とテープ）を節約できます。固定には少しテープが必要ですが、再利用できて敷くのもずっと楽です（屋外で作業する場合は風で最初が少し大変かもしれません）。
 
-## Training Behavior Models
+## 振る舞いモデルの学習
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/aLFuHGlU0CM" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 ----
 
-### How to train a Behavior model
+### 振る舞いモデルの学習方法
 
- * Make sure ```TRAIN_BEHAVIORS = True``` in myconfig.py when training and when running on the robot.
+ * 学習時およびロボットで実行するときは myconfig.py の `TRAIN_BEHAVIORS = True` を確認してください。
 
-* Setup an RGB led on robot to indicate which state is active. Enable in config.py. Verify when running robot that L1 PS3 button changes state led indicator. (that's the left upper shoulder button)
+* ロボットに RGB LED を取り付け、どの状態がアクティブか示すようにします。config.py で有効にし、ロボットを実行中に L1 PS3 ボタン（左上のショルダーボタン）を押すと状態表示 LED が変わるか確認します。
 
-* By default there are two states. If you like, adjust the number of states in bottom of config.py. Rename or change `BEHAVIOR_LIST` to an arbitrary number of labels. Make sure same number of rgb colors in `BEHAVIOR_LED_COLORS`. Make sure to reflect any changes to both PC and Robot.
+* デフォルトでは状態は 2 つです。必要に応じて config.py の末尾で状態数を変更してください。`BEHAVIOR_LIST` を任意のラベル数に変更し、`BEHAVIOR_LED_COLORS` の RGB カラーも同数用意します。変更内容は PC とロボットの両方で反映させてください。
 
-* Now for training: Activate any state with L1 shoulder button. Then drive as you wish the car to drive when in that state. Switch states and then transition to the new steady state behavior.
+* 学習では L1 ショルダーボタンで任意の状態をアクティブにし、その状態で走らせたい走行を行います。状態を切り替えたら新しい定常状態へ移行します。
 
-* For the two lane case. Drive 33% in one lane, 33% in the other, and 33% transitioning between them. It's important to trigger the state transition before changing lanes.
+* 二車線の場合は、片側 33%、もう片側 33%、そして残り 33% をレーン変更中として走行します。レーンを変える前に状態遷移をトリガーすることが重要です。
 
-* Check the records in the data file. Open a .json. In addition to steering and throttle, you should also have some additional state information about your behavior vector and which was was activate on that frame. This is crucial to training correctly.
+* データファイル内の記録を確認します。.json を開くとステアリングやスロットルに加えて、振る舞いベクトルやそのフレームでどの状態がアクティブだったかが追加されているはずです。これが正しく学習するために重要です。
 
-* Move data to PC and train as normal, ensuring ```TRAIN_BEHAVIORS = True``` in myconfig.py on PC, otherwise extra state information will be ignored.
+* データを PC に移動し、通常どおり学習します。その際 PC 側の myconfig.py でも `TRAIN_BEHAVIORS = True` になっていることを確認してください。そうでないと追加の状態情報が無視されてしまいます。
 
-* Move trained model back to robot. Now place the robot in the location of the initial state. Start the robot with the given model
+* 学習したモデルをロボットに戻します。初期状態の場所にロボットを置き、以下のようにモデルを指定して起動します。
 
 ```bash
 python manage.py drive --model=models/my_beh.h5 --type=behavior
 ```
 
-* Now press select to switch to desired AI mode. Constant throttle available as well as trained throttle.
+* Select ボタンを押すと目的の AI モードに切り替えられます。一定スロットルも学習したスロットルも利用可能です。
 
-As it drives, you can now toggle states with L1 and see whether and how much it can replicate your steady state behaviors and transitions.
+走行中に L1 を押すと状態を切り替え、どれだけ学習した定常状態や遷移を再現できるか確かめられます。
 
-Be sure to include quite a lot of example of transitions from one state to another. At least 50, but more like 100. 
+状態間の遷移例を多く含めるようにしてください。最低でも 50 回、できれば 100 回ほど行いましょう。

@@ -1,12 +1,12 @@
-# Donkey Simulator
+# Donkey シミュレーター
 
-The [Donkey Gym](https://github.com/tawnkramer/gym-donkeycar) project is a OpenAI gym wrapper around the [Self Driving Sandbox](https://github.com/tawnkramer/sdsandbox/tree/donkey) donkey simulator (`sdsandbox`). When building the sim from source, checkout the `donkey` branch of the `sdsandbox` project. 
+[Donkey Gym](https://github.com/tawnkramer/gym-donkeycar) プロジェクトは、[Self Driving Sandbox](https://github.com/tawnkramer/sdsandbox/tree/donkey) ドンキーシミュレータ（`sdsandbox`）を OpenAI Gym で扱えるようにしたラッパーです。ソースからシミュレーターをビルドする場合は `sdsandbox` プロジェクトの `donkey` ブランチをチェックアウトしてください。
 
-The simulator is built on the the [Unity](https://unity.com/) game platform, uses their internal physics and graphics, and connects to a donkey Python process to use our trained model to control the simulated Donkey.
+このシミュレーターは [Unity](https://unity.com/) ゲームプラットフォーム上に構築されており、内部の物理演算とグラフィックスを利用し、学習済みモデルで制御する Python プロセスへ接続します。
 
-## Installation Video:
+## インストール動画:
 
-Here's some videos to help you through the installation.
+インストール手順を説明したビデオです。
 
 Linux:
 https://youtu.be/J6Ll5Obtuxk
@@ -16,16 +16,16 @@ https://youtu.be/wqQMmHVT8qw
 
 ## My Virtual Donkey
 
-There are many ways to use the simulator, depending on your goals. You can use the simulator to get to know and use the standard Donkeycar drive/train/test cycle by treating it as virtual hardware. You will collect data, drive, and train using the __same commands__ as if you were using a real robot. We will walk through that use-case first.
+目的に応じてシミュレーターの使い方はさまざまです。ここではシミュレーターを仮想ハードウェアとして扱い、通常の Donkeycar の drive/train/test サイクルを体験します。実機と__同じコマンド__でデータ収集、走行、学習を行います。まずこの使い方から説明します。
 
-![sim_screen_shot](../../assets/sim_screen_shot.png) 
+![sim_screen_shot](../../assets/sim_screen_shot.png)
 
-## Install
+## インストール
 
-* Download and unzip the simulator for your host pc platform from [Donkey Gym Release](https://github.com/tawnkramer/gym-donkeycar/releases).
-* Place the simulator where you like. For this example it will be ~/projects/DonkeySimLinux. Your dir will have a different name depending on platform. 
-* Complete all the steps to [install Donkey on your host pc](https://docs.donkeycar.com/guide/install_software/#step-1-install-software-on-host-pc).
-* Setup DonkeyGym:
+* [Donkey Gym Release](https://github.com/tawnkramer/gym-donkeycar/releases) からホスト PC 用のシミュレーターをダウンロードし解凍します。
+* 好きな場所にシミュレーターを置きます。ここでは ~/projects/DonkeySimLinux を例にしますが、プラットフォームにより名前は異なります。
+* [ホスト PC への Donkey インストール](https://docs.donkeycar.com/guide/install_software/#step-1-install-software-on-host-pc) の手順をすべて実行します。
+* DonkeyGym を設定します:
 
 ```bash
 cd ~/projects
@@ -35,14 +35,14 @@ conda activate donkey
 pip install -e .[gym-donkeycar]
 ```
 
-* You may use an existing ~/mycar donkey application, or begin a new one. Here we will start fresh: 
+* 既存の ~/mycar アプリケーションを使うことも新しく作成することもできます。ここでは新規作成します:
 
 ```bash
 donkey createcar --path ~/mysim
 cd ~/mysim
 ```
 
-* Edit your myconfig.py to enable donkey gym simulator wrapper, replace `<user-name>` and the other parts of the path:
+* myconfig.py を編集して Donkey Gym シミュレーターラッパーを有効にし、`<user-name>` などを自分の環境に合わせます:
 
 ```bash
 DONKEY_GYM = True
@@ -50,42 +50,39 @@ DONKEY_SIM_PATH = "/home/<user-name>/projects/DonkeySimLinux/donkey_sim.x86_64"
 DONKEY_GYM_ENV_NAME = "donkey-generated-track-v0"
 ```
 
-
-> Note: your path to the executable will vary depending on platform and user.
+> 注: 実行ファイルのパスはプラットフォームとユーザーによって異なります。
 >  Windows: DonkeySimWin/donkey_sim.exe
 >  Mac OS: DonkeySimMac/donkey_sim.app/Contents/MacOS/donkey_sim
 >  Linux: DonkeySimLinux/donkey_sim.x86_64
 
+## ドライブ
 
-## Drive
-
-You may use all the normal commands to manage.py at this point. Such as:
+manage.py の通常のコマンドが使えます。例えば:
 
 ```bash
 python manage.py drive
 ```
 
-This should start the simulator and connect to it automatically. By default you will have a web interface to control the donkey. Navigate to [http://localhost:8887/drive](http://localhost:8887/drive) to see control page.
+自動的にシミュレーターが起動し接続されます。デフォルトではウェブインターフェースで操作でき、[http://localhost:8887/drive](http://localhost:8887/drive) にアクセスすると操作ページが表示されます。
 
-On Ubuntu Linux only, you may plug in your joystick of choice.
-If it mounts as `/dev/input/js0` then there's a good chance it will work.
-Modify myconfig.py to indicate your joystick model and use the `--js` arg to run.
+Ubuntu Linux ではジョイスティックを接続して使用することも可能です。
+`/dev/input/js0` として認識されれば動作する可能性があります。
+myconfig.py でジョイスティックモデルを設定し `--js` オプションを付けて起動します。
 
 ```bash
 python manage.py drive --js
 ```
 
-As you drive, this will create a tub of records in your data dir as usual.
+走行すると通常通り data ディレクトリに記録が保存されます。
 
-## Train
-
+## 学習
 You will not need to rsync your data, as it was recorded and resides locally. You can train as usual:
 
 ```bash
 donkey train --tub ./data --model models/mypilot.h5
 ```
 
-## Test
+## テスト
 
 You can use the model as usual:
 
@@ -95,7 +92,7 @@ python manage.py drive --model models/mypilot.h5
 
 Then navigate to web control page. Set `Mode and Pilot` to `Local Pilot(d)`. The car should start driving.
 
-## Sample Driving Data
+## サンプル走行データ
 
 Here's some sample driving data to get you started. [Download this](https://drive.google.com/open?id=1A5sTSddFsf494UDtnvYQBaEPYX87_LMp) and unpack it into your data dir. This should train to a slow but stable driver.
 
@@ -107,27 +104,26 @@ Here's some info on the api to talk to the sim server. Make a TCP client and con
 
 ---
 
-### Get Protocol Version
+### プロトコルバージョン取得
 
-Client=>Sim. Ask for the version of the protocol. Will help know when changes are made to these messages.
+Client=>Sim。プロトコルのバージョンを問い合わせます。メッセージ変更の確認に使用します。
 
 Fields: *None*
 
 Example:
 ```bash
     {
-    "msg_type" : "get_protocol_version" 
+    "msg_type" : "get_protocol_version"
     }
 ```
 
-
 ---
 
-### Protocol Version
+### プロトコルバージョン
 
-Sim=>Client. Reply for the version of the protocol. Currently at version 2.
+Sim=>Client。プロトコルのバージョンを返します。現在はバージョン 2 です。
 
-Fields: 
+Fields:
 
 * *version* : string integer
 
@@ -141,64 +137,59 @@ Example:
 
 ---
 
-### Scene Selection Ready
+### シーン選択準備完了
 
-Sim=>Client. When the Menu scene is finished loading this will be sent. After this point, the sim can honor the Scene Loading message. (Menu only)
-
-Fields: *None*
-
-Example:
-```bash
-    {
-    "msg_type" : "scene_selection_ready" 
-    }
-```
-
----
-
-
-### Get Scene Names
-
-Client=>Sim. Ask names of the scene you can load. (Menu only)
+Sim=>Client。メニューシーンのロードが完了すると送信されます。この後にシーンロードメッセージが有効になります。（メニューのみ）
 
 Fields: *None*
 
 Example:
 ```bash
     {
-    "msg_type" : "get_scene_names" 
+    "msg_type" : "scene_selection_ready"
     }
 ```
 
+---
+
+### シーン名取得
+
+Client=>Sim。ロード可能なシーン名を尋ねます。（メニューのみ）
+
+Fields: *None*
+
+Example:
+```bash
+    {
+    "msg_type" : "get_scene_names"
+    }
+```
 
 ---
 
+### シーン名一覧
 
-### Scene Names
+Sim=>Client。シーン名の一覧を返します。
 
-Sim=>Client. Sim will reply with list of scene names.
-
-Fields: 
+Fields:
 
 * *scene_names* : array of scene names
 
 Example:
 ```bash
     {
-    "msg_type" : "scene_names" 
-    "scene_names" : [ "generated_road", "warehouse", "sparkfun_avc". "generated_track" ]
+    "msg_type" : "scene_names",
+    "scene_names" : [ "generated_road", "warehouse", "sparkfun_avc", "generated_track" ]
     }
 ```
 
-
 ---
 
+### シーン読み込み
 
-### Load Scene
+Client=>Sim。メニュー画面からシーンを読み込むよう要求します。（メニューのみ）
 
-Client=>Sim. Asks the sim to load one of the scenes from the Menu screen. (Menu only)
-
-Fields: 
+Fields:
 
 *scene_name* : **generated_road | warehouse | sparkfun_avc | generated_track** ( or whatever list the sim returns from get_scene_names)
 
@@ -212,9 +203,9 @@ Example:
 
 ---
 
-### Scene Loaded
+### シーン読み込み完了
 
-Sim=>Client. Once scene is loaded, in reply, you will get a:
+Sim=>Client。シーンが読み込まれると次のメッセージが返ります:
 
 ```bash
     {
@@ -222,36 +213,34 @@ Sim=>Client. Once scene is loaded, in reply, you will get a:
     }
 ```
 
-
 ---
 
-### Car Loaded
+### 車両読み込み完了
 
-Sim=>Client. Once the sim finishes loading your car, it sends this message. The car is loaded for you automatically once the scene is loaded with an active client. Or a client make a connection.
+Sim=>Client。シミュレータが車両のロードを完了すると送信されます。シーン読み込み時にクライアントが接続されていれば自動的に車両がロードされます。
 
 Fields: *None*
 
 Example:
 ```bash
     {
-    "msg_type" : "car_loaded" 
+    "msg_type" : "car_loaded"
     }
 ```
 
 ---
+### 車両設定
 
-### Car Config
+Client=>Sim。読み込み後、車両の外観を設定できます（シーンのみ）。
 
-Client=>Sim. Once loaded, you may configure your car visual details (scene only)
-
-Fields: 
+Fields:
 
 * *body_style* :  **donkey | bare | car01 | cybertruck | f1**
-* *body_r* :  string value of integer between 0-255
-* *body_g* :  string value of integer between 0-255
-* *body_b* :  string value of integer between 0-255
-* *car_name* :  string value car name to display over car. Newline accepted for multi-line.
-* *font_size* :  string value of integer between 10-100 to set size of car name text
+* *body_r* :  0〜255 の整数値（文字列）
+* *body_g* :  0〜255 の整数値（文字列）
+* *body_b* :  0〜255 の整数値（文字列）
+* *car_name* :  車名を表示する文字列。改行を入れると複数行で表示されます。
+* *font_size* :  10〜100 の整数値（文字列）で車名表示のフォントサイズを指定
 
 Example:
 ```bash
@@ -266,33 +255,31 @@ Example:
     }
 ```
 
-
 ---
 
-### Camera Config
+### カメラ設定
 
-Client=>Sim. Once the scene is loaded, you may configure your car camera sensor details
+Client=>Sim。シーン読み込み後、車載カメラのセンサー設定を行えます。
 
-Fields: 
+Fields:
 
-* *fov* :  string value of float between 10-200. Sets the camera field of view in degrees.
-* *fish_eye_x* :  string value of float between 0-1. Causes distortion warping in x axis.
-* *fish_eye_y* :  string value of float between 0-1. Causes distortion warping in y axis.
-* *img_w* :  string value of integer between 16-512. Sets camera sensor image width.
-* *img_h* :  string value of integer between 16-512. Sets camera sensor image height.
-* *img_d* :  string value of integer 1 or 3. Sets camera sensor image depth. In case of 1, you get 3 channels but all identicle with greyscale conversion done on the sim.
-* *img_enc* :  Image format of data **JPG | PNG | TGA**
-* *offset_x* : string value of float. Moves the camera left and right axis.
-* *offset_y* : string value of float. Moves the camera up and down.
-* *offset_z* : string value of float. Moves the camera forward and back.
-* *rot_x* : string value of float. Degrees. Rotates camera around X axis.
-
+* *fov* :  10〜200 の浮動小数点値（文字列）。カメラの視野角を度で指定。
+* *fish_eye_x* :  0〜1 の浮動小数点値（文字列）。X 軸方向の歪み量。
+* *fish_eye_y* :  0〜1 の浮動小数点値（文字列）。Y 軸方向の歪み量。
+* *img_w* :  16〜512 の整数値（文字列）。カメラ画像の幅。
+* *img_h* :  16〜512 の整数値（文字列）。カメラ画像の高さ。
+* *img_d* :  1 または 3 の整数値（文字列）。画像の深さ。1 の場合でもチャンネル数は 3 で、シミュレータ側でグレースケール変換が行われます。
+* *img_enc* :  画像フォーマット **JPG | PNG | TGA**
+* *offset_x* : 浮動小数点値（文字列）。カメラを左右方向に移動。
+* *offset_y* : 浮動小数点値（文字列）。カメラを上下方向に移動。
+* *offset_z* : 浮動小数点値（文字列）。カメラを前後方向に移動。
+* *rot_x* : 浮動小数点値（文字列）。度数法。カメラを X 軸回りに回転。
 
 Example:
 ```bash
     {
     "msg_type" : "cam_config",
-    "fov" : "150", 
+    "fov" : "150",
     "fish_eye_x" : "1.0",
     "fish_eye_y" : "1.0",
     "img_w" : "255",
@@ -306,20 +293,20 @@ Example:
     }
 ```
 
-Note:
-You can add an other camera by changing the msg_type to "cam_config_b"
+注意:
+msg_type を "cam_config_b" に変更すると別のカメラを追加できます。
 
 ---
 
-### Control Car
+### 車両操作
 
-Client=>Sim. Control throttle and steering.
+Client=>Sim。スロットルとステアリングを制御します。
 
 Fields:
 
-* *steering* :  string value of float between -1 to 1. Maps to full left or right, 16 deg from center.
-* *throttle* :  string value of float between -1 to 1. Full forward or reverse torque to wheels.
-* *brake* :  string value of float between 0 to 1.
+* *steering* :  -1〜1 の浮動小数点値（文字列）。-1 が左いっぱい、1 が右いっぱいで中心から約16度。
+* *throttle* :  -1〜1 の浮動小数点値（文字列）。前進または後退のトルクを指定。
+* *brake* :  0〜1 の浮動小数点値（文字列）。
 
 Example:
 ```bash
@@ -331,119 +318,114 @@ Example:
     }
 ```
 
-
 ---
 
+### テレメトリ
 
-### Telemetry
+Sim=>Client。カメラ画像と車両状態を含むメッセージを送ります。通常 1 秒間に約 20 回の頻度で送られます。
 
-Sim=>Client. The sim sends this message containing camera image and details about vehicle state. These come at a regular rate set in the sim. Usually about 20 HZ.
+Fields:
 
-Fields: 
-
-* *steering_angle* :  Last steering applied. Why not just steering like control? idk.
-* *throttle* :  Last throttle applied.
-* *speed* :  magnitude of linear velocity.
-* *image* :  a BinHex encoded binary image. Use PIL.Image.open(BytesIO(base64.b64decode(imgString)))
-* *imageb* :  (optionnal) same as above but for the second camera
-* *lidar* :  (optionnal) list of lidar points in the following format: {d: distanceToObject, rx: rayRotationX, ry: rayRotationY}
-* *hit* :  name of the last object struck. Or None if no object hit.
-* *accel_x* :  x acceleration of vehicle.
-* *accel_y* :  y acceleration of vehicle.
-* *accel_z* :  z acceleration of vehicle.
-* *gyro_x* :  x gyro acceleration.
-* *gyro_y* :  y gyro acceleration.
-* *gyro_z* :  z gyro acceleration.
-* *gyro_w* :  w gyro acceleration.
-* *pitch* :  pitch of the car in degrees.
-* *roll* :  roll of the car degrees.
-* *yaw* :  yaw of the car degrees.
-* *activeNode* : Progress on track (not working properly with multiple car for the moment)
-* *totalNodes* : number of nodes on track
-* *pos_x* :  (training only) x world coordinate of vehicle.
-* *pos_y* :  (training only) y world coordinate of vehicle.
-* *pos_z* :  (training only) z world coordinate of vehicle.
-* *vel_x* :  (training only) x velocity of vehicle.
-* *vel_y* :  (training only) y velocity of vehicle.
-* *vel_z* :  (training only) z velocity of vehicle.
-* *cte* :  (training only) Cross track error. The distance from the car to the path in the center of the right most lane or center of the track (depends on the track)
+* *steering_angle* :  最後に適用されたステアリング角。なぜ control と同じ名前ではないのかは不明。
+* *throttle* :  最後に適用されたスロットル。
+* *speed* :  車両速度の大きさ。
+* *image* :  BinHex でエンコードされた画像。`PIL.Image.open(BytesIO(base64.b64decode(imgString)))` で読み込めます。
+* *imageb* :  （オプション）2 台目のカメラ画像も同様に取得。
+* *lidar* :  （オプション）{d: distanceToObject, rx: rayRotationX, ry: rayRotationY} 形式の LiDAR 点群リスト。
+* *hit* :  最後に衝突したオブジェクト名。衝突していない場合は None。
+* *accel_x* :  車両の X 軸加速度。
+* *accel_y* :  車両の Y 軸加速度。
+* *accel_z* :  車両の Z 軸加速度。
+* *gyro_x* :  X 軸ジャイロ。
+* *gyro_y* :  Y 軸ジャイロ。
+* *gyro_z* :  Z 軸ジャイロ。
+* *gyro_w* :  W 成分のジャイロ。
+* *pitch* :  車両のピッチ角（度）。
+* *roll* :  車両のロール角（度）。
+* *yaw* :  車両のヨー角（度）。
+* *activeNode* :  コース上の進行状況（複数車両では正しく動きません）。
+* *totalNodes* :  コースのノード総数。
+* *pos_x* :  （学習時のみ）車両の X 座標。
+* *pos_y* :  （学習時のみ）車両の Y 座標。
+* *pos_z* :  （学習時のみ）車両の Z 座標。
+* *vel_x* :  （学習時のみ）車両の X 速度。
+* *vel_y* :  （学習時のみ）車両の Y 速度。
+* *vel_z* :  （学習時のみ）車両の Z 速度。
+* *cte* :  （学習時のみ）クロストラック誤差。右車線中央またはコース中央から車両までの距離（コースによる）。
 
 Example:
 ```bash
     {
-    "msg_type" : "telemetry", 
-    "steering_angle" : "0.0", 
-    "throttle" : "0.0", 
-    "speed" : "1.0", 
-    "image" : "0x123...", 
-    "hit" : "None", 
-    "pos_x" : "0.0", 
-    "pos_y" : "0.0", 
-    "pos_z" : "0.0", 
-    "accel_x" : "0.0", 
-    "accel_y" : "0.0", 
-    "accel_z" : "0.0", 
-    "gyro_x" : "0.0", 
-    "gyro_y" : "0.0", 
-    "gyro_z" : "0.0", 
+    "msg_type" : "telemetry",
+    "steering_angle" : "0.0",
+    "throttle" : "0.0",
+    "speed" : "1.0",
+    "image" : "0x123...",
+    "hit" : "None",
+    "pos_x" : "0.0",
+    "pos_y" : "0.0",
+    "pos_z" : "0.0",
+    "accel_x" : "0.0",
+    "accel_y" : "0.0",
+    "accel_z" : "0.0",
+    "gyro_x" : "0.0",
+    "gyro_y" : "0.0",
+    "gyro_z" : "0.0",
     "gyro_w" : "0.0",
-    "pitch" : "0.0", 
-    "roll" : "0.0", 
+    "pitch" : "0.0",
+    "roll" : "0.0",
     "yaw" : "0.0",
-    "activeNode" : "5"
-    "totalNodes" : "26"
+    "activeNode" : "5",
+    "totalNodes" : "26",
     "cte" : "0.5"
     }
 ```
 
-
 ---
 
-### Reset Car
+### 車両リセット
 
-Client=>Sim. Return the car to the start point.
+Client=>Sim。車両をスタート地点に戻します。
 
 Fields: *None*
 
 Example:
 ```bash
     {
-    "msg_type" : "reset_car" 
+    "msg_type" : "reset_car"
     }
 ```
 
-
 ---
+### 車両位置設定
+Client=>Sim。指定した位置に車両を移動させます（学習時のみ）。
 
-### Set Car Position
-Client=>Sim. Move the car to the given position (training only)
+Fields:
 
-Fields: 
-
-* *pos_x* :  x world coordinate.
-* *pos_y* :  y world coordinate.
-* *pos_z* :  z world coordinate. 
-* *qx* :  (optionnal) quaternion x
-* *qy* :  (optionnal) quaternion y
-* *qz* :  (optionnal) quaternion z
-* *qw* :  (optionnal) quaternion w
+* *pos_x* :  X 座標。
+* *pos_y* :  Y 座標。
+* *pos_z* :  Z 座標。
+* *qx* :  （オプション）クォータニオン x
+* *qy* :  （オプション）クォータニオン y
+* *qz* :  （オプション）クォータニオン z
+* *qw* :  （オプション）クォータニオン w
 
 Example:
 ```bash
     {
-    "msg_type" : "set_position" 
-    "pos_x" : "0.0", 
-    "pos_y" : "0.0", 
+    "msg_type" : "set_position",
+    "pos_x" : "0.0",
+    "pos_y" : "0.0",
     "pos_z" : "0.0"
     }
 ```
-or:
+または:
 
 ```bash
     {
-    "msg_type" : "set_position" 
-    "pos_x" : "0.0", 
-    "pos_y" : "0.0", 
+    "msg_type" : "set_position",
+    "pos_x" : "0.0",
+    "pos_y" : "0.0",
     "pos_z" : "0.0",
     "qx" : "0.0",
     "qy" : "0.2",
@@ -454,12 +436,12 @@ or:
 
 ---
 
-### Get node position and rotation
-Client=>Sim. Ask for a node_position packet
+### ノード位置と回転の取得
+Client=>Sim。node_position パケットを要求します。
 
-Fields: 
+Fields:
 
-* *index* :  node index
+* *index* :  ノードのインデックス
 
 Example:
 ```bash
@@ -471,18 +453,18 @@ Example:
 
 ---
 
-### Node position and rotation
-Sim=>Client. node_position packet (received after sending a node_position packet)
+### ノード位置と回転
+Sim=>Client。node_position パケット（node_position メッセージ送信後に受信）。
 
 Fields:
 
-* *pos_x* :  x world coordinate.
-* *pos_y* :  y world coordinate.
-* *pos_z* :  z world coordinate. 
-* *qx* :  (optionnal) quaternion x
-* *qy* :  (optionnal) quaternion y
-* *qz* :  (optionnal) quaternion z
-* *qw* :  (optionnal) quaternion w
+* *pos_x* :  X 座標。
+* *pos_y* :  Y 座標。
+* *pos_z* :  Z 座標。
+* *qx* :  （オプション）クォータニオン x
+* *qy* :  （オプション）クォータニオン y
+* *qz* :  （オプション）クォータニオン z
+* *qw* :  （オプション）クォータニオン w
 
 Example:
 ```bash
@@ -500,33 +482,51 @@ Example:
 
 ---
 
-### Exit Scene
+### シーン終了
 
-Client=>Sim. Leave the scene and return to the main menu screen.
+Client=>Sim。シーンを離れてメインメニューに戻ります。
 
 Fields: *None*
-
 
 Example:
 ```bash
     {
-    "msg_type" : "exit_scene" 
+    "msg_type" : "exit_scene"
     }
 ```
-
 
 ---
 
-### Quit App
+### アプリ終了
 
-Client=>Sim. Close the sim executable. (Menu only)
+Client=>Sim。シミュレータアプリを終了します。（メニューのみ）
 
 Fields: *None*
-
 
 Example:
 ```bash
     {
-    "msg_type" : "quit_app" 
+    "msg_type" : "quit_app"
     }
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

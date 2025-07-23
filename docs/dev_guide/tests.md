@@ -1,15 +1,15 @@
-# Tests
+# テスト
 
-There is a limited test suite to ensure that the your changes to the code
-don't break something unintended.
+あなたのコード変更が
+予期せぬ部分を壊さないことを確認するための限定的なテストスイートがあります。
 
-## Run all the tests
+## すべてのテストを実行する
 
-Run `pytest` from the `donkeycar` project directory. 
+`donkeycar` プロジェクトディレクトリで `pytest` を実行します。
 
-## Code Organization
+## コードの構成
 
-The test code is in `tests` foders in the same folder as the code. This is to
-help keep the test code linked to the code its self. If you change the code,
-change the tests. :)
+テストコードはコードと同じフォルダーにある `tests` フォルダーに置かれています。これは
+テストコードを実装コードと関連付けておくためです。コードを変更したら、
+テストも変更してください。:)
 

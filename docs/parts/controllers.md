@@ -1,54 +1,50 @@
-# Controller Parts
+# コントローラーのパーツ
 
-## Web Controller
+## Webコントローラー
 
-The default controller to drive the car with your phone or browser. This has a web live preview of camera. Control options include:
+スマートフォンやブラウザから車を操縦できる標準コントローラーです。カメラのライブプレビューも表示されます。操作方法は次のとおりです:
 
-1. A virtual joystick
-2. The tilt, when using a mobile device with supported accelerometer
-3. A physical joystick using the web adapter. Support varies per browser, OS, and joystick combination.
-4. Keyboard input via the 'ikjl' keys.
+1. バーチャルジョイスティック
+2. 対応する加速度センサーを搭載したモバイル端末の傾き操作
+3. Webアダプター経由の物理ジョイスティック(ブラウザ・OS・ジョイスティックの組み合わせによってサポート状況が異なります)
+4. キーボードの'ikjl'キー入力
 
-> Note: Recently iOS has [disabled default Safari](https://www.macrumors.com/2019/02/04/ios-12-2-safari-motion-orientation-access-toggle/) access to motion control. 
+> 注意: 最近のiOSでは[Safariのモーションアクセスがデフォルトで無効](https://www.macrumors.com/2019/02/04/ios-12-2-safari-motion-orientation-access-toggle/)になりました。
  
 
-## Joystick Controller
+## ジョイスティックコントローラー
 
-Many people find it easier to control the car using a game controller. There are several parts that provide this option.
+ゲームコントローラーを使った方が操作しやすいという声も多く、これを実現するパーツが用意されています。
 
-The default web controller may be replaced with a one line change to use a physical joystick part for input. This uses the OS device /dev/input/js0 by default. In theory, any joystick device that the OS mounts like this can be used. In practice, the behavior will change depending on the model of joystick ( Sony, or knockoff ), or XBox controller and the Bluetooth driver used to support it. The default code has been written and tested with a [Sony brand PS3 Sixaxis controller](https://www.ebay.com/sch/i.html?_nkw=Sony+Playstation+Dualshock+PS3+controller+OEM). Other controllers may work, but will require alternative Bluetooth installs, and tweaks to the software for correct axis and buttons.
+デフォルトのWebコントローラーは1行変更するだけで物理ジョイスティック入力に置き換えられます。標準ではOSのデバイス /dev/input/js0 を使用します。理論上はOSがこのようにマウントするジョイスティックであれば何でも利用できますが、実際にはジョイスティックの種類（純正品や互換品）、XBoxコントローラー、それを支えるBluetoothドライバーによって挙動が変化します。
+デフォルトのコードは[Sony製PS3 Sixaxisコントローラー](https://www.ebay.com/sch/i.html?_nkw=Sony+Playstation+Dualshock+PS3+controller+OEM)で作成・テストされています。ほかのコントローラーも使用可能ですが、Bluetoothの設定を変えたり、軸やボタンを正しく合わせるための調整が必要になる場合があります。
 
 ### These joysticks are known to work:
-
+### 動作確認済みのジョイスティック:
 * [Logitech Gamepad F710](https://www.amazon.com/Logitech-940-000117-Gamepad-F710/dp/B0041RR0TW)
-* [Sony PS3 Sixaxis OEM](https://www.ebay.com/sch/i.html?&_nkw=Sony+PS3+Sixaxis+OEM) (Not compatible with Jetson Nano)
+* [Sony PS3 Sixaxis OEM](https://www.ebay.com/sch/i.html?&_nkw=Sony+PS3+Sixaxis+OEM) (Jetson Nanoでは非対応)
 * [Sony PS4 Dualshock OEM](https://www.ebay.com/sch/i.html?&_nkw=Sony+PS4+Dualshock+OEM)
 * [WiiU Pro](https://www.amazon.com/Nintendo-Wii-U-Pro-Controller-Black/dp/B00MUY0OFU)
 * [XBox Controller](https://www.amazon.com/Xbox-Wireless-Controller-Blue-one/dp/B01M0F0OIY)
-* [Generic Controllers with a USB dongle](https://amzn.to/42WIKTm)
+これらはmyconfig.py内のCONTROLLER_TYPEを該当する識別子に設定することで有効になります(コメントアウトを解除してください)。汎用コントローラーは通常Xbox設定を使用できます。
 
-These can be enabled by finding the CONTROLLER_TYPE in your myconfig.py and setting it to the correct string identifier ( after disabling the comment ). Generic controllers can usually use the Xbox settings, which are the default.
 
-These can be used plugged in with a USB cable. It's been much more convenient to setup Bluetooth for a wireless control.
+> 注: 下記に記載のないコントローラーを使用する場合や、正しく動作しない場合、あるいは独自にボタン配置を変更したい場合は[新しいまたはカスタムゲームコントローラーの作成](./#creating-a-new-or-custom-game-controller)を参照してください。
 
-There are controller specific setup details below.
-
-> Note: If you have a controller that is not listed below, or you are having troubles getting your controller to work or you want to map your controller differently, see [Creating a New or Custom Game Controller](./#creating-a-new-or-custom-game-controller). 
-
-### Change myconfig.py or run with --js
+### myconfig.pyを変更するか、--jsオプションを付けて実行する
 
 ```bash
 python manage.py drive --js
 ```
 
 Will enable driving with the joystick. This disables the live preview of the camera and the web page features. If you modify myconfig.py to make `USE_JOYSTICK_AS_DEFAULT = True`, then you do not need to run with the `--js`.
+ジョイスティックで操縦できるようになります。この場合カメラのライブプレビューやWebページ機能は無効になります。myconfig.pyで`USE_JOYSTICK_AS_DEFAULT = True`と設定しておけば`--js`オプションは不要です。
 
+## PS3コントローラー
 
-## PS3 Controller
+### Bluetooth設定
 
-### Bluetooth Setup
-
-Follow [this guide](https://pythonhosted.org/triangula/sixaxis.html). You can ignore steps past the 'Accessing the SixAxis from Python' section. I will include steps here in case the link becomes stale.
+この[ガイド](https://pythonhosted.org/triangula/sixaxis.html)に従ってください。'Accessing the SixAxis from Python'以降の手順は省略できます。念のため手順を以下にも記載します。
 
 ``` bash
 sudo apt-get install bluetooth libbluetooth3 libusb-dev
@@ -56,9 +52,9 @@ sudo systemctl enable bluetooth.service
 sudo usermod -G bluetooth -a pi
 ```
 
-Reboot after changing the user group.
+ユーザーグループを変更した後は再起動してください。
 
-Plug in the PS3 with USB cable. Hit center PS logo button. Get and build the command line pairing tool. Run it:
+PS3をUSBケーブルで接続し、中央のPSロゴボタンを押します。次に、コマンドライン用のペアリングツールを取得・ビルドして実行します:
 
 ```bash
 wget http://www.pabr.org/sixlinux/sixpair.c
@@ -66,7 +62,7 @@ gcc -o sixpair sixpair.c -lusb
 sudo ./sixpair
 ```
 
-Use bluetoothctl to pair
+bluetoothctl を使ってペアリングします
 
 ```bash
 bluetoothctl
@@ -77,17 +73,17 @@ default-agent
 quit
 ```
 
-Unplug USB cable. Hit center PS logo button.
+USBケーブルを外し、中央のPSロゴボタンを押します。
 
-To test that the Bluetooth PS3 remote is working, verify that `/dev/input/js0` exists:
+Bluetooth接続したPS3リモコンが正常に動作しているか確認するには、`/dev/input/js0` の存在をチェックします:
 
 ```bash
 ls /dev/input/js0
 ```
 
-#### Troubleshooting
+#### トラブルシューティング
 
-In case the BT connection on the Raspberry Pi does not work, you see might something like this in `bluetoothctl`:
+Raspberry PiでBluetooth接続がうまくいかない場合、`bluetoothctl` で次のような表示が出ることがあります:
 
 ```text
 [NEW] Controller 00:11:22:33:44:55 super-donkey [default]
@@ -103,52 +99,48 @@ In case the BT connection on the Raspberry Pi does not work, you see might somet
 [bluetooth]#
 ```
 
-Try updating the Linux kernel and firmware by running:
+以下のコマンドでLinuxカーネルとファームウェアを更新してみてください:
 
 ```bash
 sudo rpi-update
 ```
 
-And then reboot:
+その後、再起動します:
 
 ```bash
 sudo reboot
 ```
 
-### Charging PS3 Sixaxis Joystick
+### PS3 Sixaxisジョイスティックの充電
 
-For some reason, they don't like to charge in a powered USB port that doesn't have an active Bluetooth control and OS driver. This means a phone type USB charger will not work. Try a powered Linux or mac laptop USB port. You should see the lights blink after plugging in and hitting center PS logo.
+何らかの理由で、Bluetooth制御とOSドライバーが動作していない給電USBポートでは充電できません。スマートフォン用のUSB充電器では充電できないため、LinuxまたはMacのノートPCなどの電源付きUSBポートを利用してください。PSロゴボタンを押すとランプが点滅するはずです。
 
-After charging, you will need to plug-in the controller again to the Pi, hit the PS logo, then unplug to pair again.
+充電後は再度コントローラーをPiに接続し、PSロゴを押してからケーブルを抜き、再びペアリングします。
 
-### New Battery for PS3 Sixaxis Joystick
+### PS3 Sixaxisジョイスティックのバッテリー交換
 
-Sometimes these controllers can be quite old. Here's a link to a [new battery](http://a.co/5k1lbns). Be careful when taking off the cover. Remove 5 screws. There's a tab on the top half between the hand grips. You'll want to split/open it from the front and try pulling the bottom forward as you do, or you'll break the tab off as I did.
+これらのコントローラーは古いものも多いため、[新しいバッテリー](http://a.co/5k1lbns)に交換することをおすすめします。カバーを外す際は注意してください。ネジを5本外し、グリップ間の上部にあるツメを折らないよう前側から開いて下側を前方に引くようにすると良いでしょう。
 
-### PS3 Mouse problems on Linux
+### LinuxでPS3を接続するとマウスが乗っ取られる問題
 
-Sometimes when you plug-in the PS3 joystick it starts taking over your mouse. If you want to prevent that, you can run this:
+PS3ジョイスティックを接続するとマウス操作を乗っ取られることがあります。防ぐには次のコマンドを実行します:
 
 ```bash
 xinput set-prop "Sony PLAYSTATION(R)3 Controller" "Device Enabled" 0
 ```
 
-## PS4 DualShock 4 Wireless Gamepad Controller
-The following instructions are intended for use with the Raspberry Pi 3 or 4 running Raspberry Pi OS Buster.
-The DS4 gamepad will be connected via bluetooth without installing any additional software.  Bluetoothd is a system service
-that runs as a daemon automatically on boot.  Bluetoothctl is a program to manage connection and pairing devices.
-
-#### Configure your user account to use Bluetoothctl without sudo
-Add the pi user to the bluetooth group. And then reboot so that the change takes effect properly.
-
+## PS4 DualShock 4 ワイヤレスゲームパッド
+以下の手順はRaspberry Pi OS Busterを搭載したRaspberry Pi 3または4を想定しています。
+DS4ゲームパッドは追加ソフトなしでBluetooth接続できます。Bluetoothdは起動時に自動で動作するシステムサービスで、bluetoothctlはデバイスの接続やペアリングを管理するプログラムです。
+#### sudoを使わずBluetoothctlを利用するための設定
+piユーザーをbluetoothグループに追加し、変更を反映させるため再起動します。
 ```bash
 sudo usermod -a -G bluetooth pi
 sudo reboot
 ```
 
-#### Scan for your PS4 gamepad
-After reboot, run bluetoothctl, turn on scanner to find bluetooth devices.  See below for an example response. Note that
-the actual HEX characters will be different for your devices!
+#### PS4ゲームパッドをスキャンする
+再起動後、bluetoothctlを起動してスキャナーをオンにし、Bluetoothデバイスを検索します。以下の例では実際のHEX文字列はあなたの環境で異なります。
 
 
 ```bash
@@ -165,15 +157,15 @@ scan on
 [NEW] Device 20:AA:88:44:BB:10 WHSCL1
 ```
 
-Wait a couple of minutes for the scanner to find all your existing bluetooth devices. Now set your gamepad in pairing mode
-by holding down the share button and the playstation button together until the light double flashes. You should see a
-new entry for a Wireless Controller.
+数分待ってスキャナーが既存のBluetoothデバイスをすべて見つけるのを待ちます。その後、シェアボタンとPlayStationボタンを同時に長押ししてゲームパッドをペアリングモードにします。
+ランプが二回点滅したら、新しい"Wireless Controller"の項目が表示されるはずです。
+新しいWireless Controllerの行が現れます。
 
 ```bash
 <response>
 [NEW] Device 1C:AA:BB:99:DD:AA Wireless Controller
 ```
-Turn off scanning to stop the status reporting
+スキャンを終了して表示を止めます
 ```bash
 scan off
 ```
